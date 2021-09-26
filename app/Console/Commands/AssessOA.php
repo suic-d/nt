@@ -54,6 +54,7 @@ class AssessOA extends Command
         $this->syncDeptUser();
         $this->syncStaffDetail();
         $this->syncShopList();
+        $this->syncUserList();
     }
 
     /**
