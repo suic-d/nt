@@ -96,11 +96,7 @@ class OACommand extends Command
      */
     public function syncDeptUser($deptId = null)
     {
-        if (is_null($deptId)) {
-            $deptIdArr = DeptList::get(['dept_id'])->pluck('dept_id');
-        } else {
-            $deptIdArr = [$deptId];
-        }
+        $deptIdArr = is_null($deptId) ? DeptList::get(['dept_id'])->pluck('dept_id') : [$deptId];
 
         $requests = function () use ($deptIdArr) {
             $uri = 'index.php/oaapi/oaapi/deptUser';
@@ -127,11 +123,9 @@ class OACommand extends Command
      */
     public function syncStaffDetail($staffId = null)
     {
-        if (is_null($staffId)) {
-            $staffIdArr = StaffList::where('is_dimission', '!=', 2)->get(['staff_id'])->pluck('staff_id');
-        } else {
-            $staffIdArr = [$staffId];
-        }
+        $staffIdArr = is_null($staffId) ? StaffList::where('is_dimission', '!=', 2)
+            ->get(['staff_id'])
+            ->pluck('staff_id') : [$staffId];
 
         $requests = function () use ($staffIdArr) {
             $uri = 'index.php/oaapi/oaapi/staffDetail';
@@ -171,11 +165,10 @@ class OACommand extends Command
      */
     public function syncSupplier($supplierId = null)
     {
-        if (is_null($supplierId)) {
-            $supplierIdArr = Supplier::where('is_sync', 1)->where('py_id', 0)->get(['id'])->pluck('id');
-        } else {
-            $supplierIdArr = [$supplierId];
-        }
+        $supplierIdArr = is_null($supplierId) ? Supplier::where('is_sync', 1)
+            ->where('py_id', 0)
+            ->get(['id'])
+            ->pluck('id') : [$supplierId];
 
         $requests = function () use ($supplierIdArr) {
             $uri = 'index.php/pyapi/pyapi/syncSupplierInfo';
@@ -202,11 +195,10 @@ class OACommand extends Command
      */
     public function syncProductCategory($categoryId = null)
     {
-        if (is_null($categoryId)) {
-            $categoryIdArr = ProductCategory::where('is_sync', 1)->where('py_id', 0)->get(['id'])->pluck('id');
-        } else {
-            $categoryIdArr = [$categoryId];
-        }
+        $categoryIdArr = is_null($categoryId) ? ProductCategory::where('is_sync', 1)
+            ->where('py_id', 0)
+            ->get(['id'])
+            ->pluck('id') : [$categoryId];
 
         $requests = function () use ($categoryIdArr) {
             $uri = 'index.php/pyapi/pyapi/syncProductCategory';
@@ -233,11 +225,10 @@ class OACommand extends Command
      */
     public function syncGood($sku = null)
     {
-        if (is_null($sku)) {
-            $skuArr = ProductPool::where('is_sync', 1)->where('py_id', 0)->get(['sku'])->pluck('sku');
-        } else {
-            $skuArr = [$sku];
-        }
+        $skuArr = is_null($sku) ? ProductPool::where('is_sync', 1)
+            ->where('py_id', 0)
+            ->get(['sku'])
+            ->pluck('sku') : [$sku];
 
         $requests = function () use ($skuArr) {
             $uri = 'index.php/pyapi/pyapi/syncGoodInfo';
@@ -264,11 +255,10 @@ class OACommand extends Command
      */
     public function updateSupplier($supplierId = null)
     {
-        if (is_null($supplierId)) {
-            $supplierIdArr = Supplier::where('is_sync', 1)->where('py_id', '!=', 0)->get(['id'])->pluck('id');
-        } else {
-            $supplierIdArr = [$supplierId];
-        }
+        $supplierIdArr = is_null($supplierId) ? Supplier::where('is_sync', 1)
+            ->where('py_id', '!=', 0)
+            ->get(['id'])
+            ->pluck('id') : [$supplierId];
 
         $requests = function () use ($supplierIdArr) {
             $uri = 'index.php/pyapi/pyapi/updateSupplierInfo';
@@ -295,11 +285,10 @@ class OACommand extends Command
      */
     public function updateProductCategory($categoryId = null)
     {
-        if (is_null($categoryId)) {
-            $categoryIdArr = ProductCategory::where('is_sync', 1)->where('py_id', '!=', 0)->get(['id'])->pluck('id');
-        } else {
-            $categoryIdArr = [$categoryId];
-        }
+        $categoryIdArr = is_null($categoryId) ? ProductCategory::where('is_sync', 1)
+            ->where('py_id', '!=', 0)
+            ->get(['id'])
+            ->pluck('id') : [$categoryId];
 
         $requests = function () use ($categoryIdArr) {
             $uri = 'index.php/pyapi/pyapi/syncProductCategory';
@@ -326,11 +315,10 @@ class OACommand extends Command
      */
     public function updateGood($sku = null)
     {
-        if (is_null($sku)) {
-            $skuArr = ProductPool::where('is_sync', 1)->where('py_id', '!=', 0)->get(['sku'])->pluck('sku');
-        } else {
-            $skuArr = [$sku];
-        }
+        $skuArr = is_null($sku) ? ProductPool::where('is_sync', 1)
+            ->where('py_id', '!=', 0)
+            ->get(['sku'])
+            ->pluck('sku') : [$sku];
 
         $requests = function () use ($skuArr) {
             $uri = 'index.php/pyapi/pyapi/updateGoodInfo';

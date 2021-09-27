@@ -57,11 +57,7 @@ class UpdateCompanyInfo extends Command
      */
     public function updateCompanyStatus($companyId = null)
     {
-        if (is_null($companyId)) {
-            $companyIds = Company::get()->pluck('id');
-        } else {
-            $companyIds = [$companyId];
-        }
+        $companyIds = is_null($companyId) ? Company::get(['id'])->pluck('id') : [$companyId];
 
         $requests = function () use ($companyIds) {
             $uri = 'listing/test/set_company_status';

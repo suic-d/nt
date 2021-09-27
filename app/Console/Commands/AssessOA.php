@@ -77,11 +77,7 @@ class AssessOA extends Command
      */
     public function syncDeptUser($deptId = null)
     {
-        if (is_null($deptId)) {
-            $deptIdArr = AssessDeptList::get(['dept_id'])->pluck('dept_id');
-        } else {
-            $deptIdArr = [$deptId];
-        }
+        $deptIdArr = is_null($deptId) ? AssessDeptList::get(['dept_id'])->pluck('dept_id') : [$deptId];
 
         $requests = function () use ($deptIdArr) {
             $uri = 'index.php/oaapi/oaapi/deptUser';
@@ -108,11 +104,9 @@ class AssessOA extends Command
      */
     public function syncStaffDetail($staffId = null)
     {
-        if (is_null($staffId)) {
-            $staffIdArr = AssessStaffList::where('is_dimission', '!=', 2)->get(['staff_id'])->pluck('staff_id');
-        } else {
-            $staffIdArr = [$staffId];
-        }
+        $staffIdArr = is_null($staffId) ? AssessStaffList::where('is_dimission', '!=', 2)
+            ->get(['staff_id'])
+            ->pluck('staff_id') : [$staffId];
 
         $requests = function () use ($staffIdArr) {
             $uri = 'index.php/oaapi/oaapi/staffDetail';
