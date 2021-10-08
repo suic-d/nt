@@ -61,8 +61,22 @@ class SpuPublishedListCommand extends Command
                     $model->add_time = date('Y-m-d H:i:s');
                 }
 
-                $model->link_count = SpuPublished::where('sku', $item->sku)->count();
-                $model->pl_count = SpuPublished::where('sku', $item->sku)->distinct()->count('platform');
+                $spuPublishedModels = SpuPublished::where('sku', $item->sku)->get();
+                $spuPublishedGroup = $spuPublishedModels->reduce(function ($carry, SpuPublished $item) {
+                    $platform = strtolower($item->platform);
+                    if (!isset($carry[$platform])) {
+                        $carry[$platform] = [];
+                    }
+                    $carry[$platform][] = $item;
+
+                    return $carry;
+                }, []);
+
+                $model->link_count = $spuPublishedModels->count();
+                $model->pl_count = count($spuPublishedGroup);
+                $model->amazon_count = isset($spuPublishedGroup['amazon']) ? count($spuPublishedGroup['amazon']) : 0;
+                $model->ebay_count = isset($spuPublishedGroup['ebay']) ? count($spuPublishedGroup['ebay']) : 0;
+                $model->lazada_count = isset($spuPublishedGroup['lazada']) ? count($spuPublishedGroup['lazada']) : 0;
                 if ($model->isDirty()) {
                     $model->update_time = date('Y-m-d H:i:s');
                     $model->save();
