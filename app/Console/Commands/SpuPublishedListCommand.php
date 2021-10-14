@@ -77,6 +77,9 @@ class SpuPublishedListCommand extends Command
                 $model->amazon_count = isset($spuPublishedGroup['amazon']) ? count($spuPublishedGroup['amazon']) : 0;
                 $model->ebay_count = isset($spuPublishedGroup['ebay']) ? count($spuPublishedGroup['ebay']) : 0;
                 $model->lazada_count = isset($spuPublishedGroup['lazada']) ? count($spuPublishedGroup['lazada']) : 0;
+                $model->aliexpress_count = isset($spuPublishedGroup['aliexpress'])
+                    ? count($spuPublishedGroup['aliexpress']) : 0;
+                $model->shopee_count = isset($spuPublishedGroup['shopee']) ? count($spuPublishedGroup['shopee']) : 0;
                 if ($model->isDirty()) {
                     $model->update_time = date('Y-m-d H:i:s');
                     $model->save();
