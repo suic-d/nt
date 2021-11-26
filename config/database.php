@@ -180,6 +180,26 @@ return [
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
         ],
+        //数据中心正式
+        'mysql_data' => [
+            'driver' => 'mysql',
+            'url' => '',
+            'host' => '139.196.41.97',
+            'port' => '3306',
+            'database' => 'nterp_db',
+            'username' => 'zhangchu',
+            'password' => 'aGVsbG93b3JsZA==',
+            'unix_socket' => '',
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => false,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
 
         'pgsql' => [
             'driver' => 'pgsql',
