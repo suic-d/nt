@@ -92,9 +92,7 @@ class LevelReport extends Command
                         $periodSum[] = $value->period * $value->batch;
                         $batchSum[] = $value->batch;
                     }
-                    $batchSum = array_sum($batchSum);
-                    $periodSum = array_sum($periodSum);
-                    $model->arrival_time = round($periodSum / $batchSum, 1);
+                    $model->arrival_time = round(array_sum($periodSum) / array_sum($batchSum), 1);
                 }
                 unset($arrivalList);
 
