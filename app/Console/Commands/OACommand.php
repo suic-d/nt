@@ -62,6 +62,7 @@ class OACommand extends Command
         // 获取商品中心的用户
         $this->syncProductUser();
 
+        /*
         // 同步供应商信息到普源
         $this->syncSupplier();
         // 同步产品品类到普源
@@ -74,6 +75,7 @@ class OACommand extends Command
         $this->updateProductCategory();
         // 同步更新商品到普源
         $this->updateGood();
+        */
     }
 
     /**
