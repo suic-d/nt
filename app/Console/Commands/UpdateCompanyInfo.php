@@ -27,8 +27,9 @@ class UpdateCompanyInfo extends Command
     /**
      * @var string
      */
-//    protected $url = 'http://assetinfo.api.nantang-tech.com';
-    protected $url = 'http://test.assetinfo.api.nantang-tech.com';
+    protected $url = 'http://assetinfo.api.nantang-tech.com';
+
+//    protected $url = 'http://test.assetinfo.api.nantang-tech.com';
 
     /**
      * @var Client
