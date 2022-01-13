@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Models\AssessDeptList;
-use App\Models\AssessStaffList;
+use App\Models\Assess\DeptList;
+use App\Models\Assess\StaffList;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Pool;
@@ -77,7 +77,7 @@ class AssessOA extends Command
      */
     public function syncDeptUser($deptId = null)
     {
-        $deptIdArr = is_null($deptId) ? AssessDeptList::get(['dept_id'])->pluck('dept_id') : [$deptId];
+        $deptIdArr = is_null($deptId) ? DeptList::get(['dept_id'])->pluck('dept_id') : [$deptId];
 
         $requests = function () use ($deptIdArr) {
             $uri = 'index.php/oaapi/oaapi/deptUser';
@@ -104,7 +104,7 @@ class AssessOA extends Command
      */
     public function syncStaffDetail($staffId = null)
     {
-        $staffIdArr = is_null($staffId) ? AssessStaffList::where('is_dimission', '!=', 2)
+        $staffIdArr = is_null($staffId) ? StaffList::where('is_dimission', '!=', 2)
             ->get(['staff_id'])
             ->pluck('staff_id') : [$staffId];
 

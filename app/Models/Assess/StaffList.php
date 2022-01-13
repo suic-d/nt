@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Assess;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class AssessDeptList extends Model
+class StaffList extends Model
 {
     use HasFactory;
 
@@ -28,5 +28,5 @@ class AssessDeptList extends Model
      *
      * @var string
      */
-    protected $table = 'assess_dept_list';
+    protected $table = 'assess_staff_list';
 }
