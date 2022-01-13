@@ -101,7 +101,7 @@ class LevelReport extends Command
 
             unset($productPools, $skuArr, $stepPriceGroup, $levelMap);
 
-            dump($page++);
+            dump(date('Y-m-d H:i:s'), $page++);
         }
     }
 }
