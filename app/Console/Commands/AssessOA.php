@@ -55,6 +55,8 @@ class AssessOA extends Command
         $this->syncStaffDetail();
         $this->syncShopList();
         $this->syncUserList();
+
+        $this->v2();
     }
 
     /**
@@ -160,6 +162,56 @@ class AssessOA extends Command
             echo $response->getBody()->getContents(), PHP_EOL;
         } catch (GuzzleException $exception) {
             echo $exception->getMessage(), PHP_EOL;
+        }
+    }
+
+    public function v2()
+    {
+        $client = new Client(['base_uri' => 'http://v2.assess.php.nantang-tech.com', 'verify' => false]);
+
+        // 获取部门列表
+        try {
+            $client->request('GET', 'index.php/oaapi/oaapi/deptList');
+        } catch (GuzzleException $exception) {
+        }
+
+        // 获取部门下用户
+        $deptIdArr = DeptList::get(['dept_id'])->pluck('dept_id');
+        $requests = function () use ($deptIdArr) {
+            $uri = 'index.php/oaapi/oaapi/deptUser';
+            foreach ($deptIdArr as $value) {
+                yield new Request('GET', $uri.'?id='.$value);
+            }
+        };
+        (new Pool($client, $requests(), ['concurrency' => 5]))->promise()->wait();
+
+        // 获取员工详情
+        $staffIdArr = StaffList::where('is_dimission', '!=', 2)
+            ->get(['staff_id'])
+            ->pluck('staff_id')
+        ;
+        $requests = function () use ($staffIdArr) {
+            $uri = 'index.php/oaapi/oaapi/staffDetail';
+            foreach ($staffIdArr as $value) {
+                yield new Request('GET', $uri.'?id='.$value);
+            }
+        };
+        (new Pool($client, $requests(), ['concurrency' => 5]))->promise()->wait();
+
+        // 拉取店铺信息
+        $platforms = ['Amazon', 'eBay', 'Aliexpress', 'shopify', 'Lazada'];
+        $requests = function () use ($platforms) {
+            $uri = 'index.php/oaapi/oaapi/getShopList';
+            foreach ($platforms as $value) {
+                yield new Request('GET', $uri.'?id='.$value);
+            }
+        };
+        (new Pool($client, $requests(), ['concurrency' => 5]))->promise()->wait();
+
+        // 测评用户
+        try {
+            $client->request('GET', 'index.php/oaapi/oaapi/userList');
+        } catch (GuzzleException $exception) {
         }
     }
 }
