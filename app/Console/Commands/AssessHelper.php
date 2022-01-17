@@ -91,7 +91,6 @@ class AssessHelper extends Command
             ->distinct()
             ->get(['follower_id'])
             ->each(function ($item) use ($userId) {
-                dump($item->follower_id);
                 if (empty($item->follower_id)) {
                     return;
                 }
