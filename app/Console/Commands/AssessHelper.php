@@ -113,6 +113,32 @@ class AssessHelper extends Command
     }
 
     /**
+     * @param string $username
+     * @param string $password
+     *
+     * @return string
+     */
+    public function getToken($username, $password)
+    {
+        $token = '';
+        $client = new Client(['base_uri' => 'https://dbsrv.nterp.nantang-tech.com/', 'verify' => false]);
+
+        try {
+            $response = $client->request('GET', 'rest/auth/user/login', [RequestOptions::QUERY => [
+                'mobile' => $username,
+                'password' => $password,
+            ]]);
+            if (!empty($json = json_decode($response->getBody()->getContents()))) {
+                $token = $json->data->token ?? '';
+            }
+        } catch (GuzzleException $exception) {
+            dump($exception->getMessage());
+        }
+
+        return $token;
+    }
+
+    /**
      * @param string $token
      */
     public function deleteToken($token)
