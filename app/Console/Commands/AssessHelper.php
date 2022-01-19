@@ -5,6 +5,9 @@ namespace App\Console\Commands;
 use App\Models\Assess\AssessFollowerDetail;
 use App\Models\Assess\AssessUserDetail;
 use App\Models\Assess\DeptList;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\RequestOptions;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -107,5 +110,21 @@ class AssessHelper extends Command
                 }
             })
         ;
+    }
+
+    /**
+     * @param string $token
+     */
+    public function deleteToken($token)
+    {
+        $client = new Client(['base_uri' => 'http://assess.php.nantang-tech.com', 'verify' => false]);
+
+        try {
+            $client->request('GET', 'index.php/assess/test/deleteToken', [
+                RequestOptions::QUERY => ['token' => $token],
+            ]);
+        } catch (GuzzleException $exception) {
+            dump($exception->getMessage());
+        }
     }
 }
