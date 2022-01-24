@@ -75,12 +75,14 @@ class AssessHelper extends Command
                 ->where('dept_id', $item->dept_id)
                 ->first()
             ;
-            if (is_null($assessUserDetail)) {
-                $model = new AssessUserDetail();
-                $model->user_id = $userId;
-                $model->dept_id = $item->dept_id;
-                $model->save();
+            if (!is_null($assessUserDetail)) {
+                return;
             }
+
+            $model = new AssessUserDetail();
+            $model->user_id = $userId;
+            $model->dept_id = $item->dept_id;
+            $model->save();
         });
     }
 
@@ -102,12 +104,14 @@ class AssessHelper extends Command
                     ->where('staff_id', $item->follower_id)
                     ->first()
                 ;
-                if (is_null($assessFollowerDetail)) {
-                    $model = new AssessFollowerDetail();
-                    $model->user_id = $userId;
-                    $model->staff_id = $item->follower_id;
-                    $model->save();
+                if (!is_null($assessFollowerDetail)) {
+                    return;
                 }
+
+                $model = new AssessFollowerDetail();
+                $model->user_id = $userId;
+                $model->staff_id = $item->follower_id;
+                $model->save();
             })
         ;
     }
