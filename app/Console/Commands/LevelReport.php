@@ -77,25 +77,7 @@ class LevelReport extends Command
                 $model->has_step_price = isset($stepPriceGroup[$productPool->sku]) ? 1 : 0;
                 $model->has_moq = (0 == $productPool->moq) ? 0 : 1;
                 $model->delivery_place = $productPool->name ?? '';
-
-                $arrivalList = DB::connection('mysql_data')
-                    ->table('purchase_stat_current', 'psc')
-                    ->leftJoin('store as s', 's.storeId', '=', 'psc.storeId')
-                    ->where('psc.supplierName', $productPool->supplier_name)
-                    ->groupBy(['psc.storeId', 'psc.supplierName'])
-                    ->get(['s.name', 'psc.supplierName', 'psc.period', DB::raw('if(count(*),count(*),0) as batch')])
-                ;
-                if ($arrivalList->isNotEmpty()) {
-                    $periodSum = [];
-                    $batchSum = [];
-                    foreach ($arrivalList as $value) {
-                        $periodSum[] = $value->period * $value->batch;
-                        $batchSum[] = $value->batch;
-                    }
-                    $model->arrival_time = round(array_sum($periodSum) / array_sum($batchSum), 1);
-                }
-                unset($arrivalList);
-
+                $model->arrival_time = $this->getArrivalTime($productPool->supplier_name);
                 $model->save();
             }
 
@@ -103,5 +85,33 @@ class LevelReport extends Command
 
             dump(date('Y-m-d H:i:s'), $page++);
         }
+    }
+
+    /**
+     * @param string $supplierName
+     *
+     * @return float
+     */
+    public function getArrivalTime($supplierName)
+    {
+        $arrivalList = DB::connection('mysql_data')
+            ->table('purchase_stat_current', 'psc')
+            ->leftJoin('store as s', 's.storeId', '=', 'psc.storeId')
+            ->where('psc.supplierName', $supplierName)
+            ->groupBy(['psc.storeId', 'psc.supplierName'])
+            ->get(['s.name', 'psc.supplierName', 'psc.period', DB::raw('if(count(*),count(*),0) as batch')])
+        ;
+        if ($arrivalList->isNotEmpty()) {
+            $periodSum = [];
+            $batchSum = [];
+            foreach ($arrivalList as $value) {
+                $periodSum[] = $value->period * $value->batch;
+                $batchSum[] = $value->batch;
+            }
+
+            return round(array_sum($periodSum) / array_sum($batchSum), 1);
+        }
+
+        return 0.0;
     }
 }
