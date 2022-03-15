@@ -28,7 +28,7 @@ class LevelReportController extends Controller
 
         try {
             $page = $request->input('page', 1);
-            $limit = $request->input('limit', 1000);
+            $limit = $request->input('limit', 100);
             $productPools = DB::table('nt_product_pool', 'pp')
                 ->join('nt_sku as sk', 'sk.sku', '=', 'pp.sku')
                 ->join('nt_spu_info as si', 'si.spu', '=', 'pp.spu')
@@ -73,7 +73,7 @@ class LevelReportController extends Controller
                 $model->save();
             }
 
-            exit('page = '.$page.'completed');
+            exit('page = '.$page.' completed');
         } catch (Exception $exception) {
             exit($exception->getMessage());
         }

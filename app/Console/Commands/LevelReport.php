@@ -37,7 +37,7 @@ class LevelReport extends Command
      */
     public function handle()
     {
-        $perPage = 1000;
+        $perPage = 100;
         $lastPage = DB::table('nt_product_pool', 'pp')
             ->join('nt_sku as sk', 'sk.sku', '=', 'pp.sku')
             ->join('nt_spu_info as si', 'si.spu', '=', 'pp.spu')
