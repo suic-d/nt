@@ -67,7 +67,7 @@ class UpdateCompanyInfo extends Command
             }
         };
         $pool = new Pool($this->client, $requests(), [
-            'concurrency' => 5,
+            //            'concurrency' => 5,
             'fulfilled' => function ($response) {
                 dump(json_decode($response->getBody()->getContents()));
             },
