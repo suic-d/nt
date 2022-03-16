@@ -73,7 +73,7 @@ class LevelReportController extends Controller
                 $model->save();
             }
 
-            exit('page = '.$page.' completed');
+            exit(date('Y-m-d H:i:s').' page = '.$page.' completed');
         } catch (Exception $exception) {
             exit($exception->getMessage());
         }

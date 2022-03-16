@@ -88,7 +88,7 @@ class AssessOA extends Command
             }
         };
         $pool = new Pool($this->client, $requests(), [
-            'concurrency' => 5,
+            //            'concurrency' => 5,
             'fulfilled' => function ($response) {
                 echo $response->getBody()->getContents(), PHP_EOL;
             },
@@ -117,7 +117,7 @@ class AssessOA extends Command
             }
         };
         $pool = new Pool($this->client, $requests(), [
-            'concurrency' => 5,
+            //            'concurrency' => 5,
             'fulfilled' => function ($response) {
                 echo $response->getBody()->getContents(), PHP_EOL;
             },
@@ -141,7 +141,7 @@ class AssessOA extends Command
             }
         };
         $pool = new Pool($this->client, $requests(), [
-            'concurrency' => 5,
+            //            'concurrency' => 5,
             'fulfilled' => function ($response) {
                 echo $response->getBody()->getContents(), PHP_EOL;
             },
@@ -183,7 +183,9 @@ class AssessOA extends Command
                 yield new Request('GET', $uri.'?id='.$value);
             }
         };
-        (new Pool($client, $requests(), ['concurrency' => 5]))->promise()->wait();
+        (new Pool($client, $requests(), [
+            //            'concurrency' => 5,
+        ]))->promise()->wait();
 
         // 获取员工详情
         $staffIdArr = StaffList::where('is_dimission', '!=', 2)
@@ -196,7 +198,9 @@ class AssessOA extends Command
                 yield new Request('GET', $uri.'?id='.$value);
             }
         };
-        (new Pool($client, $requests(), ['concurrency' => 5]))->promise()->wait();
+        (new Pool($client, $requests(), [
+            //            'concurrency' => 5
+        ]))->promise()->wait();
 
         // 拉取店铺信息
         $platforms = ['Amazon', 'eBay', 'Aliexpress', 'shopify', 'Lazada'];
@@ -206,7 +210,9 @@ class AssessOA extends Command
                 yield new Request('GET', $uri.'?id='.$value);
             }
         };
-        (new Pool($client, $requests(), ['concurrency' => 5]))->promise()->wait();
+        (new Pool($client, $requests(), [
+            //            'concurrency' => 5
+        ]))->promise()->wait();
 
         // 测评用户
         try {
