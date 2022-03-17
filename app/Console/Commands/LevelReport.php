@@ -52,7 +52,7 @@ class LevelReport extends Command
         $requests = function () use ($perPage, $lastPage) {
             for ($page = 1; $page <= $lastPage; ++$page) {
 //                yield new Request('GET', 'api/level_report/update?page='.$page.'&limit='.$perPage);
-                yield new Request('GET', 'index.php//crontab/TransAttr/lr?page='.$page.'&limit='.$perPage);
+                yield new Request('GET', 'index.php/crontab/TransAttr/lr?page='.$page.'&limit='.$perPage);
             }
         };
         $pool = new Pool($client, $requests(), [
