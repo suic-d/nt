@@ -47,14 +47,16 @@ class LevelReport extends Command
             ->paginate($perPage, ['pp.sku'], 'page', 1)
             ->lastPage()
         ;
-        $client = new Client(['base_uri' => 'http://dev.laravel.cn', 'verify' => false]);
+//        $client = new Client(['base_uri' => 'http://dev.laravel.cn', 'verify' => false]);
+        $client = new Client(['base_uri' => 'http://v2.product.nantang-tech.com', 'verify' => false]);
         $requests = function () use ($perPage, $lastPage) {
             for ($page = 1; $page <= $lastPage; ++$page) {
-                yield new Request('GET', 'api/level_report/update?page='.$page.'&limit='.$perPage);
+//                yield new Request('GET', 'api/level_report/update?page='.$page.'&limit='.$perPage);
+                yield new Request('GET', 'index.php//crontab/TransAttr/lr?page='.$page.'&limit='.$perPage);
             }
         };
         $pool = new Pool($client, $requests(), [
-            'concurrency' => 5,
+            //            'concurrency' => 5,
             'fulfilled' => function ($response) {
                 dump($response->getBody()->getContents());
             },
