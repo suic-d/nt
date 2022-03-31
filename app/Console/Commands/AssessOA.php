@@ -82,9 +82,8 @@ class AssessOA extends Command
         $deptIdArr = is_null($deptId) ? DeptList::get(['dept_id'])->pluck('dept_id') : [$deptId];
 
         $requests = function () use ($deptIdArr) {
-            $uri = 'index.php/oaapi/oaapi/deptUser';
             foreach ($deptIdArr as $value) {
-                yield new Request('GET', $uri.'?id='.$value);
+                yield new Request('GET', 'index.php/oaapi/oaapi/deptUser?id='.$value);
             }
         };
         $pool = new Pool($this->client, $requests(), [
@@ -111,9 +110,8 @@ class AssessOA extends Command
             ->pluck('staff_id') : [$staffId];
 
         $requests = function () use ($staffIdArr) {
-            $uri = 'index.php/oaapi/oaapi/staffDetail';
             foreach ($staffIdArr as $value) {
-                yield new Request('GET', $uri.'?id='.$value);
+                yield new Request('GET', 'index.php/oaapi/oaapi/staffDetail?id='.$value);
             }
         };
         $pool = new Pool($this->client, $requests(), [
@@ -135,9 +133,8 @@ class AssessOA extends Command
     {
         $platforms = ['Amazon', 'eBay', 'Aliexpress', 'shopify', 'Lazada'];
         $requests = function () use ($platforms) {
-            $uri = 'index.php/oaapi/oaapi/getShopList';
             foreach ($platforms as $value) {
-                yield new Request('GET', $uri.'?id='.$value);
+                yield new Request('GET', 'index.php/oaapi/oaapi/getShopList?id='.$value);
             }
         };
         $pool = new Pool($this->client, $requests(), [
@@ -178,9 +175,8 @@ class AssessOA extends Command
         // 获取部门下用户
         $deptIdArr = DeptList::get(['dept_id'])->pluck('dept_id');
         $requests = function () use ($deptIdArr) {
-            $uri = 'index.php/oaapi/oaapi/deptUser';
             foreach ($deptIdArr as $value) {
-                yield new Request('GET', $uri.'?id='.$value);
+                yield new Request('GET', 'index.php/oaapi/oaapi/deptUser?id='.$value);
             }
         };
         (new Pool($client, $requests(), [
@@ -193,9 +189,8 @@ class AssessOA extends Command
             ->pluck('staff_id')
         ;
         $requests = function () use ($staffIdArr) {
-            $uri = 'index.php/oaapi/oaapi/staffDetail';
             foreach ($staffIdArr as $value) {
-                yield new Request('GET', $uri.'?id='.$value);
+                yield new Request('GET', 'index.php/oaapi/oaapi/staffDetail?id='.$value);
             }
         };
         (new Pool($client, $requests(), [
@@ -205,9 +200,8 @@ class AssessOA extends Command
         // 拉取店铺信息
         $platforms = ['Amazon', 'eBay', 'Aliexpress', 'shopify', 'Lazada'];
         $requests = function () use ($platforms) {
-            $uri = 'index.php/oaapi/oaapi/getShopList';
             foreach ($platforms as $value) {
-                yield new Request('GET', $uri.'?id='.$value);
+                yield new Request('GET', 'index.php/oaapi/oaapi/getShopList?id='.$value);
             }
         };
         (new Pool($client, $requests(), [

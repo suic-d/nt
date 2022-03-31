@@ -101,9 +101,8 @@ class OACommand extends Command
         $deptIdArr = is_null($deptId) ? DeptList::get(['dept_id'])->pluck('dept_id') : [$deptId];
 
         $requests = function () use ($deptIdArr) {
-            $uri = 'index.php/oaapi/oaapi/deptUser';
             foreach ($deptIdArr as $value) {
-                yield new Request('GET', $uri.'?id='.$value);
+                yield new Request('GET', 'index.php/oaapi/oaapi/deptUser?id='.$value);
             }
         };
         $pool = new Pool($this->client, $requests(), [
@@ -130,9 +129,8 @@ class OACommand extends Command
             ->pluck('staff_id') : [$staffId];
 
         $requests = function () use ($staffIdArr) {
-            $uri = 'index.php/oaapi/oaapi/staffDetail';
             foreach ($staffIdArr as $value) {
-                yield new Request('GET', $uri.'?id='.$value);
+                yield new Request('GET', 'index.php/oaapi/oaapi/staffDetail?id='.$value);
             }
         };
         $pool = new Pool($this->client, $requests(), [
@@ -173,9 +171,8 @@ class OACommand extends Command
             ->pluck('id') : [$supplierId];
 
         $requests = function () use ($supplierIdArr) {
-            $uri = 'index.php/pyapi/pyapi/syncSupplierInfo';
             foreach ($supplierIdArr as $value) {
-                yield new Request('GET', $uri.'?id='.$value);
+                yield new Request('GET', 'index.php/pyapi/pyapi/syncSupplierInfo?id='.$value);
             }
         };
         $pool = new Pool($this->client, $requests(), [
@@ -203,9 +200,8 @@ class OACommand extends Command
             ->pluck('id') : [$categoryId];
 
         $requests = function () use ($categoryIdArr) {
-            $uri = 'index.php/pyapi/pyapi/syncProductCategory';
             foreach ($categoryIdArr as $value) {
-                yield new Request('GET', $uri.'?id='.$value);
+                yield new Request('GET', 'index.php/pyapi/pyapi/syncProductCategory?id='.$value);
             }
         };
         $pool = new Pool($this->client, $requests(), [
@@ -233,9 +229,8 @@ class OACommand extends Command
             ->pluck('sku') : [$sku];
 
         $requests = function () use ($skuArr) {
-            $uri = 'index.php/pyapi/pyapi/syncGoodInfo';
             foreach ($skuArr as $value) {
-                yield new Request('GET', $uri.'?sku='.$value);
+                yield new Request('GET', 'index.php/pyapi/pyapi/syncGoodInfo?sku='.$value);
             }
         };
         $pool = new Pool($this->client, $requests(), [
@@ -263,9 +258,8 @@ class OACommand extends Command
             ->pluck('id') : [$supplierId];
 
         $requests = function () use ($supplierIdArr) {
-            $uri = 'index.php/pyapi/pyapi/updateSupplierInfo';
             foreach ($supplierIdArr as $value) {
-                yield new Request('GET', $uri.'?id='.$value);
+                yield new Request('GET', 'index.php/pyapi/pyapi/updateSupplierInfo?id='.$value);
             }
         };
         $pool = new Pool($this->client, $requests(), [
@@ -293,9 +287,8 @@ class OACommand extends Command
             ->pluck('id') : [$categoryId];
 
         $requests = function () use ($categoryIdArr) {
-            $uri = 'index.php/pyapi/pyapi/syncProductCategory';
             foreach ($categoryIdArr as $value) {
-                yield new Request('GET', $uri.'?id='.$value);
+                yield new Request('GET', 'index.php/pyapi/pyapi/syncProductCategory?id='.$value);
             }
         };
         $pool = new Pool($this->client, $requests(), [
@@ -323,9 +316,8 @@ class OACommand extends Command
             ->pluck('sku') : [$sku];
 
         $requests = function () use ($skuArr) {
-            $uri = 'index.php/pyapi/pyapi/updateGoodInfo';
             foreach ($skuArr as $value) {
-                yield new Request('GET', $uri.'?sku='.$value);
+                yield new Request('GET', 'index.php/pyapi/pyapi/updateGoodInfo?sku='.$value);
             }
         };
         $pool = new Pool($this->client, $requests(), [
