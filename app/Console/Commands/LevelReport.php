@@ -25,6 +25,11 @@ class LevelReport extends Command
     protected $description = 'sku等级报表';
 
     /**
+     * @var string
+     */
+    protected $baseUri = 'http://v2.product.nantang-tech.com';
+
+    /**
      * Create a new command instance.
      */
     public function __construct()
@@ -47,7 +52,7 @@ class LevelReport extends Command
             ->paginate($perPage, ['pp.sku'], 'page', 1)
             ->lastPage()
         ;
-        $client = new Client(['base_uri' => 'http://v2.product.nantang-tech.com', 'verify' => false]);
+        $client = new Client(['base_uri' => $this->baseUri, 'verify' => false]);
         $requests = function () use ($perPage, $lastPage) {
             for ($page = 1; $page <= $lastPage; ++$page) {
                 yield new Request('GET', 'index.php/crontab/TransAttr/lr?page='.$page.'&limit='.$perPage);
