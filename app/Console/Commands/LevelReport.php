@@ -59,7 +59,7 @@ class LevelReport extends Command
             }
         };
         $pool = new Pool($client, $requests(), [
-            //            'concurrency' => 5,
+            'concurrency' => 5,
             'fulfilled' => function ($response) {
                 dump($response->getBody()->getContents());
             },
