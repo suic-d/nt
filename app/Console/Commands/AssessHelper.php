@@ -79,10 +79,10 @@ class AssessHelper extends Command
                 return;
             }
 
-            $model = new AssessUserDetail();
-            $model->user_id = $userId;
-            $model->dept_id = $item->dept_id;
-            $model->save();
+            $assessUserDetail = new AssessUserDetail();
+            $assessUserDetail->user_id = $userId;
+            $assessUserDetail->dept_id = $item->dept_id;
+            $assessUserDetail->save();
         });
     }
 
@@ -108,10 +108,10 @@ class AssessHelper extends Command
                     return;
                 }
 
-                $model = new AssessFollowerDetail();
-                $model->user_id = $userId;
-                $model->staff_id = $item->follower_id;
-                $model->save();
+                $assessFollowerDetail = new AssessFollowerDetail();
+                $assessFollowerDetail->user_id = $userId;
+                $assessFollowerDetail->staff_id = $item->follower_id;
+                $assessFollowerDetail->save();
             })
         ;
     }
