@@ -124,7 +124,6 @@ class AssessHelper extends Command
      */
     public function getToken($username, $password)
     {
-        $token = '';
         $client = new Client(['base_uri' => 'https://dbsrv.nterp.nantang-tech.com/', 'verify' => false]);
 
         try {
@@ -132,14 +131,14 @@ class AssessHelper extends Command
                 'mobile' => $username,
                 'password' => $password,
             ]]);
-            if (!empty($json = json_decode($response->getBody()->getContents()))) {
-                $token = $json->data->token ?? '';
-            }
+            $json = json_decode($response->getBody()->getContents(), true);
+
+            return $json['data']['token'] ?? '';
         } catch (GuzzleException $exception) {
             dump($exception->getMessage());
         }
 
-        return $token;
+        return '';
     }
 
     /**
