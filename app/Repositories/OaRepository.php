@@ -29,6 +29,29 @@ class OaRepository
     private $oaAppSecret = '72e80fef340b576bac6af717nterp_oa';
 
     /**
+     * @var int[]
+     */
+    private $devDeptIds = [
+        504128923, // 武汉产品中心
+        504109891, // 上海产品中心
+        133726326, // 开发（系统权限使用）
+    ];
+
+    /**
+     * @var int[]
+     */
+    private $designDeptIds = [
+        133702357, // 视觉策划部
+    ];
+
+    /**
+     * @var int[]
+     */
+    private $purchaseDeptIds = [
+        133373000, // 采购部
+    ];
+
+    /**
      * @var Client
      */
     private $client;
@@ -238,10 +261,78 @@ class OaRepository
             $productUser->is_dimission = $staff->is_dimission;
             $productUser->position = $staff->position;
             $productUser->employee_type = $staff->employee_type;
+            if ($this->isDevDept($staffMainDept->department)) {
+                // 开发
+                $productUser->user_depart = 1;
+            } elseif ($this->isDesignDept($staffMainDept->department)) {
+                // 设计
+                $productUser->user_depart = 2;
+            } elseif ($this->isPurchaseDept($staffMainDept->department)) {
+                // 采购
+                $productUser->user_depart = 4;
+            }
+
             $productUser->department = $staffMainDept->department;
             $productUser->hired_date = $staff->hired_date;
             $productUser->modify_time = date('Y-m-d H:i:s');
             $productUser->save();
         }
+    }
+
+    /**
+     * @param int $deptId
+     *
+     * @return bool
+     */
+    public function isDevDept($deptId)
+    {
+        $dept = DeptList::where('dept_id', $deptId)->first();
+        if (is_null($dept)) {
+            return false;
+        }
+
+        if (in_array($dept->dept_id, $this->devDeptIds)) {
+            return true;
+        }
+
+        return $this->isDevDept($dept->parent_id);
+    }
+
+    /**
+     * @param int $deptId
+     *
+     * @return bool
+     */
+    public function isDesignDept($deptId)
+    {
+        $dept = DeptList::where('dept_id', $deptId)->first();
+        if (is_null($dept)) {
+            return false;
+        }
+
+        if (in_array($dept->dept_id, $this->designDeptIds)) {
+            return true;
+        }
+
+        return $this->isDesignDept($dept->parent_id);
+    }
+
+    /**
+     * @param int $deptId
+     *
+     * @return bool
+     */
+    public function isPurchaseDept($deptId)
+    {
+        $dept = DeptList::where('dept_id', $deptId)->first();
+        if (is_null($dept)) {
+            return false;
+        }
+
+        if (in_array($dept->dept_id, $this->purchaseDeptIds)) {
+            return true;
+        }
+
+        return $this->isPurchaseDept($dept->parent_id);
     }
 }
