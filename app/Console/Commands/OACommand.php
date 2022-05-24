@@ -106,7 +106,7 @@ class OACommand extends Command
             }
         };
         $pool = new Pool($this->client, $requests(), [
-            //            'concurrency' => 5,
+            'concurrency' => 5,
             'fulfilled' => function ($response) {
                 echo $response->getBody()->getContents(), PHP_EOL;
             },
@@ -134,7 +134,7 @@ class OACommand extends Command
             }
         };
         $pool = new Pool($this->client, $requests(), [
-            //            'concurrency' => 5,
+            'concurrency' => 5,
             'fulfilled' => function ($response) {
                 echo $response->getBody()->getContents(), PHP_EOL;
             },
