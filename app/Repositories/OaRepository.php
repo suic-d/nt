@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\DeptList;
+use App\Models\ProductUser;
 use App\Models\StaffDept;
 use App\Models\StaffList;
 use App\Models\StaffMainDept;
@@ -225,6 +226,22 @@ class OaRepository
             $staffMainDept->department = $user['mainDeptId'];
             $staffMainDept->modify_time = date('Y-m-d H:i:s');
             $staffMainDept->save();
+
+            $productUser = ProductUser::where('staff_id', $staff->staff_id)->first();
+            if (is_null($productUser)) {
+                $productUser = new ProductUser();
+            }
+            $productUser->staff_id = $staff->staff_id;
+            $productUser->staff_name = $staff->staff_name;
+            $productUser->mobile = $staff->mobile;
+            $productUser->job_number = $staff->job_number;
+            $productUser->is_dimission = $staff->is_dimission;
+            $productUser->position = $staff->position;
+            $productUser->employee_type = $staff->employee_type;
+            $productUser->department = $staffMainDept->department;
+            $productUser->hired_date = $staff->hired_date;
+            $productUser->modify_time = date('Y-m-d H:i:s');
+            $productUser->save();
         }
     }
 }

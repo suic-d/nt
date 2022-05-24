@@ -2,6 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Models\AliExpressListingProhibit;
+use App\Models\EbayBanOn;
+use App\Models\EbayBanOnList;
 use Illuminate\Console\Command;
 
 class EditorHelper extends Command
@@ -36,6 +39,10 @@ class EditorHelper extends Command
         $this->call('clear-compiled');
         $this->call('ide-helper:generate');
         $this->call('ide-helper:meta');
-        $this->call('ide-helper:models', ['--nowrite' => true]);
+        $this->call('ide-helper:models', ['--nowrite' => true, '--ignore' => join(',', [
+            AliExpressListingProhibit::class,
+            EbayBanOn::class,
+            EbayBanOnList::class,
+        ])]);
     }
 }
