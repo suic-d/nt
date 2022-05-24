@@ -87,7 +87,7 @@ class AssessOA extends Command
             }
         };
         $pool = new Pool($this->client, $requests(), [
-            //            'concurrency' => 5,
+            'concurrency' => 5,
             'fulfilled' => function ($response) {
                 echo $response->getBody()->getContents(), PHP_EOL;
             },
@@ -115,7 +115,7 @@ class AssessOA extends Command
             }
         };
         $pool = new Pool($this->client, $requests(), [
-            //            'concurrency' => 5,
+            'concurrency' => 5,
             'fulfilled' => function ($response) {
                 echo $response->getBody()->getContents(), PHP_EOL;
             },
@@ -138,7 +138,7 @@ class AssessOA extends Command
             }
         };
         $pool = new Pool($this->client, $requests(), [
-            //            'concurrency' => 5,
+            'concurrency' => 5,
             'fulfilled' => function ($response) {
                 echo $response->getBody()->getContents(), PHP_EOL;
             },
@@ -180,7 +180,7 @@ class AssessOA extends Command
             }
         };
         (new Pool($client, $requests(), [
-            //            'concurrency' => 5,
+            'concurrency' => 5,
         ]))->promise()->wait();
 
         // 获取员工详情
@@ -194,7 +194,7 @@ class AssessOA extends Command
             }
         };
         (new Pool($client, $requests(), [
-            //            'concurrency' => 5
+            'concurrency' => 5,
         ]))->promise()->wait();
 
         // 拉取店铺信息
@@ -205,7 +205,7 @@ class AssessOA extends Command
             }
         };
         (new Pool($client, $requests(), [
-            //            'concurrency' => 5
+            'concurrency' => 5,
         ]))->promise()->wait();
 
         // 测评用户
