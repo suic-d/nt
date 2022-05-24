@@ -199,8 +199,7 @@ class OaRepository
         }
 
         foreach ($staffs as $staff) {
-            if (empty($user = $this->getStaffDetail($staff->
-            staff_id))) {
+            if (empty($user = $this->getStaffDetail($staff->staff_id))) {
                 continue;
             }
 
