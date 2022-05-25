@@ -166,6 +166,8 @@ class OaRepository
             $dept->order = $item['deptOrder'];
             $dept->modify_time = date('Y-m-d H:i:s');
             $dept->save();
+
+            echo __FUNCTION__, ' : ', $dept->dept_id, PHP_EOL;
         }
     }
 
@@ -212,6 +214,8 @@ class OaRepository
                     }
                 }
             }
+
+            echo __FUNCTION__, ' : ', $dept->dept_id, PHP_EOL;
         }
     }
 
@@ -276,6 +280,8 @@ class OaRepository
             $productUser->hired_date = $staff->hired_date;
             $productUser->modify_time = date('Y-m-d H:i:s');
             $productUser->save();
+
+            echo __FUNCTION__, ' : ', $staff->staff_id, PHP_EOL;
         }
     }
 
