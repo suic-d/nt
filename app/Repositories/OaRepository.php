@@ -239,7 +239,7 @@ class OaRepository
             $staff->is_boss = ('true' == $user['isBoss']) ? 1 : 0;
             $staff->is_hide = ('true' == $user['isHide']) ? 1 : 0;
             $staff->active = ('true' == $user['active']) ? 1 : 0;
-            $staff->hired_date = $user['hiredDate'];
+            $staff->hired_date = empty($user['hiredDate']) ? '0000-00-00' : $user['hiredDate'];
             $staff->email = $user['email'];
             $staff->remark = $user['remark'];
             $staff->modify_time = date('Y-m-d H:i:s');
