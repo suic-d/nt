@@ -154,7 +154,7 @@ class OaRepository
         }
 
         foreach ($deptList as $item) {
-            $dept = DeptList::find($item['id']);
+            $dept = DeptList::where('dept_id', $item['id'])->first();
             if (is_null($dept)) {
                 $dept = new DeptList();
             }
