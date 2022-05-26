@@ -29,6 +29,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('crontab:spu_published_list')->dailyAt('10:15')->withoutOverlapping();
         // 同步OA
         $schedule->command('crontab:oa')->dailyAt('12:30')->withoutOverlapping();
+        // 钉钉审核
+        $schedule->command('get-process-instance')->everyFiveMinutes()->withoutOverlapping();
 
         /** 资产信息管理 */
         // 更新公司天眼查数据信息，每周二、周五执行
