@@ -71,7 +71,7 @@ class OaRepository
      */
     public function getAuthorization()
     {
-        if (is_null($this->authorization)) {
+        if (empty($this->authorization)) {
             try {
                 $response = $this->client->request('GET', 'rest/authorization/authorize', [
                     RequestOptions::QUERY => [
