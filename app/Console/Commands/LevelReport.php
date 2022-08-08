@@ -2,6 +2,14 @@
 
 namespace App\Console\Commands;
 
+use App\Models\LevelConfig;
+use App\Models\Product\Dictionary;
+use App\Models\Product\SkuStepPrice;
+use App\Models\Sku;
+use App\Models\SkuLevel;
+use App\Models\SpuInfo;
+use App\Models\Supplier;
+use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
@@ -28,6 +36,11 @@ class LevelReport extends Command
      * @var string
      */
     protected $baseUri = 'http://v2.product.nantang-tech.com';
+
+    /**
+     * @var \Illuminate\Database\Eloquent\Collection|LevelConfig[]
+     */
+    private static $levelConfigs;
 
     /**
      * Create a new command instance.
@@ -68,5 +81,144 @@ class LevelReport extends Command
             },
         ]);
         $pool->promise()->wait();
+    }
+
+    /**
+     * @param string $sku
+     */
+    public function abs($sku)
+    {
+        $skuLevel = SkuLevel::where('sku', $sku)->first();
+        if (is_null($skuLevel)) {
+            $skuLevel = new SkuLevel();
+            $skuLevel->sku = $sku;
+        }
+        $skuLevel->has_step_price = 0;
+        $skuLevel->has_moq = 0;
+        $skuLevel->arrival_time = 0.0;
+        $skuLevel->delivery_place = '';
+        $skuLevel->product_level = '';
+
+        $skuStepPrices = SkuStepPrice::where('sku', $sku)->get();
+        if ($skuStepPrices->isNotEmpty()) {
+            $skuLevel->has_step_price = 1;
+        }
+
+        $skuModel = Sku::find($sku);
+        if (!is_null($skuModel)) {
+            if (0 != $skuModel->moq) {
+                $skuLevel->has_moq = 1;
+            }
+
+            $supplier = Supplier::find($skuModel->supplier_id);
+            if (!is_null($supplier)) {
+                $skuLevel->arrival_time = self::getArrivalTime($supplier->supplier_name);
+
+                $dictionary = Dictionary::find($supplier->shipping_province);
+                if (!is_null($dictionary)) {
+                    $skuLevel->delivery_place = $dictionary->name;
+                }
+            }
+
+            $spuInfo = SpuInfo::find($skuModel->spu);
+            if (!is_null($spuInfo)) {
+                $levels = [];
+                foreach (self::getLevelConfigs() as $config) {
+                    if (!is_null($config->arrival_time_min)) {
+                        if (1 == $config->arrival_time_min_contain) {
+                            if (bccomp($skuLevel->arrival_time, $config->arrival_time_min, 1) < 0) {
+                                continue;
+                            }
+                        } else {
+                            if (bccomp($skuLevel->arrival_time, $config->arrival_time_min, 1) <= 0) {
+                                continue;
+                            }
+                        }
+                    }
+
+                    if (!is_null($config->arrival_time_max)) {
+                        if (1 == $config->arrival_time_max_contain) {
+                            if (bccomp($skuLevel->arrival_time, $config->arrival_time_max, 1) > 0) {
+                                continue;
+                            }
+                        } else {
+                            if (bccomp($skuLevel->arrival_time, $config->arrival_time_max, 1) > 0) {
+                                continue;
+                            }
+                        }
+                    }
+
+                    if (!is_null($config->has_step_price) && $skuLevel->has_step_price != $config->has_step_price) {
+                        continue;
+                    }
+
+                    if (!is_null($config->has_moq) && $skuLevel->has_moq != $config->has_moq) {
+                        continue;
+                    }
+
+                    if (!is_null($config->order_arrange) && $spuInfo->order_arrange !== $config->order_arrange) {
+                        continue;
+                    }
+
+                    if (!is_null($config->is_tort) && $skuModel->is_tort != $config->is_tort) {
+                        continue;
+                    }
+
+                    if (!empty($config->delivery_place)
+                        && !in_array($skuLevel->delivery_place, explode(',', $config->delivery_place))) {
+                        continue;
+                    }
+
+                    $levels[] = $config->level;
+                }
+                $skuLevel->product_level = join('、', $levels);
+            }
+        }
+
+        $skuLevel->save();
+    }
+
+    /**
+     * @param string $supplierName
+     *
+     * @return float
+     */
+    public static function getArrivalTime($supplierName)
+    {
+        try {
+            $arrivalList = DB::connection('mysql_data')
+                ->table('purchase_stat_current', 'psc')
+                ->leftJoin('store', 'storeId', '=', 'storeId')
+                ->where('psc.supplierName', $supplierName)
+                ->groupBy(['psc.storeId', 'psc.supplierName'])
+                ->get(['store.name', 'psc.supplierName', 'psc.period', 'if(count(*),count(*),0) as batch'])
+                ->toArray()
+            ;
+            if (!empty($arrivalList)) {
+                $periodSum = [];
+                $batchSum = array_sum(array_column($arrivalList, 'batch'));
+                foreach ($arrivalList as $val) {
+                    $periodSum[] = $val['period'] * $val['batch'];
+                }
+                $periodSum = array_sum($periodSum);
+
+                return round($periodSum / $batchSum, 1);
+            }
+        } catch (Exception $exception) {
+        }
+
+        return 0.0;
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection|LevelConfig[]
+     */
+    public static function getLevelConfigs()
+    {
+        if (is_null(self::$levelConfigs)) {
+            self::$levelConfigs = LevelConfig::get();
+        }
+
+        return self::$levelConfigs;
     }
 }
