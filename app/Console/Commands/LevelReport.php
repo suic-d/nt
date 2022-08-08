@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\LevelConfig;
 use App\Models\Product\Dictionary;
 use App\Models\Product\SkuStepPrice;
+use App\Models\ProductPool;
 use App\Models\Sku;
 use App\Models\SkuLevel;
 use App\Models\SpuInfo;
@@ -54,6 +55,11 @@ class LevelReport extends Command
      */
     public function handle()
     {
+        $this->url();
+    }
+
+    public function url()
+    {
         $perPage = 100;
         $lastPage = DB::table('nt_product_pool', 'pp')
             ->join('nt_sku as sk', 'sk.sku', '=', 'pp.sku')
@@ -82,10 +88,34 @@ class LevelReport extends Command
         $pool->promise()->wait();
     }
 
+    public function db()
+    {
+        ini_set('memory_limit', '512M');
+
+        $page = 1;
+        $limit = 1000;
+        while (true) {
+            $products = ProductPool::where('sample', 1)
+                ->orderBy('done_at')
+                ->forPage($page, $limit)
+                ->get(['sku'])
+            ;
+            if ($products->isEmpty()) {
+                break;
+            }
+
+            foreach ($products as $v) {
+                $this->updateSkuLevel($v->sku);
+            }
+
+            unset($products);
+        }
+    }
+
     /**
      * @param string $sku
      */
-    public function abs($sku)
+    public function updateSkuLevel($sku)
     {
         $skuLevel = SkuLevel::where('sku', $sku)->first();
         if (is_null($skuLevel)) {
