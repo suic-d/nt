@@ -191,18 +191,18 @@ class LevelReport extends Command
             ->groupBy(['psc.storeId', 'psc.supplierName'])
             ->get(['s.name', 'psc.supplierName', 'psc.period', DB::raw('IF(COUNT(*), COUNT(*), 0) AS batch')])
         ;
-        if ($arrivalList->isNotEmpty()) {
-            $periodSum = 0;
-            $batchSum = 0;
-            foreach ($arrivalList as $val) {
-                $periodSum = bcadd($periodSum, bcmul($val->period, $val->batch, 2), 2);
-                $batchSum += $val->batch;
-            }
-
-            return round($periodSum / $batchSum, 1);
+        if ($arrivalList->isEmpty()) {
+            return 0.0;
         }
 
-        return 0.0;
+        $periodSum = 0;
+        $batchSum = 0;
+        foreach ($arrivalList as $val) {
+            $periodSum = bcadd($periodSum, bcmul($val->period, $val->batch, 2), 2);
+            $batchSum += $val->batch;
+        }
+
+        return round($periodSum / $batchSum, 1);
     }
 
     /**
