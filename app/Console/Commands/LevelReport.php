@@ -186,10 +186,10 @@ class LevelReport extends Command
     {
         $arrivalList = DB::connection('mysql_data')
             ->table('purchase_stat_current', 'psc')
-            ->leftJoin('store', 'store.storeId', '=', 'psc.storeId')
+            ->leftJoin('store AS s', 's.storeId', '=', 'psc.storeId')
             ->where('psc.supplierName', $supplierName)
             ->groupBy(['psc.storeId', 'psc.supplierName'])
-            ->get(['store.name', 'psc.supplierName', 'psc.period', DB::raw('IF(COUNT(*), COUNT(*), 0) AS batch')])
+            ->get(['s.name', 'psc.supplierName', 'psc.period', DB::raw('IF(COUNT(*), COUNT(*), 0) AS batch')])
             ->toArray()
             ;
         if (!empty($arrivalList)) {
