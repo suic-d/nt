@@ -9,7 +9,6 @@ use App\Models\Sku;
 use App\Models\SkuLevel;
 use App\Models\SpuInfo;
 use App\Models\Supplier;
-use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
@@ -185,26 +184,23 @@ class LevelReport extends Command
      */
     public static function getArrivalTime($supplierName)
     {
-        try {
-            $arrivalList = DB::connection('mysql_data')
-                ->table('purchase_stat_current', 'psc')
-                ->leftJoin('store', 'storeId', '=', 'storeId')
-                ->where('psc.supplierName', $supplierName)
-                ->groupBy(['psc.storeId', 'psc.supplierName'])
-                ->get(['store.name', 'psc.supplierName', 'psc.period', 'if(count(*),count(*),0) as batch'])
-                ->toArray()
+        $arrivalList = DB::connection('mysql_data')
+            ->table('purchase_stat_current', 'psc')
+            ->leftJoin('store', 'store.storeId', '=', 'psc.storeId')
+            ->where('psc.supplierName', $supplierName)
+            ->groupBy(['psc.storeId', 'psc.supplierName'])
+            ->get(['store.name', 'psc.supplierName', 'psc.period', DB::raw('IF(COUNT(*), COUNT(*), 0) AS batch')])
+            ->toArray()
             ;
-            if (!empty($arrivalList)) {
-                $periodSum = [];
-                $batchSum = array_sum(array_column($arrivalList, 'batch'));
-                foreach ($arrivalList as $val) {
-                    $periodSum[] = $val['period'] * $val['batch'];
-                }
-                $periodSum = array_sum($periodSum);
-
-                return round($periodSum / $batchSum, 1);
+        if (!empty($arrivalList)) {
+            $periodSum = 0;
+            $batchSum = 0;
+            foreach ($arrivalList as $val) {
+                $periodSum = bcadd($periodSum, bcmul($val->period, $val->batch, 2), 2);
+                $batchSum += $val->batch;
             }
-        } catch (Exception $exception) {
+
+            return round($periodSum / $batchSum, 1);
         }
 
         return 0.0;
