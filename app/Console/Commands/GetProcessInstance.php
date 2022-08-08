@@ -24,6 +24,11 @@ class GetProcessInstance extends Command
     protected $description = '钉钉审核';
 
     /**
+     * @var string
+     */
+    private $baseUri = 'http://v2.product.nantang-tech.com';
+
+    /**
      * Create a new command instance.
      */
     public function __construct()
@@ -41,7 +46,7 @@ class GetProcessInstance extends Command
             return;
         }
 
-        $client = new Client(['base_uri' => 'http://v2.product.nantang-tech.com', 'verify' => false]);
+        $client = new Client(['base_uri' => $this->baseUri, 'verify' => false]);
         foreach ($reviews as $review) {
             try {
                 $response = $client->request('GET', 'index.php/api/v1/ExternalAPI/getProcessInstance', [
