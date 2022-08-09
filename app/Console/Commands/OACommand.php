@@ -12,7 +12,6 @@ use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Log;
 
 class OACommand extends Command
 {
@@ -86,9 +85,9 @@ class OACommand extends Command
     {
         try {
             $response = $this->client->request('GET', 'index.php/oaapi/oaapi/deptList');
-            Log::info($response->getBody()->getContents(), ['method' => __METHOD__]);
+            dump($response->getBody()->getContents());
         } catch (GuzzleException $exception) {
-            Log::error($exception->getMessage(), ['method' => __METHOD__]);
+            dump($exception->getMessage());
         }
     }
 
@@ -108,11 +107,11 @@ class OACommand extends Command
         };
         $pool = new Pool($this->client, $requests(), [
             'concurrency' => 5,
-            'fulfilled' => function ($response, $idx) {
-                Log::info($response->getBody()->getContents(), ['method' => __METHOD__, 'dept_id' => $idx]);
+            'fulfilled' => function ($response) {
+                dump($response->getBody()->getContents());
             },
             'rejected' => function ($reason) {
-                Log::error($reason->getMessage(), ['method' => __METHOD__]);
+                dump($reason->getMessage());
             },
         ]);
         $pool->promise()->wait();
@@ -136,11 +135,11 @@ class OACommand extends Command
         };
         $pool = new Pool($this->client, $requests(), [
             'concurrency' => 5,
-            'fulfilled' => function ($response, $idx) {
-                Log::info($response->getBody()->getContents(), ['method' => __METHOD__, 'staff_id' => $idx]);
+            'fulfilled' => function ($response) {
+                dump($response->getBody()->getContents());
             },
             'rejected' => function ($reason) {
-                Log::error($reason->getMessage(), ['method' => __METHOD__]);
+                dump($reason->getMessage());
             },
         ]);
         $pool->promise()->wait();
@@ -153,9 +152,9 @@ class OACommand extends Command
     {
         try {
             $response = $this->client->request('GET', 'index.php/oaapi/oaapi/getProductUser');
-            Log::info($response->getBody()->getContents(), ['method' => __METHOD__]);
+            dump($response->getBody()->getContents());
         } catch (GuzzleException $exception) {
-            Log::error($exception->getMessage(), ['method' => __METHOD__]);
+            dump($exception->getMessage());
         }
     }
 
