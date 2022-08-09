@@ -6,6 +6,7 @@ use App\Models\SkuReview;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class GetProcessInstance extends Command
@@ -53,9 +54,9 @@ class GetProcessInstance extends Command
                 $response = $client->request('GET', 'index.php/api/v1/ExternalAPI/getProcessInstance', [
                     RequestOptions::QUERY => ['review_id' => $review->id],
                 ]);
-                dump($response->getBody()->getContents());
+                Log::info($response->getBody()->getContents(), ['review_id' => $review->id]);
             } catch (Throwable $exception) {
-                dump($exception->getMessage());
+                Log::error($exception->getMessage());
             }
         }
     }
