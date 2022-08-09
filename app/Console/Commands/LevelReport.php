@@ -82,7 +82,7 @@ class LevelReport extends Command
             }
 
             try {
-                $response = $this->client->request('POST', 'index.php/crontab/TransAttr/lr', [
+                $response = $this->client->request('POST', 'index.php/crontab/TransAttr/rl', [
                     RequestOptions::JSON => ['skus' => $products->pluck('sku')],
                 ]);
                 dump($response->getBody()->getContents());
