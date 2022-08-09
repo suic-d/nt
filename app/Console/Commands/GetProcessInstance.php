@@ -63,7 +63,7 @@ class GetProcessInstance extends Command
             }
         }
 
-        $message = sprintf('[%] %'.PHP_EOL, date('Y-m-d H:i:s'), __METHOD__);
+        $message = sprintf('[%s] %s'.PHP_EOL, date('Y-m-d H:i:s'), __METHOD__);
         $file = '/www/logs/'.date('Ymd').'.log';
         error_log($message, 3, $file);
     }
