@@ -49,14 +49,23 @@ class GetProcessInstance extends Command
      */
     public function handle()
     {
-        $reviews = SkuReview::whereIn('process_status', ['NEW', 'RUNNING'])->forPage(1, 200)->get();
-        if ($reviews->isEmpty()) {
-            return;
-        }
-
+        $reviews = SkuReview::whereIn('process_status', ['NEW', 'RUNNING'])
+            ->orderBy('id')
+            ->forPage(1, 200)
+            ->get()
+        ;
         foreach ($reviews as $review) {
             $this->request($review);
         }
+        if ($reviews->isNotEmpty()) {
+            foreach ($reviews as $v) {
+                $this->request($v);
+            }
+        }
+
+        $message = sprintf('[%] %'.PHP_EOL, date('Y-m-d H:i:s'), __METHOD__);
+        $file = '/www/logs/'.date('Ymd').'.log';
+        error_log($message, 3, $file);
     }
 
     /**
