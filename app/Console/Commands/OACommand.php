@@ -86,9 +86,9 @@ class OACommand extends Command
     {
         try {
             $response = $this->client->request('GET', 'index.php/oaapi/oaapi/deptList');
-            Log::info($response->getBody()->getContents());
+            Log::info($response->getBody()->getContents(), ['method' => __METHOD__]);
         } catch (GuzzleException $exception) {
-            Log::error($exception->getMessage());
+            Log::error($exception->getMessage(), ['method' => __METHOD__]);
         }
     }
 
@@ -109,10 +109,10 @@ class OACommand extends Command
         $pool = new Pool($this->client, $requests(), [
             'concurrency' => 5,
             'fulfilled' => function ($response, $idx) {
-                Log::info($response->getBody()->getContents(), ['dept_id' => $idx]);
+                Log::info($response->getBody()->getContents(), ['method' => __METHOD__, 'dept_id' => $idx]);
             },
             'rejected' => function ($reason) {
-                Log::error($reason->getMessage());
+                Log::error($reason->getMessage(), ['method' => __METHOD__]);
             },
         ]);
         $pool->promise()->wait();
@@ -137,10 +137,10 @@ class OACommand extends Command
         $pool = new Pool($this->client, $requests(), [
             'concurrency' => 5,
             'fulfilled' => function ($response, $idx) {
-                Log::info($response->getBody()->getContents(), ['staff_id' => $idx]);
+                Log::info($response->getBody()->getContents(), ['method' => __METHOD__, 'staff_id' => $idx]);
             },
             'rejected' => function ($reason) {
-                Log::error($reason->getMessage());
+                Log::error($reason->getMessage(), ['method' => __METHOD__]);
             },
         ]);
         $pool->promise()->wait();
@@ -153,9 +153,9 @@ class OACommand extends Command
     {
         try {
             $response = $this->client->request('GET', 'index.php/oaapi/oaapi/getProductUser');
-            echo $response->getBody()->getContents(), PHP_EOL;
+            Log::info($response->getBody()->getContents(), ['method' => __METHOD__]);
         } catch (GuzzleException $exception) {
-            echo $exception->getMessage(), PHP_EOL;
+            Log::error($exception->getMessage(), ['method' => __METHOD__]);
         }
     }
 
