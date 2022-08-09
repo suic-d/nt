@@ -4,10 +4,9 @@ namespace App\Console\Commands;
 
 use App\Models\SkuReview;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Log;
-use Throwable;
 
 class GetProcessInstance extends Command
 {
@@ -31,11 +30,18 @@ class GetProcessInstance extends Command
     private $baseUri = 'http://v2.product.nantang-tech.com';
 
     /**
+     * @var Client
+     */
+    private $client;
+
+    /**
      * Create a new command instance.
      */
     public function __construct()
     {
         parent::__construct();
+
+        $this->client = new Client(['base_uri' => $this->baseUri, 'verify' => false]);
     }
 
     /**
@@ -48,16 +54,23 @@ class GetProcessInstance extends Command
             return;
         }
 
-        $client = new Client(['base_uri' => $this->baseUri, 'verify' => false]);
         foreach ($reviews as $review) {
-            try {
-                $response = $client->request('GET', 'index.php/api/v1/ExternalAPI/getProcessInstance', [
-                    RequestOptions::QUERY => ['review_id' => $review->id],
-                ]);
-                Log::info($response->getBody()->getContents(), ['review_id' => $review->id]);
-            } catch (Throwable $exception) {
-                Log::error($exception->getMessage());
-            }
+            $this->request($review);
+        }
+    }
+
+    /**
+     * @param SkuReview $review
+     */
+    public function request($review)
+    {
+        try {
+            $response = $this->client->request('GET', 'index.php/api/v1/ExternalAPI/getProcessInstance', [
+                RequestOptions::QUERY => ['review_id' => $review->id],
+            ]);
+            dump($response->getBody()->getContents());
+        } catch (GuzzleException $exception) {
+            dump($exception->getMessage());
         }
     }
 }
