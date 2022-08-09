@@ -11,8 +11,10 @@ use App\Models\SkuLevel;
 use App\Models\SpuInfo;
 use App\Models\Supplier;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\RequestOptions;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -43,11 +45,18 @@ class LevelReport extends Command
     private static $levelConfigs;
 
     /**
+     * @var Client
+     */
+    private $client;
+
+    /**
      * Create a new command instance.
      */
     public function __construct()
     {
         parent::__construct();
+
+        $this->client = new Client(['base_uri' => $this->baseUri, 'verify' => false]);
     }
 
     /**
@@ -56,6 +65,34 @@ class LevelReport extends Command
     public function handle()
     {
         $this->url();
+    }
+
+    public function rl()
+    {
+        $page = 1;
+        $limit = 1000;
+        while (true) {
+            $products = ProductPool::where('sample', 1)
+                ->orderBy('done_at')
+                ->forPage($page, $limit)
+                ->get(['sku'])
+            ;
+            if ($products->isEmpty()) {
+                break;
+            }
+
+            try {
+                $response = $this->client->request('POST', 'index.php/crontab/TransAttr/lr', [
+                    RequestOptions::JSON => ['skus' => $products->pluck('sku')],
+                ]);
+                dump($response->getBody()->getContents());
+            } catch (GuzzleException $exception) {
+                dump($exception->getMessage());
+            }
+
+            unset($products);
+            dump($page++);
+        }
     }
 
     public function url()
@@ -70,13 +107,12 @@ class LevelReport extends Command
             ->paginate($perPage, ['pp.sku'], 'page', 1)
             ->lastPage()
         ;
-        $client = new Client(['base_uri' => $this->baseUri, 'verify' => false]);
         $requests = function () use ($perPage, $lastPage) {
             for ($page = 1; $page <= $lastPage; ++$page) {
                 yield new Request('GET', 'index.php/crontab/TransAttr/lr?page='.$page.'&limit='.$perPage);
             }
         };
-        $pool = new Pool($client, $requests(), [
+        $pool = new Pool($this->client, $requests(), [
             'concurrency' => 5,
             'fulfilled' => function ($response) {
                 dump($response->getBody()->getContents());
