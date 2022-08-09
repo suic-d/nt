@@ -12,6 +12,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class OACommand extends Command
 {
@@ -85,9 +86,9 @@ class OACommand extends Command
     {
         try {
             $response = $this->client->request('GET', 'index.php/oaapi/oaapi/deptList');
-            echo $response->getBody()->getContents(), PHP_EOL;
+            Log::info($response->getBody()->getContents());
         } catch (GuzzleException $exception) {
-            echo $exception->getMessage(), PHP_EOL;
+            Log::error($exception->getMessage());
         }
     }
 
@@ -102,16 +103,16 @@ class OACommand extends Command
 
         $requests = function () use ($deptIdArr) {
             foreach ($deptIdArr as $value) {
-                yield new Request('GET', 'index.php/oaapi/oaapi/deptUser?id='.$value);
+                yield $value => new Request('GET', 'index.php/oaapi/oaapi/deptUser?id='.$value);
             }
         };
         $pool = new Pool($this->client, $requests(), [
             'concurrency' => 5,
-            'fulfilled' => function ($response) {
-                echo $response->getBody()->getContents(), PHP_EOL;
+            'fulfilled' => function ($response, $idx) {
+                Log::info($response->getBody()->getContents(), ['dept_id' => $idx]);
             },
             'rejected' => function ($reason) {
-                echo $reason->getMessage(), PHP_EOL;
+                Log::error($reason->getMessage());
             },
         ]);
         $pool->promise()->wait();
@@ -130,16 +131,16 @@ class OACommand extends Command
 
         $requests = function () use ($staffIdArr) {
             foreach ($staffIdArr as $value) {
-                yield new Request('GET', 'index.php/oaapi/oaapi/staffDetail?id='.$value);
+                yield $value => new Request('GET', 'index.php/oaapi/oaapi/staffDetail?id='.$value);
             }
         };
         $pool = new Pool($this->client, $requests(), [
             'concurrency' => 5,
-            'fulfilled' => function ($response) {
-                echo $response->getBody()->getContents(), PHP_EOL;
+            'fulfilled' => function ($response, $idx) {
+                Log::info($response->getBody()->getContents(), ['staff_id' => $idx]);
             },
             'rejected' => function ($reason) {
-                echo $reason->getMessage(), PHP_EOL;
+                Log::error($reason->getMessage());
             },
         ]);
         $pool->promise()->wait();
