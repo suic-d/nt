@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\OaModel;
 use App\Models\Product\PriceChangePush;
 use App\Models\Product\SkuLog;
 use App\Models\Product\SkuMid;
@@ -60,6 +61,8 @@ class Sku extends Model
      * @param array  $data
      * @param string $staffId
      * @param string $staffName
+     *
+     * @throws \Throwable
      *
      * @return bool
      */
