@@ -2,6 +2,7 @@
 
 namespace App\Models\Product;
 
+use App\Helpers\SkuModifiedListener;
 use App\Models\DeptList;
 use App\Models\ProductCategory;
 use App\Models\ProductPool;
@@ -349,5 +350,18 @@ class SkuLog extends Model
         }
 
         return ['old_str' => $oldStr, 'new_str' => $newStr, 'desc' => $desc];
+    }
+
+    /**
+     * @param string $sku
+     * @param int    $logTypeId
+     * @param array  $skuLogs
+     * @param string $createId
+     * @param string $createName
+     * @param false  $isCache
+     */
+    public static function saveLog($sku, $logTypeId, $skuLogs, $createId, $createName, $isCache = false)
+    {
+        (new SkuModifiedListener())->handle($sku, $skuLogs, $logTypeId, $createId, $createName, $isCache);
     }
 }
