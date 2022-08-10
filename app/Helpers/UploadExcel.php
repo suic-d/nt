@@ -938,13 +938,9 @@ class UploadExcel
                 }
 
                 $infoPoolSku = $skuPoolInfo[$item['sku']];
-                $fieldSpu = [];
-                foreach ($arrFieldSpu as $field) {
-                    if (isset($item[$field])) {
-                        $fieldSpu[$field] = $item[$field];
-                        unset($item[$field]);
-                    }
-                }
+                $product = ProductPool::find($item['sku']);
+                $spu = Spu::find($infoPoolSku['spu']);
+                $spuInfo = SpuInfo::find($infoPoolSku['spu']);
 
                 // 记录产品修改日志
                 if (!empty($logSku = SkuLog::skuChangeLog($item['sku'], $item, $infoPoolSku['spu']))) {
@@ -952,6 +948,13 @@ class UploadExcel
                 }
 
                 // spu字段修改日志记录
+                $fieldSpu = [];
+                foreach ($arrFieldSpu as $field) {
+                    if (isset($item[$field])) {
+                        $fieldSpu[$field] = $item[$field];
+                        unset($item[$field]);
+                    }
+                }
                 if (!empty($fieldSpu)) {
                     if (isset($fieldSpu['quality_type']) && !empty($fieldSpu['quality_type'])) {
                         $qualityTypeSwap = [];
@@ -999,14 +1002,12 @@ class UploadExcel
                         if ($isSync) {
                             $dataPool['is_sync'] = 1;
                         }
-                        $product = ProductPool::find($item['sku']);
                         if (!is_null($product)) {
                             $product->update($dataPool);
                         }
                     }
                 } else {
                     $dataPool['is_sync'] = 1;
-                    $product = ProductPool::find($item['sku']);
                     if (!is_null($product)) {
                         $product->update($dataPool);
                     }
@@ -1034,7 +1035,6 @@ class UploadExcel
                         }
                     }
                     if (!empty($dataSpu)) {
-                        $spu = Spu::find($infoPoolSku['spu']);
                         if (!is_null($spu)) {
                             $spu->update($dataSpu);
                         }
@@ -1050,7 +1050,6 @@ class UploadExcel
                         }
                     }
                     if (!empty($dataSpuInfo)) {
-                        $spuInfo = SpuInfo::find($infoPoolSku['spu']);
                         if (!is_null($spuInfo)) {
                             $spuInfo->update($dataSpuInfo);
                         }
