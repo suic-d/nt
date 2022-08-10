@@ -34,6 +34,16 @@ class Sku extends Model
     public $incrementing = false;
 
     /**
+     * @var string[]
+     */
+    public static $labelTypes = ['CE', 'UKCA', '无需贴标', '铭牌'];
+
+    /**
+     * @var string[]
+     */
+    public static $spotCheckTypes = ['精检', '普检'];
+
+    /**
      * The table associated with the model.
      *
      * @var string
