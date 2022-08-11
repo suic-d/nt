@@ -15,6 +15,9 @@ class OaModel
 
     const APP_SECRET = '72e80fef340b576bac6af717nterp_oa';
 
+    /**
+     * @return string
+     */
     public static function getAuth()
     {
         $client = new Client(['base_uri' => self::URL, 'verify' => false]);

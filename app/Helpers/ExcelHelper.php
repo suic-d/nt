@@ -4,190 +4,16 @@ namespace App\Helpers;
 
 use Exception;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
-use PhpOffice\PhpSpreadsheet\IOFactory;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Reader\Xls;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 
 class ExcelHelper
 {
     /**
-     * 导出Excel.
-     *
-     * @param array  $list
-     * @param array  $header
-     * @param string $filename
-     * @param string $title
-     * @param mixed  $data
-     * @param mixed  $suffix
-     *
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
-     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
-     *
-     * @return bool
-     */
-    public static function exportData($data = [], $header = [], $filename = '', $suffix = '.xlsx')
-    {
-        // $filename       .= "_" . date("Y_m_d", time()) . $suffix;
-
-        $spreadsheet = new Spreadsheet();
-
-        $objPHPExcel = $spreadsheet->getActiveSheet();
-
-        // $key2 = ord("@"); //64
-        $key = $value_A = ord('A');
-        foreach ($header as $v) {
-            $ch_left = (intval(($key - $value_A) / 26) > 0) ? chr(($key - $value_A) / 26 + $value_A - 1) : '';
-            $colum = $ch_left.chr(($key - $value_A) % 26 + $value_A);
-
-            $objPHPExcel->setCellValue($colum.'1', $v);
-            ++$key;
-        }
-
-        /*
-        foreach ($header as $v) {
-
-echo $key.":". chr($key) . "\n<br/>";
-
-            if($key > ord("Z"))
-            {
-                $colum = chr(ord("A")).chr(++$key2);//超过26个字母 AA1,AB1,AC1,AD1...BA1,BB1...
-            }
-            else
-            {
-                $colum = chr($key);
-            }
-
-
-            $objPHPExcel->setCellValue($colum . '1', $v);
-
-            $key += 1;
-
-        }
-        */
-
-        $column = 2;
-
-        foreach ($data as $key => $rows) {
-            /*
-            // 行写入
-            $span = ord("A");
-            $key2 = ord("@"); //64
-            foreach ($rows as $keyName => $value) {
-                // 列写入
-                if($span > ord("Z"))
-                {
-                    $colum = chr(ord("A")).chr(++$key2);//超过26个字母 AA1,AB1,AC1,AD1...BA1,BB1...
-                }
-                else
-                {
-                    $colum = chr($span++);
-                }
-
-                $objPHPExcel->setCellValue($colum . $column, $value);
-
-                //$span++;
-
-            }
-            */
-
-            $key = $value_A;
-            foreach ($rows as $value) {
-                $ch_left = (intval(($key - $value_A) / 26) > 0) ? chr(($key - $value_A) / 26 + $value_A - 1) : '';
-                $colum = $ch_left.chr(($key - $value_A) % 26 + $value_A);
-
-                $objPHPExcel->setCellValue($colum.$column, $value);
-
-                ++$key;
-            }
-
-            ++$column;
-        }
-
-        //$fileName = iconv("utf-8", "gbk//IGNORE", $fileName); // 重命名表（UTF8编码不需要这一步）
-
-        header('Content-Type: application/vnd.ms-excel');
-
-        header('Content-Disposition: attachment;filename="'.$filename.$suffix);
-
-        header('Cache-Control: max-age=0');
-
-        $writer = new Xlsx($spreadsheet);
-
-        $writer->save('php://output');
-
-        //删除清空：
-
-        $spreadsheet->disconnectWorksheets();
-
-        unset($spreadsheet);
-
-        exit;
-    }
-
-    /**
-     * 导出的另外一种形式(不建议使用).
-     *
-     * @param array  $list
-     * @param array  $header
-     * @param string $filename
-     *
-     * @return bool
-     */
-    public static function exportCsvData($list = [], $header = [], $filename = '')
-    {
-        if (!is_array($list) || !is_array($header)) {
-            return false;
-        }
-
-        // 清除之前的错误输出
-        ob_end_clean();
-        ob_start();
-
-        !$filename && $filename = time();
-
-        $html = "\xEF\xBB\xBF";
-        foreach ($header as $k => $v) {
-            $html .= $v[0]."\t ,";
-        }
-
-        $html .= "\n";
-
-        if (!empty($list)) {
-            $info = [];
-            $size = ceil(count($list) / 500);
-
-            for ($i = 0; $i < $size; ++$i) {
-                $buffer = array_slice($list, $i * 500, 500);
-
-                foreach ($buffer as $k => $row) {
-                    $data = [];
-
-                    foreach ($header as $key => $value) {
-                        // 解析字段
-                        $realData = self::formatting($header[$key], trim(self::formattingField($row, $value[1])), $row);
-                        $data[] = str_replace(PHP_EOL, '', $realData);
-                    }
-
-                    $info[] = implode("\t ,", $data)."\t ,";
-                    unset($data, $buffer[$k]);
-                }
-            }
-
-            $html .= implode("\n", $info);
-        }
-
-        header('Content-type:text/csv');
-        header("Content-Disposition:attachment; filename={$filename}.csv");
-        echo $html;
-
-        exit();
-    }
-
-    /**
      * 导入.
      *
-     * @param $filePath
-     * @param int $startRow
+     * @param string $filePath
+     * @param int    $startRow
      *
      * @throws Exception
      * @throws \PhpOffice\PhpSpreadsheet\Exception
@@ -197,10 +23,10 @@ echo $key.":". chr($key) . "\n<br/>";
      */
     public static function import($filePath, $startRow = 1)
     {
-        $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
+        $reader = new Xlsx();
         $reader->setReadDataOnly(true);
         if (!$reader->canRead($filePath)) {
-            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xls();
+            $reader = new Xls();
             // setReadDataOnly Set read data only 只读单元格的数据，不格式化 e.g. 读时间会变成一个数据等
             $reader->setReadDataOnly(true);
 
@@ -253,123 +79,5 @@ echo $key.":". chr($key) . "\n<br/>";
         return $returnData
         && isset($returnData[$startRow])
         && !empty($returnData[$startRow]) ? array_filter($returnData) : $returnData;
-    }
-
-    /**
-     * @param array  $data
-     * @param array  $header
-     * @param string $filename
-     *
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
-     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
-     */
-    public static function exportCSV($data, $header, $filename)
-    {
-        $spreadsheet = new Spreadsheet();
-        $spreadsheet->setActiveSheetIndex(0);
-        $writer = IOFactory::createWriter($spreadsheet, 'Csv');
-        $writer->setSheetIndex(0)->setDelimiter(',')->setEnclosure('"')->setUseBOM(true);
-        $worksheet = $spreadsheet->getActiveSheet();
-
-        $column = 1;
-        foreach ($header as $value) {
-            $worksheet->setCellValue(Coordinate::stringFromColumnIndex($column++).'1', $value);
-        }
-
-        $row = 2;
-        foreach ($data as $items) {
-            $column = 1;
-            foreach ($items as $item) {
-                $worksheet->setCellValue(Coordinate::stringFromColumnIndex($column++).$row, $item);
-            }
-            ++$row;
-        }
-
-        header('Content-Type: application/vnd.ms-excel;charset=UTF-8');
-        header('Content-Disposition: attachment;filename='.urlencode($filename).'.csv');
-        header('Cache-Control: max-age=0');
-
-        $writer->save('php://output');
-        $spreadsheet->disconnectWorksheets();
-
-        exit;
-    }
-
-    /**
-     * @param int $index
-     *
-     * @return string
-     */
-    public static function toAlphaIndex($index)
-    {
-        $a = ord('A');
-        $alpha = chr($a + $index % 26);
-        $index = (int) ($index / 26);
-        while (0 != $index) {
-            $alpha = chr($a + $index % 26 - 1).$alpha;
-            $index = (int) ($index / 26);
-        }
-
-        return $alpha;
-    }
-
-    /**
-     * 格式化内容.
-     *
-     * @param array $array 头部规则
-     * @param mixed $value
-     * @param mixed $row
-     *
-     * @return null|false|mixed|string 内容值
-     */
-    protected static function formatting(array $array, $value, $row)
-    {
-        !isset($array[2]) && $array[2] = 'text';
-
-        switch ($array[2]) {
-            // 文本
-            case 'text':
-                return $value;
-            // 日期
-            case 'date':
-                return !empty($value) ? date($array[3], $value) : null;
-            // 选择框
-            case 'selectd':
-                return $array[3][$value] ?? null;
-            // 匿名函数
-            case 'function':
-                return isset($array[3]) ? call_user_func($array[3], $row) : null;
-            // 默认
-            default:
-                break;
-        }
-
-        return null;
-    }
-
-    /**
-     * 解析字段.
-     *
-     * @param $row
-     * @param $field
-     *
-     * @return mixed
-     */
-    protected static function formattingField($row, $field)
-    {
-        $newField = explode('.', $field);
-        if (1 == count($newField)) {
-            return $row[$field];
-        }
-
-        foreach ($newField as $item) {
-            if (isset($row[$item])) {
-                $row = $row[$item];
-            } else {
-                break;
-            }
-        }
-
-        return is_array($row) ? false : $row;
     }
 }
