@@ -216,7 +216,8 @@ class DingApproval
      */
     public function isAgree()
     {
-        return self::PROCESS_STATUS_COMPLETED == $this->processStatus && self::AGREE === $this->processResult;
+        return self::PROCESS_STATUS_COMPLETED == strtoupper($this->processStatus)
+            && self::AGREE == strtolower($this->processResult);
     }
 
     /**
@@ -224,7 +225,8 @@ class DingApproval
      */
     public function isRefuse()
     {
-        return self::PROCESS_STATUS_COMPLETED == $this->processStatus && self::REFUSE === $this->processResult;
+        return self::PROCESS_STATUS_COMPLETED == strtoupper($this->processStatus)
+            && self::AGREE == strtolower($this->processResult);
     }
 
     /**
@@ -264,6 +266,6 @@ class DingApproval
      */
     public function setCCPosition($ccPosition)
     {
-        $this->ccPosition = $ccPosition;
+        $this->ccPosition = strtoupper($ccPosition);
     }
 }
