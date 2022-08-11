@@ -247,4 +247,76 @@ abstract class ReviewAbstract
             $this->designRejectLog();
         }
     }
+
+    /**
+     * @param object $record
+     */
+    protected function devdReview($record)
+    {
+        if (8 != $this->review->status) {
+            return;
+        }
+
+        $this->review->devd_review_time = date('Y-m-d H:i:s', strtotime($record->date));
+        if (self::agreed($record->operation_result)) {
+            $this->review->status = 10;
+            $this->review->save();
+
+            $this->devdPassLog();
+        } elseif (self::refused($record->operation_result)) {
+            $this->review->status = 9;
+            $this->review->devd_reject_reason = $record->remark ?? '';
+            $this->review->save();
+
+            $this->devdRejectLog();
+        }
+    }
+
+    /**
+     * @param object $record
+     */
+    protected function oplReview($record)
+    {
+        if (10 != $this->review->status) {
+            return;
+        }
+
+        $this->review->opl_review_time = date('Y-m-d H:i:s', strtotime($record->date));
+        if (self::agreed($record->operation_result)) {
+            $this->review->status = 12;
+            $this->review->save();
+
+            $this->oplPassLog();
+        } elseif (self::refused($record->operation_result)) {
+            $this->review->status = 11;
+            $this->review->opl_reject_reason = $record->remark ?? '';
+            $this->review->save();
+
+            $this->oplRejectLog();
+        }
+    }
+
+    /**
+     * @param object $record
+     */
+    protected function opdReview($record)
+    {
+        if (12 != $this->review->status) {
+            return;
+        }
+
+        $this->review->opd_review_time = date('Y-m-d H:i:s', strtotime($record->date));
+        if (self::agreed($record->operation_result)) {
+            $this->review->status = 14;
+            $this->review->save();
+
+            $this->opdPassLog();
+        } elseif (self::refused($record->operation_result)) {
+            $this->review->status = 13;
+            $this->review->opd_reject_reason = $record->remark ?? '';
+            $this->review->save();
+
+            $this->opdRejectLog();
+        }
+    }
 }
