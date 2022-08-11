@@ -10,7 +10,7 @@ abstract class ReviewAbstract
     /**
      * @var SkuReview
      */
-    private $review;
+    protected $review;
 
     abstract public function run();
 
@@ -174,5 +174,27 @@ abstract class ReviewAbstract
         $log->op_staff_name = $this->review->opd_name;
         $log->op_time = date('Y-m-d H:i:s', strtotime($this->review->opd_review_time));
         $log->save();
+    }
+
+    /**
+     * @param object $record
+     */
+    protected function devReview($record)
+    {
+        if (3 != $this->review->status) {
+            return;
+        }
+
+        $this->review->dev_review_time = date('Y-m-d H:i:s', strtotime($record->date));
+        if (self::agreed($record->operation_result)) {
+            $this->review->status = 7;
+            $this->review->save();
+            $this->devPassLog();
+        } elseif (self::refused($record->operation_result)) {
+            $this->review->status = 4;
+            $this->review->dev_reject_reason = $record->remark ?? '';
+            $this->review->save();
+            $this->devRejectLog();
+        }
     }
 }

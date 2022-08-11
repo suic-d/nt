@@ -10,11 +10,6 @@ use Illuminate\Support\Facades\DB;
 class UpdateFields extends ReviewAbstract
 {
     /**
-     * @var SkuReview
-     */
-    private $review;
-
-    /**
      * @param SkuReview $review
      */
     public function __construct($review)
@@ -88,30 +83,6 @@ class UpdateFields extends ReviewAbstract
             if ($this->review->dev_reviewer_id == $item->userid) {
                 $this->devReview($item);
             }
-        }
-    }
-
-    /**
-     * @param object $record
-     */
-    private function devReview($record)
-    {
-        if (3 != $this->review->status) {
-            return;
-        }
-
-        $this->review->dev_review_time = date('Y-m-d H:i:s', strtotime($record->date));
-        if (self::agreed($record->operation_result)) {
-            $this->review->status = 7;
-            $this->review->save();
-
-            $this->devPassLog();
-        } elseif (self::refused($record->operation_result)) {
-            $this->review->status = 4;
-            $this->review->dev_reject_reason = $record->remark ?? '';
-            $this->review->save();
-
-            $this->devRejectLog();
         }
     }
 }

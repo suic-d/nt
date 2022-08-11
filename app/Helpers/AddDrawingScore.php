@@ -12,11 +12,6 @@ use Illuminate\Support\Facades\DB;
 class AddDrawingScore extends ReviewAbstract
 {
     /**
-     * @var SkuReview
-     */
-    private $review;
-
-    /**
      * @param SkuReview $review
      */
     public function __construct($review)
@@ -50,6 +45,30 @@ class AddDrawingScore extends ReviewAbstract
             $this->pushAgreedMessage();
         } elseif ($instance->isRefuse()) {
             $this->pushRefusedMessage();
+        }
+    }
+
+    /**
+     * @param object $record
+     */
+    protected function devReview($record)
+    {
+        if (3 != $this->review->status) {
+            return;
+        }
+
+        $this->review->dev_review_time = date('Y-m-d H:i:s', strtotime($record->date));
+        if (self::agreed($record->operation_result)) {
+            $this->review->status = 5;
+            $this->review->save();
+
+            $this->devPassLog();
+        } elseif (self::refused($record->operation_result)) {
+            $this->review->status = 4;
+            $this->review->dev_reject_reason = $record->remark ?? '';
+            $this->review->save();
+
+            $this->devRejectLog();
         }
     }
 
@@ -118,27 +137,6 @@ class AddDrawingScore extends ReviewAbstract
             $this->review->save();
 
             $this->opRejectLog();
-        }
-    }
-
-    private function devReview($record)
-    {
-        if (3 != $this->review->status) {
-            return;
-        }
-
-        $this->review->dev_review_time = date('Y-m-d H:i:s', strtotime($record->date));
-        if (self::agreed($record->operation_result)) {
-            $this->review->status = 5;
-            $this->review->save();
-
-            $this->devPassLog();
-        } elseif (self::refused($record->operation_result)) {
-            $this->review->status = 4;
-            $this->review->dev_reject_reason = $record->remark ?? '';
-            $this->review->save();
-
-            $this->devRejectLog();
         }
     }
 

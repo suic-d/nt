@@ -11,11 +11,6 @@ use Illuminate\Support\Facades\DB;
 class UpdateBuyPrice extends ReviewAbstract
 {
     /**
-     * @var SkuReview
-     */
-    private $review;
-
-    /**
      * @param SkuReview $review
      */
     public function __construct($review)
