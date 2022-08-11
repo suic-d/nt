@@ -92,7 +92,6 @@ class UploadExcel
         // 存放过滤后的数据
         $data = [];
         // 检验数据
-        $strError = '';
         foreach ($dataExcel as $line => $item) {
             // 第一行为标题栏，跳过
             if (1 == $line) {
@@ -185,7 +184,7 @@ class UploadExcel
                             break;
                         }
                         $dataLine['cat_id_two'] = $catTwoInfo->id;
-                        $dataLine['cat_two_pic'] = $catTwoInfo->parent_id;
+                        $dataLine['cat_two_pid'] = $catTwoInfo->parent_id;
 
                         break;
 
@@ -298,7 +297,7 @@ class UploadExcel
                         break;
 
                     case 'content': // 产品文案
-                        $dataLine['content'] = str_replace(["\r\n", '\n'], '<br/>', $fieldValue);
+                        $dataLine['content'] = str_replace(["\r\n", "\n"], '<br/>', $fieldValue);
 
                         break;
 
@@ -883,7 +882,7 @@ class UploadExcel
             }
         }
 
-        if (!empty($str_error)) {
+        if (!empty($strError)) {
             throw new Exception($strError);
         }
 
@@ -921,12 +920,12 @@ class UploadExcel
 
         $logTypeId = 26;
 
-        $skuArr = array_unique(array_column($data, 'sku'));
-        $infoPool = ProductPool::whereIn('sku', $skuArr)->get();
-        $skuPoolInfo = [];
-        foreach ($infoPool as $v) {
-            $skuPoolInfo[$v->sku] = $v;
-        }
+        $skuPoolInfo = ProductPool::whereIn('sku', array_unique(array_column($data, 'sku')))
+            ->get()
+            ->keyBy(function ($item) {
+                return $item->sku;
+            })
+        ;
 
         // 启动事务， 保存上传的数据
         DB::beginTransaction();
@@ -938,6 +937,7 @@ class UploadExcel
                 }
 
                 $infoPoolSku = $skuPoolInfo[$item['sku']];
+                $sku = Sku::find($item['sku']);
                 $product = ProductPool::find($item['sku']);
                 $spu = Spu::find($infoPoolSku['spu']);
                 $spuInfo = SpuInfo::find($infoPoolSku['spu']);
@@ -975,40 +975,37 @@ class UploadExcel
                 }
 
                 // 更新 sku 表中信息
-                if (isset($tables['sku']) && !empty($tables['sku'])) {
-                    $dataSku = [];
-                    foreach ($tables['sku'] as $field) {
-                        if (isset($item[$field])) {
-                            $dataSku[$field] = $item[$field];
+                if (!is_null($sku)) {
+                    if (isset($tables['sku']) && !empty($tables['sku'])) {
+                        $dataSku = [];
+                        foreach ($tables['sku'] as $field) {
+                            if (isset($item[$field])) {
+                                $dataSku[$field] = $item[$field];
+                            }
                         }
-                    }
-                    if (!empty($dataSku)) {
-                        $sku = Sku::find($item['sku']);
-                        if (!is_null($sku)) {
+                        if (!empty($dataSku)) {
                             $sku->update($dataSku);
                         }
                     }
                 }
 
                 // 更新 product_pool 表
-                $dataPool = [];
-                if (isset($tables['product_pool']) && !empty($tables['product_pool'])) {
-                    foreach ($tables['product_pool'] as $field) {
-                        if (isset($item[$field])) {
-                            $dataPool[$field] = $item[$field];
+                if (!is_null($product)) {
+                    $dataPool = [];
+                    if (isset($tables['product_pool']) && !empty($tables['product_pool'])) {
+                        foreach ($tables['product_pool'] as $field) {
+                            if (isset($item[$field])) {
+                                $dataPool[$field] = $item[$field];
+                            }
                         }
-                    }
-                    if (!empty($dataPool)) {
-                        if ($isSync) {
-                            $dataPool['is_sync'] = 1;
-                        }
-                        if (!is_null($product)) {
+                        if (!empty($dataPool)) {
+                            if ($isSync) {
+                                $dataPool['is_sync'] = 1;
+                            }
                             $product->update($dataPool);
                         }
-                    }
-                } else {
-                    $dataPool['is_sync'] = 1;
-                    if (!is_null($product)) {
+                    } else {
+                        $dataPool['is_sync'] = 1;
                         $product->update($dataPool);
                     }
                 }
@@ -1027,30 +1024,30 @@ class UploadExcel
                 }
 
                 // 更新 spu 表
-                if (isset($tables['spu']) && !empty($tables['spu'])) {
-                    $dataSpu = [];
-                    foreach ($tables['spu'] as $field) {
-                        if (isset($item[$field])) {
-                            $dataSpu[$field] = $item[$field];
+                if (!is_null($spu)) {
+                    if (isset($tables['spu']) && !empty($tables['spu'])) {
+                        $dataSpu = [];
+                        foreach ($tables['spu'] as $field) {
+                            if (isset($item[$field])) {
+                                $dataSpu[$field] = $item[$field];
+                            }
                         }
-                    }
-                    if (!empty($dataSpu)) {
-                        if (!is_null($spu)) {
+                        if (!empty($dataSpu)) {
                             $spu->update($dataSpu);
                         }
                     }
                 }
 
                 // 更新 spu_info 表
-                if (isset($tables['spu_info']) && !empty($tables['spu_info'])) {
-                    $dataSpuInfo = [];
-                    foreach ($tables['spu_info'] as $field) {
-                        if (isset($item[$field])) {
-                            $dataSpuInfo[$field] = $item[$field];
+                if (!is_null($spuInfo)) {
+                    if (isset($tables['spu_info']) && !empty($tables['spu_info'])) {
+                        $dataSpuInfo = [];
+                        foreach ($tables['spu_info'] as $field) {
+                            if (isset($item[$field])) {
+                                $dataSpuInfo[$field] = $item[$field];
+                            }
                         }
-                    }
-                    if (!empty($dataSpuInfo)) {
-                        if (!is_null($spuInfo)) {
+                        if (!empty($dataSpuInfo)) {
                             $spuInfo->update($dataSpuInfo);
                         }
                     }
