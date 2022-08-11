@@ -73,7 +73,7 @@ class UpdateBuyPrice extends ReviewAbstract
         }
     }
 
-    private function pushAgreedMessage()
+    protected function pushAgreedMessage()
     {
         $message = sprintf(
             '%s 你好，你在 %s 提交的修改采购价申请已审核通过，请查收。',
@@ -83,7 +83,7 @@ class UpdateBuyPrice extends ReviewAbstract
         (new DingTalk())->push('修改采购价申请已审核通过', $message, $this->review->submitter_id);
     }
 
-    private function pushRefusedMessage()
+    protected function pushRefusedMessage()
     {
         $message = sprintf('%s 你好，你在 %s 提交的修改采购价申请被驳回。', $this->review->submitter_name, $this->review->create_time);
         (new DingTalk())->push('修改采购价申请被驳回', $message, $this->review->submitter_id);

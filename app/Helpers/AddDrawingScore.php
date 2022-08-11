@@ -96,6 +96,22 @@ class AddDrawingScore extends ReviewAbstract
         }
     }
 
+    protected function pushAgreedMessage()
+    {
+        $message = sprintf(
+            '%s 你好，你在 %s 提交的积分申请已审核通过，请查收。',
+            $this->review->submitter_name,
+            $this->review->create_time
+        );
+        (new DingTalk())->push('积分申请已审核通过', $message, $this->review->submitter_id);
+    }
+
+    protected function pushRefusedMessage()
+    {
+        $message = sprintf('%s 你好，你在 %s 提交的积分申请被驳回。', $this->review->submitter_name, $this->review->create_time);
+        (new DingTalk())->push('积分申请被驳回', $message, $this->review->submitter_id);
+    }
+
     private function updateDrawingScore()
     {
         $sku = Sku::find($this->review->sku);
@@ -122,21 +138,5 @@ class AddDrawingScore extends ReviewAbstract
         $log->create_id = $this->review->submitter_id;
         $log->create_name = $this->review->submitter_name;
         $log->save();
-    }
-
-    private function pushAgreedMessage()
-    {
-        $message = sprintf(
-            '%s 你好，你在 %s 提交的积分申请已审核通过，请查收。',
-            $this->review->submitter_name,
-            $this->review->create_time
-        );
-        (new DingTalk())->push('积分申请已审核通过', $message, $this->review->submitter_id);
-    }
-
-    private function pushRefusedMessage()
-    {
-        $message = sprintf('%s 你好，你在 %s 提交的积分申请被驳回。', $this->review->submitter_name, $this->review->create_time);
-        (new DingTalk())->push('积分申请被驳回', $message, $this->review->submitter_id);
     }
 }

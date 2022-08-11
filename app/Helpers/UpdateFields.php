@@ -52,16 +52,4 @@ class UpdateFields extends ReviewAbstract
             $this->pushRefusedMessage();
         }
     }
-
-    private function pushAgreedMessage()
-    {
-        $message = sprintf('提交人你好，你在 %s 提交的sku信息修改审核已通过，请登录系统查看。', $this->review->create_time);
-        (new DingTalk())->push('sku信息修改审核已通过', $message, $this->review->submitter_id);
-    }
-
-    private function pushRefusedMessage()
-    {
-        $message = sprintf('提交人你好，你在 %s 提交的sku信息修改审核被驳回。', $this->review->create_time);
-        (new DingTalk())->push('sku信息修改审核被驳回', $message, $this->review->submitter_id);
-    }
 }
