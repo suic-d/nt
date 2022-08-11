@@ -88,7 +88,7 @@ class UploadExcel
         $headFields = $arrType['head_fields'];
 
         // 保存错误信息
-        $strError = '';
+        $errors = [];
         // 存放过滤后的数据
         $data = [];
         // 检验数据
@@ -98,7 +98,7 @@ class UploadExcel
                 continue;
             }
             // 记录本行遇到的错误
-            $errorLine = '';
+            $errorLine = [];
             // 记录一个sku数据
             $dataLine = [];
             // 过滤一行的字段
@@ -118,7 +118,7 @@ class UploadExcel
                     case 'sku': // sku验证
                         $productPool = ProductPool::find($fieldValue);
                         if (is_null($productPool)) {
-                            $errorLine .= 'sku('.$fieldValue.')不存在产品池中;';
+                            $errorLine[] = 'sku('.$fieldValue.')不存在产品池中';
 
                             break;
                         }
@@ -135,7 +135,7 @@ class UploadExcel
                         } elseif (empty($fieldValue)) {
                             $dataLine['sale_state'] = 1;
                         } else {
-                            $errorLine .= '销售状态('.$fieldValue.')请填写在售或停售;';
+                            $errorLine[] = '销售状态('.$fieldValue.')请填写在售或停售';
 
                             break;
                         }
@@ -149,7 +149,7 @@ class UploadExcel
 
                     case 'sku_name':
                         if (empty($fieldValue)) {
-                            $errorLine .= '字段(子产品名称)不能为空;';
+                            $errorLine[] = '字段(子产品名称)不能为空';
 
                             break;
                         }
@@ -164,7 +164,7 @@ class UploadExcel
                             ->first()
                         ;
                         if (is_null($catOneInfo)) {
-                            $errorLine .= '('.$fieldValue.')不符合一级品类;';
+                            $errorLine[] = '('.$fieldValue.')不符合一级品类';
 
                             break;
                         }
@@ -179,7 +179,7 @@ class UploadExcel
                             ->first()
                         ;
                         if (is_null($catTwoInfo)) {
-                            $errorLine .= '('.$fieldValue.')不符合二级品类;';
+                            $errorLine[] = '('.$fieldValue.')不符合二级品类';
 
                             break;
                         }
@@ -190,7 +190,7 @@ class UploadExcel
 
                     case 'pack_weight':
                         if (is_numeric($fieldValue)) {
-                            $errorLine .= '字段(产品包装重量G)需传入数字;';
+                            $errorLine[] = '字段(产品包装重量G)需传入数字';
 
                             break;
                         }
@@ -200,7 +200,7 @@ class UploadExcel
 
                     case 'buy_price':
                         if (!is_numeric($fieldValue)) {
-                            $errorLine .= '字段(采购价)需传入数字;';
+                            $errorLine[] = '字段(采购价)需传入数字';
 
                             break;
                         }
@@ -211,7 +211,7 @@ class UploadExcel
                     case 'currency':
                         $dicInfo = Dictionary::where('pid', 161)->where('name', strtoupper($fieldValue))->first();
                         if (is_null($dicInfo)) {
-                            $errorLine .= '币种('.$fieldValue.')不存在;';
+                            $errorLine[] = '币种('.$fieldValue.')不存在';
 
                             break;
                         }
@@ -222,7 +222,7 @@ class UploadExcel
                     case 'supplier_name': // 验证 供应商名称
                         $supplierInfo = Supplier::where('supplier_name', $fieldValue)->where('status', 2)->first();
                         if (is_null($supplierInfo)) {
-                            $errorLine .= '供应商('.$fieldValue.')不存在;';
+                            $errorLine[] = '供应商('.$fieldValue.')不存在';
 
                             break;
                         }
@@ -233,7 +233,7 @@ class UploadExcel
 
                     case 'supplier_link':
                         if (empty($fieldValue)) {
-                            $errorLine .= '字段(采购链接)不能为空;';
+                            $errorLine[] = '字段(采购链接)不能为空';
 
                             break;
                         }
@@ -243,7 +243,7 @@ class UploadExcel
 
                     case 'declare_name_zh': // 中文申报名
                         if (empty($fieldValue)) {
-                            $errorLine .= '字段(中文申报名)不能为空;';
+                            $errorLine[] = '字段(中文申报名)不能为空';
 
                             break;
                         }
@@ -253,7 +253,7 @@ class UploadExcel
 
                     case 'declare_name_en': // 英文申报名
                         if (empty($fieldValue)) {
-                            $errorLine .= '字段(英文申报名)不能为空;';
+                            $errorLine[] = '字段(英文申报名)不能为空';
 
                             break;
                         }
@@ -268,7 +268,7 @@ class UploadExcel
 
                     case 'in_long': // 内箱长(cm)
                         if (!is_numeric($fieldValue)) {
-                            $errorLine .= '字段(内箱长)需传入数字;';
+                            $errorLine[] = '字段(内箱长)需传入数字';
 
                             break;
                         }
@@ -278,7 +278,7 @@ class UploadExcel
 
                     case 'in_wide': // 内箱宽((cm)
                         if (!is_numeric($fieldValue)) {
-                            $errorLine .= '字段(内箱宽)需传入数字;';
+                            $errorLine[] = '字段(内箱宽)需传入数字';
 
                             break;
                         }
@@ -288,7 +288,7 @@ class UploadExcel
 
                     case 'in_height': // 内箱高((cm)
                         if (!is_numeric($fieldValue)) {
-                            $errorLine .= '字段(内箱高)需传入数字;';
+                            $errorLine[] = '字段(内箱高)需传入数字';
 
                             break;
                         }
@@ -303,7 +303,7 @@ class UploadExcel
 
                     case 'product_long': // 产品长(cm)
                         if (!is_numeric($fieldValue)) {
-                            $errorLine .= '字段(产品长)需传入数字;';
+                            $errorLine[] = '字段(产品长)需传入数字';
 
                             break;
                         }
@@ -313,7 +313,7 @@ class UploadExcel
 
                     case 'product_wide': // 产品宽(cm)
                         if (!is_numeric($fieldValue)) {
-                            $errorLine .= '字段(产品宽)需传入数字;';
+                            $errorLine[] = '字段(产品宽)需传入数字';
 
                             break;
                         }
@@ -323,7 +323,7 @@ class UploadExcel
 
                     case 'product_height': // 产品高(cm)
                         if (!is_numeric($fieldValue)) {
-                            $errorLine .= '字段(产品高)需传入数字;';
+                            $errorLine[] = '字段(产品高)需传入数字';
 
                             break;
                         }
@@ -333,7 +333,7 @@ class UploadExcel
 
                     case 'out_long': // 外箱长(cm)
                         if (!is_numeric($fieldValue)) {
-                            $errorLine .= '字段(外箱长)需传入数字;';
+                            $errorLine[] = '字段(外箱长)需传入数字';
 
                             break;
                         }
@@ -343,7 +343,7 @@ class UploadExcel
 
                     case 'out_wide': // 外箱宽(cm)
                         if (!is_numeric($fieldValue)) {
-                            $errorLine .= '字段(外箱宽)需传入数字;';
+                            $errorLine[] = '字段(外箱宽)需传入数字';
 
                             break;
                         }
@@ -353,7 +353,7 @@ class UploadExcel
 
                     case 'out_height': // 外箱高(cm)
                         if (!is_numeric($fieldValue)) {
-                            $errorLine .= '字段(外箱高)需传入数字;';
+                            $errorLine[] = '字段(外箱高)需传入数字';
 
                             break;
                         }
@@ -383,7 +383,7 @@ class UploadExcel
 
                     case 'declared_value': // 申报价值$
                         if (!is_numeric($fieldValue)) {
-                            $errorLine .= '字段(申报价值)需传入数字;';
+                            $errorLine[] = '字段(申报价值)需传入数字';
 
                             break;
                         }
@@ -393,7 +393,7 @@ class UploadExcel
 
                     case 'weight': // 产品净重
                         if (!is_numeric($fieldValue)) {
-                            $errorLine .= '字段(产品净重)需传入数字;';
+                            $errorLine[] = '字段(产品净重)需传入数字';
 
                             break;
                         }
@@ -404,7 +404,7 @@ class UploadExcel
                     case 'attr_trans': // 验证 运输特性
                         $fieldValue = explode(',', str_replace('，', ',', $fieldValue));
                         if (empty($fieldValue)) {
-                            $errorLine .= '字段(运输特性)不能为空;';
+                            $errorLine[] = '字段(运输特性)不能为空';
 
                             break;
                         }
@@ -413,7 +413,7 @@ class UploadExcel
                         foreach ($fieldValue as $v) {
                             $transAttrInfo = Dictionary::where('pid', 105)->where('name', $v)->first();
                             if (is_null($transAttrInfo)) {
-                                $errorLine .= '运输特性('.$v.')未定义;';
+                                $errorLine[] = '运输特性('.$v.')未定义';
                             } else {
                                 $transAttr[] = $transAttrInfo->name;
                             }
@@ -425,7 +425,7 @@ class UploadExcel
 
                     case 'core_word': // 核心关键词
                         if (preg_match('/[\x7f-\xff]/', $fieldValue) || preg_match('/[^\x00-\x80]/', $fieldValue)) {
-                            $errorLine .= '字段(核心关键词)不能含有中文字符;';
+                            $errorLine[] = '字段(核心关键词)不能含有中文字符';
 
                             break;
                         }
@@ -441,7 +441,7 @@ class UploadExcel
                     case 'quality_type': // 质检类型
                         $fieldValue = trim($fieldValue, ',，');
                         if (empty($fieldValue)) {
-                            $errorLine .= '字段(质检类型)不能为空;';
+                            $errorLine[] = '字段(质检类型)不能为空';
 
                             break;
                         }
@@ -451,7 +451,7 @@ class UploadExcel
                         foreach ($fieldValue as $v) {
                             $typeInfo = Dictionary::where('pid', 104)->where('name', $v)->first();
                             if (is_null($typeInfo)) {
-                                $errorLine .= '质检类型('.$v.')未定义;';
+                                $errorLine[] = '质检类型('.$v.')未定义';
                             } else {
                                 $qualityTypeArr[] = [
                                     'sub_name' => 'quality_type',
@@ -466,7 +466,7 @@ class UploadExcel
 
                     case 'spu_name': // 产品主名称
                         if (empty($fieldValue)) {
-                            $errorLine .= '字段(产品主名称)不能为空;';
+                            $errorLine[] = '字段(产品主名称)不能为空';
 
                             break;
                         }
@@ -476,7 +476,7 @@ class UploadExcel
 
                     case 're_url_one': // 反向链接1
                         if (empty($fieldValue)) {
-                            $errorLine .= '字段(反向链接1)不能为空;';
+                            $errorLine[] = '字段(反向链接1)不能为空';
 
                             break;
                         }
@@ -486,28 +486,28 @@ class UploadExcel
 
                     case 'dev_name': //开发人
                         if (empty($fieldValue)) {
-                            $errorLine .= '字段(开发负责人)不能为空，为必填项;';
+                            $errorLine[] = '字段(开发负责人)不能为空，为必填项';
 
                             break;
                         }
 
                         $staffInfo = ProductUser::where('staff_name', $fieldValue)->first();
                         if (is_null($staffInfo)) {
-                            $errorLine .= '用户('.$fieldValue.')不是开发人;';
+                            $errorLine[] = '用户('.$fieldValue.')不是开发人';
 
                             break;
                         }
 
                         $deptArr = explode(',', $staffInfo->department);
                         if (empty($deptArr)) {
-                            $errorLine .= '获取用户所在组错误;';
+                            $errorLine[] = '获取用户所在组错误';
 
                             break;
                         }
 
                         $deptInfo = DeptList::where('dept_id', $deptArr[0])->first();
                         if (is_null($deptInfo)) {
-                            $errorLine .= '获取用户所在组信息错误;';
+                            $errorLine[] = '获取用户所在组信息错误';
 
                             break;
                         }
@@ -522,7 +522,7 @@ class UploadExcel
                     case 'purchaser': // 采购人
                         $purchaserInfo = StaffList::where('staff_name', $fieldValue)->first();
                         if (is_null($purchaserInfo)) {
-                            $errorLine .= '采购人('.$fieldValue.')不存在;';
+                            $errorLine[] = '采购人('.$fieldValue.')不存在';
 
                             break;
                         }
@@ -533,7 +533,7 @@ class UploadExcel
                     case 'maintainer': // 产品维护人
                         $maintainer = StaffList::where('staff_name', $fieldValue)->first();
                         if (is_null($maintainer)) {
-                            $errorLine .= '产品维护人('.$fieldValue.')不存在;';
+                            $errorLine[] = '产品维护人('.$fieldValue.')不存在';
 
                             break;
                         }
@@ -545,7 +545,7 @@ class UploadExcel
                     case 'performance_attributor_three': // 业绩归属人
                         $staffInfo = StaffList::where('staff_name', $fieldValue)->first();
                         if (is_null($staffInfo)) {
-                            $errorLine .= '业绩归属人('.$fieldValue.')不存在;';
+                            $errorLine[] = '业绩归属人('.$fieldValue.')不存在';
 
                             break;
                         }
@@ -556,7 +556,7 @@ class UploadExcel
                     case 'performance_attributor_two': // 业绩归属人2
                         $staffInfo = StaffList::where('staff_name', $fieldValue)->first();
                         if (is_null($staffInfo)) {
-                            $errorLine .= '业绩归属人2('.$fieldValue.')不存在;';
+                            $errorLine[] = '业绩归属人2('.$fieldValue.')不存在';
 
                             break;
                         }
@@ -567,7 +567,7 @@ class UploadExcel
                     case 'performance_importer': // 业绩导入人
                         $staffInfo = StaffList::where('staff_name', $fieldValue)->first();
                         if (is_null($staffInfo)) {
-                            $errorLine .= '业绩导入人('.$fieldValue.')不存在;';
+                            $errorLine[] = '业绩导入人('.$fieldValue.')不存在';
 
                             break;
                         }
@@ -578,12 +578,12 @@ class UploadExcel
                     case 'performance_ratio': // 业绩提成比例
                         $fieldValue = (int) $fieldValue;
                         if ($fieldValue > 100) {
-                            $errorLine .= '业绩提成比例('.$fieldValue.')不可大于100;';
+                            $errorLine[] = '业绩提成比例('.$fieldValue.')不可大于100';
 
                             break;
                         }
                         if ($fieldValue < 0) {
-                            $errorLine .= '业绩提成比例('.$fieldValue.')不可小于0;';
+                            $errorLine[] = '业绩提成比例('.$fieldValue.')不可小于0';
 
                             break;
                         }
@@ -593,7 +593,7 @@ class UploadExcel
 
                     case 'is_naked_packaging': // 产品是否裸包装
                         if (!in_array($fieldValue, ['是', '否'])) {
-                            $errorLine .= '产品是否裸包装 格式错误;';
+                            $errorLine[] = '产品是否裸包装 格式错误';
 
                             break;
                         }
@@ -603,7 +603,7 @@ class UploadExcel
 
                     case 'is_warehouse_combination': // 产品是否需要到仓组合
                         if (!in_array($fieldValue, ['是', '否'])) {
-                            $errorLine .= '产品是否需要到仓组合 格式错误;';
+                            $errorLine[] = '产品是否需要到仓组合 格式错误';
 
                             break;
                         }
@@ -613,7 +613,7 @@ class UploadExcel
 
                     case 'is_fragile': // 产品是否易碎品
                         if (!in_array($fieldValue, ['是', '否'])) {
-                            $errorLine .= '产品是否易碎品 格式错误;';
+                            $errorLine[] = '产品是否易碎品 格式错误';
 
                             break;
                         }
@@ -623,7 +623,7 @@ class UploadExcel
 
                     case 'tax_price': // 含税RMB
                         if (!is_numeric($fieldValue)) {
-                            $errorLine .= '字段(含税RMB)需传入数字;';
+                            $errorLine[] = '字段(含税RMB)需传入数字';
 
                             break;
                         }
@@ -633,7 +633,7 @@ class UploadExcel
 
                     case 'usd_price': // USD
                         if (!is_numeric($fieldValue)) {
-                            $errorLine .= '字段(USD)需传入数字;';
+                            $errorLine[] = '字段(USD)需传入数字';
 
                             break;
                         }
@@ -643,7 +643,7 @@ class UploadExcel
 
                     case 'purchase_in_arrears':
                         if (!in_array($fieldValue, ['是', '否'])) {
-                            $errorLine .= '是否欠单购买 格式错误;';
+                            $errorLine[] = '是否欠单购买 格式错误';
 
                             break;
                         }
@@ -658,7 +658,7 @@ class UploadExcel
 
                     case 'label_type':
                         if (!in_array(strtoupper($fieldValue), Sku::$labelTypes)) {
-                            $errorLine .= '贴标类型错误;';
+                            $errorLine[] = '贴标类型错误';
 
                             break;
                         }
@@ -668,7 +668,7 @@ class UploadExcel
 
                     case 'adjust_reason':
                         if (empty($fieldValue)) {
-                            $errorLine .= '调价原因不可为空;';
+                            $errorLine[] = '调价原因不可为空';
 
                             break;
                         }
@@ -679,7 +679,7 @@ class UploadExcel
                     case 'qty_pack':
                         $fieldValue = filter_var($fieldValue, FILTER_VALIDATE_INT);
                         if (empty($fieldValue)) {
-                            $errorLine .= '装箱数(PCS/箱)不可为空;';
+                            $errorLine[] = '装箱数(PCS/箱)不可为空';
 
                             break;
                         }
@@ -704,7 +704,7 @@ class UploadExcel
                             return $carry;
                         }, []);
                         if (!isset($brandTypeMap[$fieldValue])) {
-                            $errorLine .= '品牌类型不存在;';
+                            $errorLine[] = '品牌类型不存在';
 
                             break;
                         }
@@ -719,7 +719,7 @@ class UploadExcel
 
                     case 'tax_refund':
                         if (!in_array($fieldValue, ['是', '否'])) {
-                            $errorLine .= '是否退税 格式错误;';
+                            $errorLine[] = '是否退税 格式错误';
 
                             break;
                         }
@@ -734,7 +734,7 @@ class UploadExcel
                             return $carry;
                         }, []);
                         if (!isset($exportBenefitMap[$fieldValue])) {
-                            $errorLine .= '出口享惠情况不存在;';
+                            $errorLine[] = '出口享惠情况不存在';
 
                             break;
                         }
@@ -784,7 +784,7 @@ class UploadExcel
 
                     case 'category_id': // 产品类目
                         if (empty($cid = self::parseCategory($fieldValue))) {
-                            $errorLine .= '产品类目不存在;';
+                            $errorLine[] = '产品类目不存在';
 
                             break;
                         }
@@ -805,7 +805,7 @@ class UploadExcel
                             ['spot_check_type' => '抽检类型']
                         );
                         if ($validator->fails()) {
-                            $errorLine .= $validator->errors()->first();
+                            $errorLine[] = $validator->errors()->first();
 
                             break;
                         }
@@ -821,7 +821,7 @@ class UploadExcel
                             ['spot_check_percent' => '标准精检抽检比例']
                         );
                         if ($validator->fails()) {
-                            $errorLine .= $validator->errors()->first();
+                            $errorLine[] = $validator->errors()->first();
 
                             break;
                         }
@@ -837,7 +837,7 @@ class UploadExcel
                             ['spot_check_amount' => '功能精检抽检数量']
                         );
                         if ($validator->fails()) {
-                            $errorLine .= $validator->errors()->first();
+                            $errorLine[] = $validator->errors()->first();
 
                             break;
                         }
@@ -853,7 +853,7 @@ class UploadExcel
                             ['content_title' => '文案标题']
                         );
                         if ($validator->fails()) {
-                            $errorLine .= $validator->errors()->first();
+                            $errorLine[] = $validator->errors()->first();
 
                             break;
                         }
@@ -872,18 +872,18 @@ class UploadExcel
             }
 
             if (isset($dataLine['ali_attr_type']) && empty($dataLine['ali_attr_type'])) {
-                $errorLine .= '1688款式类型为空;';
+                $errorLine[] = '1688款式类型为空';
             }
 
             if (!empty($errorLine)) {
-                $strError .= '第'.$line.'行有错误：'.$errorLine;
+                $errors[] = '第'.$line.'行有错误：'.join(';', $errorLine);
             } else {
                 $data[] = $dataLine;
             }
         }
 
-        if (!empty($strError)) {
-            throw new Exception($strError);
+        if (!empty($errors)) {
+            throw new Exception(join('', $errors));
         }
 
         $purchaserErrorSku = [];
