@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 
 class AddDrawingScore extends ReviewAbstract
 {
-    public function run()
+    public function handle()
     {
         $instance = new DingApproval();
         if (!$instance->getProcessInstance($this->review->process_instance_id)) {

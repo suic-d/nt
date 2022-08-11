@@ -20,7 +20,7 @@ abstract class ReviewAbstract
         $this->review = $review;
     }
 
-    abstract public function run();
+    abstract public function handle();
 
     /**
      * @param string $opType
