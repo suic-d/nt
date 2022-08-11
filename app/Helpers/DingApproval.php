@@ -242,7 +242,7 @@ class DingApproval
      */
     public function getProcessStatus()
     {
-        return $this->processStatus;
+        return strtoupper($this->processStatus);
     }
 
     /**
