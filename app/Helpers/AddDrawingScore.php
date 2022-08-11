@@ -117,51 +117,6 @@ class AddDrawingScore extends ReviewAbstract
     }
 
     /**
-     * @param object $record
-     */
-    private function opReview($record)
-    {
-        if (1 != $this->review->status) {
-            return;
-        }
-
-        $this->review->op_review_time = date('Y-m-d H:i:s', strtotime($record->date));
-        if (self::agreed($record->operation_result)) {
-            $this->review->status = 3;
-            $this->review->save();
-
-            $this->opPassLog();
-        } elseif (self::refused($record->operation_result)) {
-            $this->review->status = 2;
-            $this->review->op_reject_reason = $record->remark ?? '';
-            $this->review->save();
-
-            $this->opRejectLog();
-        }
-    }
-
-    private function designReview($record)
-    {
-        if (5 != $this->review->status) {
-            return;
-        }
-
-        $this->review->design_review_time = date('Y-m-d H:i:s', strtotime($record->date));
-        if (self::agreed($record->operation_result)) {
-            $this->review->status = 7;
-            $this->review->save();
-
-            $this->designPassLog();
-        } elseif (self::refused($record->operation_result)) {
-            $this->review->status = 6;
-            $this->review->design_reject_reason = $record->remark ?? '';
-            $this->review->save();
-
-            $this->designRejectLog();
-        }
-    }
-
-    /**
      * @param array $operationRecords
      */
     private function reviewLog($operationRecords)
