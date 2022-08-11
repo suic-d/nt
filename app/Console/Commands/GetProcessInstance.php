@@ -63,7 +63,7 @@ class GetProcessInstance extends Command
         $reviews = SkuReview::whereIn('process_status', ['NEW', 'RUNNING'])
             ->orderBy('id')
             ->forPage(1, 200)
-            ->get()
+            ->get(['id'])
         ;
         if ($reviews->isNotEmpty()) {
             foreach ($reviews as $v) {
@@ -85,7 +85,7 @@ class GetProcessInstance extends Command
             $reviews = SkuReview::whereIn('process_status', ['NEW', 'RUNNING'])
                 ->orderBy('id')
                 ->forPage(1, 200)
-                ->get()
+                ->get(['id'])
             ;
             foreach ($reviews as $v) {
                 yield $v->id => new Request('GET', 'index.php/api/v1/ExternalAPI/getProcessInstance?review_id='.$v->id);
