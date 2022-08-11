@@ -319,4 +319,24 @@ abstract class ReviewAbstract
             $this->opdRejectLog();
         }
     }
+
+    /**
+     * @param array $operationRecords
+     */
+    protected function reviewLog($operationRecords)
+    {
+        if (empty($operationRecords)) {
+            return;
+        }
+
+        foreach ($operationRecords as $item) {
+            if (!self::executeTaskNormal($item->operation_type)) {
+                continue;
+            }
+
+            if ($this->review->dev_reviewer_id == $item->userid) {
+                $this->devReview($item);
+            }
+        }
+    }
 }

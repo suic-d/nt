@@ -49,26 +49,10 @@ class UpdateBuyPrice extends ReviewAbstract
         }
     }
 
-    private function pushAgreedMessage()
-    {
-        $message = sprintf(
-            '%s 你好，你在 %s 提交的修改采购价申请已审核通过，请查收。',
-            $this->review->submitter_name,
-            $this->review->create_time
-        );
-        (new DingTalk())->push('修改采购价申请已审核通过', $message, $this->review->submitter_id);
-    }
-
-    private function pushRefusedMessage()
-    {
-        $message = sprintf('%s 你好，你在 %s 提交的修改采购价申请被驳回。', $this->review->submitter_name, $this->review->create_time);
-        (new DingTalk())->push('修改采购价申请被驳回', $message, $this->review->submitter_id);
-    }
-
     /**
      * @param array $operationRecords
      */
-    private function reviewLog($operationRecords)
+    protected function reviewLog($operationRecords)
     {
         if (empty($operationRecords)) {
             return;
@@ -87,6 +71,22 @@ class UpdateBuyPrice extends ReviewAbstract
                 $this->opdReview($item);
             }
         }
+    }
+
+    private function pushAgreedMessage()
+    {
+        $message = sprintf(
+            '%s 你好，你在 %s 提交的修改采购价申请已审核通过，请查收。',
+            $this->review->submitter_name,
+            $this->review->create_time
+        );
+        (new DingTalk())->push('修改采购价申请已审核通过', $message, $this->review->submitter_id);
+    }
+
+    private function pushRefusedMessage()
+    {
+        $message = sprintf('%s 你好，你在 %s 提交的修改采购价申请被驳回。', $this->review->submitter_name, $this->review->create_time);
+        (new DingTalk())->push('修改采购价申请被驳回', $message, $this->review->submitter_id);
     }
 
     private function updateBuyPrice()

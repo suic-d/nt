@@ -72,6 +72,30 @@ class AddDrawingScore extends ReviewAbstract
         }
     }
 
+    /**
+     * @param array $operationRecords
+     */
+    protected function reviewLog($operationRecords)
+    {
+        if (empty($operationRecords)) {
+            return;
+        }
+
+        foreach ($operationRecords as $item) {
+            if (!self::executeTaskNormal($item->operation_type)) {
+                continue;
+            }
+
+            if ($this->review->op_reviewer_id == $item->userid) {
+                $this->opReview($item);
+            } elseif ($this->review->dev_reviewer_id == $item->userid) {
+                $this->devReview($item);
+            } elseif ($this->review->design_reviewer_id == $item->userid) {
+                $this->designReview($item);
+            }
+        }
+    }
+
     private function updateDrawingScore()
     {
         $sku = Sku::find($this->review->sku);
@@ -114,29 +138,5 @@ class AddDrawingScore extends ReviewAbstract
     {
         $message = sprintf('%s 你好，你在 %s 提交的积分申请被驳回。', $this->review->submitter_name, $this->review->create_time);
         (new DingTalk())->push('积分申请被驳回', $message, $this->review->submitter_id);
-    }
-
-    /**
-     * @param array $operationRecords
-     */
-    private function reviewLog($operationRecords)
-    {
-        if (empty($operationRecords)) {
-            return;
-        }
-
-        foreach ($operationRecords as $item) {
-            if (!self::executeTaskNormal($item->operation_type)) {
-                continue;
-            }
-
-            if ($this->review->op_reviewer_id == $item->userid) {
-                $this->opReview($item);
-            } elseif ($this->review->dev_reviewer_id == $item->userid) {
-                $this->devReview($item);
-            } elseif ($this->review->design_reviewer_id == $item->userid) {
-                $this->designReview($item);
-            }
-        }
     }
 }

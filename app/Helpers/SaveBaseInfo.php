@@ -2,7 +2,6 @@
 
 namespace App\Helpers;
 
-use App\Models\Product\ReviewLog;
 use App\Models\Sku;
 use App\Models\SkuReview;
 use Exception;
@@ -64,25 +63,5 @@ class SaveBaseInfo extends ReviewAbstract
     {
         $message = sprintf('提交人你好，你在 %s 提交的sku信息修改审核被驳回。', $this->review->create_time);
         (new DingTalk())->push('sku信息修改审核被驳回', $message, $this->review->submitter_id);
-    }
-
-    /**
-     * @param array $operationRecords
-     */
-    private function reviewLog($operationRecords)
-    {
-        if (empty($operationRecords)) {
-            return;
-        }
-
-        foreach ($operationRecords as $item) {
-            if (!self::executeTaskNormal($item->operation_type)) {
-                continue;
-            }
-
-            if ($this->review->dev_reviewer_id == $item->userid) {
-                $this->devReview($item);
-            }
-        }
     }
 }
