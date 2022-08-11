@@ -5,6 +5,8 @@ namespace App\Console\Commands;
 use App\Models\SkuReview;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Pool;
+use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\RequestOptions;
 use Illuminate\Console\Command;
 
@@ -49,6 +51,15 @@ class GetProcessInstance extends Command
      */
     public function handle()
     {
+        $this->pool();
+
+        $message = sprintf('[%s] %s'.PHP_EOL, date('Y-m-d H:i:s'), __METHOD__);
+        $file = '/www/logs/'.date('Ymd').'.log';
+        error_log($message, 3, $file);
+    }
+
+    public function request()
+    {
         $reviews = SkuReview::whereIn('process_status', ['NEW', 'RUNNING'])
             ->orderBy('id')
             ->forPage(1, 200)
@@ -56,27 +67,39 @@ class GetProcessInstance extends Command
         ;
         if ($reviews->isNotEmpty()) {
             foreach ($reviews as $v) {
-                $this->request($v);
+                try {
+                    $response = $this->client->request('GET', 'index.php/api/v1/ExternalAPI/getProcessInstance', [
+                        RequestOptions::QUERY => ['review_id' => $v->id],
+                    ]);
+                    dump($response->getBody()->getContents());
+                } catch (GuzzleException $exception) {
+                    dump($exception->getMessage());
+                }
             }
         }
-
-        $message = sprintf('[%s] %s'.PHP_EOL, date('Y-m-d H:i:s'), __METHOD__);
-        $file = '/www/logs/'.date('Ymd').'.log';
-        error_log($message, 3, $file);
     }
 
-    /**
-     * @param SkuReview $review
-     */
-    public function request($review)
+    public function pool()
     {
-        try {
-            $response = $this->client->request('GET', 'index.php/api/v1/ExternalAPI/getProcessInstance', [
-                RequestOptions::QUERY => ['review_id' => $review->id],
-            ]);
-            dump($response->getBody()->getContents());
-        } catch (GuzzleException $exception) {
-            dump($exception->getMessage());
-        }
+        $requests = function () {
+            $reviews = SkuReview::whereIn('process_status', ['NEW', 'RUNNING'])
+                ->orderBy('id')
+                ->forPage(1, 200)
+                ->get()
+            ;
+            foreach ($reviews as $v) {
+                yield $v->id => new Request('GET', 'index.php/api/v1/ExternalAPI/getProcessInstance?review_id='.$v->id);
+            }
+        };
+        $pool = new Pool($this->client, $requests(), [
+            'concurrency' => 5,
+            'fulfilled' => function ($response) {
+                dump($response->getBody()->getContents());
+            },
+            'rejected' => function ($reason) {
+                dump($reason->getMessage());
+            },
+        ]);
+        $pool->promise()->wait();
     }
 }
