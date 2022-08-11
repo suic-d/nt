@@ -2,20 +2,11 @@
 
 namespace App\Helpers;
 
-use App\Models\SkuReview;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
 class UpdateFields extends ReviewAbstract
 {
-    /**
-     * @param SkuReview $review
-     */
-    public function __construct($review)
-    {
-        $this->review = $review;
-    }
-
     public function run()
     {
         $instance = new DingApproval();

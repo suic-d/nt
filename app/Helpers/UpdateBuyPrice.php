@@ -3,21 +3,12 @@
 namespace App\Helpers;
 
 use App\Models\Product\ReviewLog;
-use App\Models\SkuReview;
 use App\Repositories\ProductPoolRepository;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
 class UpdateBuyPrice extends ReviewAbstract
 {
-    /**
-     * @param SkuReview $review
-     */
-    public function __construct($review)
-    {
-        $this->review = $review;
-    }
-
     public function run()
     {
         $instance = new DingApproval();

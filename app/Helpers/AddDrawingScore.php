@@ -5,20 +5,11 @@ namespace App\Helpers;
 use App\Models\Product\ReviewLog;
 use App\Models\Product\SkuLog;
 use App\Models\Sku;
-use App\Models\SkuReview;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
 class AddDrawingScore extends ReviewAbstract
 {
-    /**
-     * @param SkuReview $review
-     */
-    public function __construct($review)
-    {
-        $this->review = $review;
-    }
-
     public function run()
     {
         $instance = new DingApproval();

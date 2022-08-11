@@ -12,6 +12,14 @@ abstract class ReviewAbstract
      */
     protected $review;
 
+    /**
+     * @param SkuReview $review
+     */
+    public function __construct($review)
+    {
+        $this->review = $review;
+    }
+
     abstract public function run();
 
     /**
