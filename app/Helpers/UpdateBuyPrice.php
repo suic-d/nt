@@ -94,28 +94,6 @@ class UpdateBuyPrice extends ReviewAbstract
         }
     }
 
-    private function devdPassLog()
-    {
-        $log = new ReviewLog();
-        $log->review_id = $this->review->id;
-        $log->action = '审核通过';
-        $log->op_staff_id = $this->review->devd_id;
-        $log->op_staff_name = $this->review->devd_name;
-        $log->op_time = date('Y-m-d H:i:s', strtotime($this->review->devd_review_time));
-        $log->save();
-    }
-
-    private function devdRejectLog()
-    {
-        $log = new ReviewLog();
-        $log->review_id = $this->review->id;
-        $log->action = '驳回';
-        $log->op_staff_id = $this->review->devd_id;
-        $log->op_staff_name = $this->review->devd_name;
-        $log->op_time = date('Y-m-d H:i:s', strtotime($this->review->devd_review_time));
-        $log->save();
-    }
-
     /**
      * @param object $record
      */
@@ -140,28 +118,6 @@ class UpdateBuyPrice extends ReviewAbstract
         }
     }
 
-    private function oplPassLog()
-    {
-        $log = new ReviewLog();
-        $log->review_id = $this->review->id;
-        $log->action = '审核通过';
-        $log->op_staff_id = $this->review->opl_id;
-        $log->op_staff_name = $this->review->opl_name;
-        $log->op_time = date('Y-m-d H:i:s', strtotime($this->review->opl_review_time));
-        $log->save();
-    }
-
-    private function oplRejectLog()
-    {
-        $log = new ReviewLog();
-        $log->review_id = $this->review->id;
-        $log->action = '驳回';
-        $log->op_staff_id = $this->review->opl_id;
-        $log->op_staff_name = $this->review->opl_name;
-        $log->op_time = date('Y-m-d H:i:s', strtotime($this->review->opl_review_time));
-        $log->save();
-    }
-
     /**
      * @param object $record
      */
@@ -184,28 +140,6 @@ class UpdateBuyPrice extends ReviewAbstract
 
             $this->opdRejectLog();
         }
-    }
-
-    private function opdPassLog()
-    {
-        $log = new ReviewLog();
-        $log->review_id = $this->review->id;
-        $log->action = '审核通过';
-        $log->op_staff_id = $this->review->opd_id;
-        $log->op_staff_name = $this->review->opd_name;
-        $log->op_time = date('Y-m-d H:i:s', strtotime($this->review->opd_review_time));
-        $log->save();
-    }
-
-    private function opdRejectLog()
-    {
-        $log = new ReviewLog();
-        $log->review_id = $this->review->id;
-        $log->action = '驳回';
-        $log->op_staff_id = $this->review->opd_id;
-        $log->op_staff_name = $this->review->opd_name;
-        $log->op_time = date('Y-m-d H:i:s', strtotime($this->review->opd_review_time));
-        $log->save();
     }
 
     /**

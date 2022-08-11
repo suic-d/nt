@@ -97,28 +97,6 @@ class AddDrawingScore extends ReviewAbstract
         (new DingTalk())->push('积分申请被驳回', $message, $this->review->submitter_id);
     }
 
-    private function opPassLog()
-    {
-        $log = new ReviewLog();
-        $log->review_id = $this->review->id;
-        $log->action = '审核通过';
-        $log->op_staff_id = $this->review->op_reviewer_id;
-        $log->op_staff_name = $this->review->op_reviewer_name;
-        $log->op_time = date('Y-m-d H:i:s', strtotime($this->review->op_review_time));
-        $log->save();
-    }
-
-    private function opRejectLog()
-    {
-        $log = new ReviewLog();
-        $log->review_id = $this->review->id;
-        $log->action = '驳回';
-        $log->op_staff_id = $this->review->op_reviewer_id;
-        $log->op_staff_name = $this->review->op_reviewer_name;
-        $log->op_time = date('Y-m-d H:i:s', strtotime($this->review->op_review_time));
-        $log->save();
-    }
-
     /**
      * @param object $record
      */
@@ -164,28 +142,6 @@ class AddDrawingScore extends ReviewAbstract
         }
     }
 
-    private function devPassLog()
-    {
-        $log = new ReviewLog();
-        $log->review_id = $this->review->id;
-        $log->action = '审核通过';
-        $log->op_staff_id = $this->review->dev_reviewer_id;
-        $log->op_staff_name = $this->review->dev_reviewer_name;
-        $log->op_time = date('Y-m-d H:i:s', strtotime($this->review->dev_review_time));
-        $log->save();
-    }
-
-    private function devRejectLog()
-    {
-        $log = new ReviewLog();
-        $log->review_id = $this->review->id;
-        $log->action = '驳回';
-        $log->op_staff_id = $this->review->dev_reviewer_id;
-        $log->op_staff_name = $this->review->dev_reviewer_name;
-        $log->op_time = date('Y-m-d H:i:s', strtotime($this->review->dev_review_time));
-        $log->save();
-    }
-
     private function designReview($record)
     {
         if (5 != $this->review->status) {
@@ -205,28 +161,6 @@ class AddDrawingScore extends ReviewAbstract
 
             $this->designRejectLog();
         }
-    }
-
-    private function designPassLog()
-    {
-        $log = new ReviewLog();
-        $log->review_id = $this->review->id;
-        $log->action = '审核通过';
-        $log->op_staff_id = $this->review->design_reviewer_id;
-        $log->op_staff_name = $this->review->design_reviewer_name;
-        $log->op_time = date('Y-m-d H:i:s', strtotime($this->review->design_review_time));
-        $log->save();
-    }
-
-    private function designRejectLog()
-    {
-        $log = new ReviewLog();
-        $log->review_id = $this->review->id;
-        $log->action = '驳回';
-        $log->op_staff_id = $this->review->design_reviewer_id;
-        $log->op_staff_name = $this->review->design_reviewer_name;
-        $log->op_time = date('Y-m-d H:i:s', strtotime($this->review->design_review_time));
-        $log->save();
     }
 
     /**

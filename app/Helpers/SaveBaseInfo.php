@@ -114,26 +114,4 @@ class SaveBaseInfo extends ReviewAbstract
             $this->devRejectLog();
         }
     }
-
-    private function devPassLog()
-    {
-        $log = new ReviewLog();
-        $log->review_id = $this->review->id;
-        $log->action = '审核通过';
-        $log->op_staff_id = $this->review->dev_reviewer_id;
-        $log->op_staff_name = $this->review->dev_reviewer_name;
-        $log->op_time = date('Y-m-d H:i:s', strtotime($this->review->dev_review_time));
-        $log->save();
-    }
-
-    private function devRejectLog()
-    {
-        $log = new ReviewLog();
-        $log->review_id = $this->review->id;
-        $log->action = '驳回';
-        $log->op_staff_id = $this->review->dev_reviewer_id;
-        $log->op_staff_name = $this->review->dev_reviewer_name;
-        $log->op_time = date('Y-m-d H:i:s', strtotime($this->review->dev_review_time));
-        $log->save();
-    }
 }
