@@ -10,37 +10,35 @@ class UpdateFields extends ReviewAbstract
     public function handle()
     {
         $instance = new DingApproval();
-        if (!$instance->getProcessInstance($this->review->process_instance_id)) {
-            return;
-        }
+        if ($instance->getProcessInstance($this->review->process_instance_id)) {
+            DB::beginTransaction();
 
-        DB::beginTransaction();
+            try {
+                $this->review->process_status = $instance->getProcessStatus();
+                $this->review->save();
 
-        try {
-            $this->review->process_status = $instance->getProcessStatus();
-            $this->review->save();
+                $this->reviewLog($instance->getOperationRecords());
 
-            $this->reviewLog($instance->getOperationRecords());
-
-            if ($instance->isAgree()) {
-                try {
-                    $file = tempnam(storage_path(), '');
-                    file_put_contents($file, file_get_contents($this->review->annex));
-                    UploadExcel::updateFields($file, $this->review->submitter_id, $this->review->submitter_name);
-                    @unlink($file);
-                } catch (Exception $exception) {
+                if ($instance->isAgree()) {
+                    try {
+                        $file = tempnam(storage_path(), '');
+                        file_put_contents($file, file_get_contents($this->review->annex));
+                        UploadExcel::updateFields($file, $this->review->submitter_id, $this->review->submitter_name);
+                        @unlink($file);
+                    } catch (Exception $exception) {
+                    }
                 }
+
+                DB::commit();
+            } catch (Exception $exception) {
+                DB::rollBack();
             }
 
-            DB::commit();
-        } catch (Exception $exception) {
-            DB::rollBack();
-        }
-
-        if ($instance->isAgree()) {
-            $this->pushAgreedMessage();
-        } elseif ($instance->isRefuse()) {
-            $this->pushRefusedMessage();
+            if ($instance->isAgree()) {
+                $this->pushAgreedMessage();
+            } elseif ($instance->isRefuse()) {
+                $this->pushRefusedMessage();
+            }
         }
     }
 }

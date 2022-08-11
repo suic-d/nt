@@ -2,7 +2,6 @@
 
 namespace App\Helpers;
 
-use App\Models\Product\ReviewLog;
 use App\Repositories\ProductPoolRepository;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -12,31 +11,29 @@ class UpdateBuyPrice extends ReviewAbstract
     public function handle()
     {
         $instance = new DingApproval();
-        if (!$instance->getProcessInstance($this->review->process_instance_id)) {
-            return;
-        }
+        if ($instance->getProcessInstance($this->review->process_instance_id)) {
+            DB::beginTransaction();
 
-        DB::beginTransaction();
+            try {
+                $this->review->process_status = $instance->getProcessStatus();
+                $this->review->save();
 
-        try {
-            $this->review->process_status = $instance->getProcessStatus();
-            $this->review->save();
+                $this->reviewLog($instance->getOperationRecords());
 
-            $this->reviewLog($instance->getOperationRecords());
+                if ($instance->isAgree()) {
+                    $this->updateBuyPrice();
+                }
 
-            if ($instance->isAgree()) {
-                $this->updateBuyPrice();
+                DB::commit();
+            } catch (Exception $exception) {
+                DB::rollBack();
             }
 
-            DB::commit();
-        } catch (Exception $exception) {
-            DB::rollBack();
-        }
-
-        if ($instance->isAgree()) {
-            $this->pushAgreedMessage();
-        } elseif ($instance->isRefuse()) {
-            $this->pushRefusedMessage();
+            if ($instance->isAgree()) {
+                $this->pushAgreedMessage();
+            } elseif ($instance->isRefuse()) {
+                $this->pushRefusedMessage();
+            }
         }
     }
 
@@ -45,21 +42,19 @@ class UpdateBuyPrice extends ReviewAbstract
      */
     protected function reviewLog($operationRecords)
     {
-        if (empty($operationRecords)) {
-            return;
-        }
+        if (!empty($operationRecords)) {
+            foreach ($operationRecords as $item) {
+                if (!self::executeTaskNormal($item->operation_type)) {
+                    continue;
+                }
 
-        foreach ($operationRecords as $item) {
-            if (!self::executeTaskNormal($item->operation_type)) {
-                continue;
-            }
-
-            if ($this->review->devd_id == $item->userid) {
-                $this->devdReview($item);
-            } elseif ($this->review->opl_id == $item->userid) {
-                $this->oplReview($item);
-            } elseif ($this->review->opd_id == $item->userid) {
-                $this->opdReview($item);
+                if ($this->review->devd_id == $item->userid) {
+                    $this->devdReview($item);
+                } elseif ($this->review->opl_id == $item->userid) {
+                    $this->oplReview($item);
+                } elseif ($this->review->opd_id == $item->userid) {
+                    $this->opdReview($item);
+                }
             }
         }
     }
