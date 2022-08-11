@@ -54,9 +54,6 @@ class GetProcessInstance extends Command
             ->forPage(1, 200)
             ->get()
         ;
-        foreach ($reviews as $review) {
-            $this->request($review);
-        }
         if ($reviews->isNotEmpty()) {
             foreach ($reviews as $v) {
                 $this->request($v);
