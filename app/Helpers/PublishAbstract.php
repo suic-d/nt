@@ -124,9 +124,7 @@ abstract class PublishAbstract
         $client = new Client();
 
         try {
-            $response = $client->request('POST', $this->url, [
-                RequestOptions::JSON => $postData,
-            ]);
+            $response = $client->request('POST', $this->url, [RequestOptions::JSON => $postData]);
 
             // 记录日志
             $toNtEbayApi = new ToNtEbayApi();
