@@ -54,7 +54,7 @@ class GetProcessInstance extends Command
         $this->pool();
 
         $message = sprintf('[%s] %s'.PHP_EOL, date('Y-m-d H:i:s'), __METHOD__);
-        $file = '/www/logs/'.date('Ymd').'.log';
+        $file = '/www/logs/laravel-'.date('Y-m-d').'.log';
         error_log($message, 3, $file);
     }
 
