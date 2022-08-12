@@ -141,18 +141,17 @@ class AddDrawingScore extends ReviewAbstract
             $sku->drawing_score += $review->score;
             $sku->save();
 
-            $this->skuLog($review, $sku);
+            $this->skuLog($review);
         }
     }
 
     /**
      * @param SkuReview $review
-     * @param Sku       $sku
      */
-    private function skuLog(SkuReview $review, $sku)
+    private function skuLog(SkuReview $review)
     {
         $log = new SkuLog();
-        $log->sku = $sku->sku;
+        $log->sku = $review->sku;
         $log->log_type_id = 40;
         $log->remark = '增加积分：'.$review->score;
         $log->create_at = date('Y-m-d H:i:s');
