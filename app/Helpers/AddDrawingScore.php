@@ -46,37 +46,6 @@ class AddDrawingScore extends ReviewAbstract
 
     /**
      * @param SkuReview $review
-     * @param object    $record
-     */
-    protected function devReview(SkuReview $review, $record)
-    {
-        if (3 == $review->status) {
-            $review->dev_review_time = date('Y-m-d H:i:s', strtotime($record->date));
-            $review->save();
-
-            if (self::agreed($record->operation_result)) {
-                $this->devPass($review);
-            } elseif (self::refused($record->operation_result)) {
-                $this->devReject($review, $record->remark ?? '');
-            }
-        }
-    }
-
-    /**
-     * @param SkuReview $review
-     * @param string    $reason
-     */
-    protected function devReject(SkuReview $review, $reason)
-    {
-        $review->status = 4;
-        $review->dev_reject_reason = $reason;
-        $review->save();
-
-        $this->devRejectLog($review);
-    }
-
-    /**
-     * @param SkuReview $review
      */
     protected function devPass(SkuReview $review)
     {
