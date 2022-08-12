@@ -37,6 +37,11 @@ class GetProcessInstance extends Command
     private $client;
 
     /**
+     * @var string
+     */
+    private $logFile;
+
+    /**
      * Create a new command instance.
      */
     public function __construct()
@@ -44,6 +49,7 @@ class GetProcessInstance extends Command
         parent::__construct();
 
         $this->client = new Client(['base_uri' => $this->baseUri, 'verify' => false]);
+        $this->logFile = '/www/logs/laravel-'.date('Y-m-d').'.log';
     }
 
     /**
@@ -52,10 +58,16 @@ class GetProcessInstance extends Command
     public function handle()
     {
         $this->pool();
+        $this->log(__METHOD__);
+    }
 
-        $message = sprintf('[%s] %s'.PHP_EOL, date('Y-m-d H:i:s'), __METHOD__);
-        $file = '/www/logs/laravel-'.date('Y-m-d').'.log';
-        error_log($message, 3, $file);
+    /**
+     * @param string $log
+     */
+    public function log($log)
+    {
+        $message = sprintf('[%s] %s'.PHP_EOL, date('Y-m-d H:i:s'), $log);
+        error_log($message, 3, $this->logFile);
     }
 
     public function request()
@@ -71,9 +83,11 @@ class GetProcessInstance extends Command
                     $response = $this->client->request('GET', 'index.php/api/v1/ExternalAPI/getProcessInstance', [
                         RequestOptions::QUERY => ['review_id' => $v->id],
                     ]);
-                    dump($response->getBody()->getContents());
+                    $this->log($contents = $response->getBody()->getContents());
+                    dump($contents);
                 } catch (GuzzleException $exception) {
-                    dump($exception->getMessage());
+                    $this->log($msg = $exception->getMessage());
+                    dump($msg);
                 }
             }
         }
@@ -94,10 +108,12 @@ class GetProcessInstance extends Command
         $pool = new Pool($this->client, $requests(), [
             'concurrency' => 5,
             'fulfilled' => function ($response) {
-                dump($response->getBody()->getContents());
+                $this->log($contents = $response->getBody()->getContents());
+                dump($contents);
             },
             'rejected' => function ($reason) {
-                dump($reason->getMessage());
+                $this->log($msg = $reason->getMessage());
+                dump($msg);
             },
         ]);
         $pool->promise()->wait();

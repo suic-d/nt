@@ -26,13 +26,7 @@ class UpdateFields extends ReviewAbstract
                 $this->reviewLog($review, $instance->getOperationRecords());
 
                 if ($instance->isAgree()) {
-                    try {
-                        $file = tempnam(storage_path(), '');
-                        file_put_contents($file, file_get_contents($review->annex));
-                        UploadExcel::updateFields($file, $review->submitter_id, $review->submitter_name);
-                        @unlink($file);
-                    } catch (Exception $exception) {
-                    }
+                    $this->import($review);
                 }
 
                 DB::commit();
@@ -45,6 +39,20 @@ class UpdateFields extends ReviewAbstract
             } elseif ($instance->isRefuse()) {
                 $this->pushRefusedMessage($review);
             }
+        }
+    }
+
+    /**
+     * @param SkuReview $review
+     */
+    protected function import(SkuReview $review)
+    {
+        try {
+            $file = tempnam(storage_path(), '');
+            file_put_contents($file, file_get_contents($review->annex));
+            UploadExcel::updateFields($file, $review->submitter_id, $review->submitter_name);
+            @unlink($file);
+        } catch (Exception $exception) {
         }
     }
 }
