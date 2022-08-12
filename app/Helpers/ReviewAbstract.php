@@ -8,19 +8,9 @@ use App\Models\SkuReview;
 abstract class ReviewAbstract
 {
     /**
-     * @var SkuReview
-     */
-    protected $review;
-
-    /**
      * @param SkuReview $review
      */
-    public function __construct($review)
-    {
-        $this->review = $review;
-    }
-
-    abstract public function handle();
+    abstract public function handle(SkuReview $review);
 
     /**
      * @param string $opType
@@ -52,274 +42,431 @@ abstract class ReviewAbstract
         return 'REFUSE' == strtoupper($opResult);
     }
 
-    protected function devPassLog()
+    /**
+     * @param SkuReview $review
+     */
+    protected function devPassLog(SkuReview $review)
     {
         $log = new ReviewLog();
-        $log->review_id = $this->review->id;
+        $log->review_id = $review->id;
         $log->action = '审核通过';
-        $log->op_staff_id = $this->review->dev_reviewer_id;
-        $log->op_staff_name = $this->review->dev_reviewer_name;
-        $log->op_time = date('Y-m-d H:i:s', strtotime($this->review->dev_review_time));
-        $log->save();
-    }
-
-    protected function devRejectLog()
-    {
-        $log = new ReviewLog();
-        $log->review_id = $this->review->id;
-        $log->action = '驳回';
-        $log->op_staff_id = $this->review->dev_reviewer_id;
-        $log->op_staff_name = $this->review->dev_reviewer_name;
-        $log->op_time = date('Y-m-d H:i:s', strtotime($this->review->dev_review_time));
-        $log->save();
-    }
-
-    protected function opPassLog()
-    {
-        $log = new ReviewLog();
-        $log->review_id = $this->review->id;
-        $log->action = '审核通过';
-        $log->op_staff_id = $this->review->op_reviewer_id;
-        $log->op_staff_name = $this->review->op_reviewer_name;
-        $log->op_time = date('Y-m-d H:i:s', strtotime($this->review->op_review_time));
-        $log->save();
-    }
-
-    protected function opRejectLog()
-    {
-        $log = new ReviewLog();
-        $log->review_id = $this->review->id;
-        $log->action = '驳回';
-        $log->op_staff_id = $this->review->op_reviewer_id;
-        $log->op_staff_name = $this->review->op_reviewer_name;
-        $log->op_time = date('Y-m-d H:i:s', strtotime($this->review->op_review_time));
-        $log->save();
-    }
-
-    protected function designPassLog()
-    {
-        $log = new ReviewLog();
-        $log->review_id = $this->review->id;
-        $log->action = '审核通过';
-        $log->op_staff_id = $this->review->design_reviewer_id;
-        $log->op_staff_name = $this->review->design_reviewer_name;
-        $log->op_time = date('Y-m-d H:i:s', strtotime($this->review->design_review_time));
-        $log->save();
-    }
-
-    protected function designRejectLog()
-    {
-        $log = new ReviewLog();
-        $log->review_id = $this->review->id;
-        $log->action = '驳回';
-        $log->op_staff_id = $this->review->design_reviewer_id;
-        $log->op_staff_name = $this->review->design_reviewer_name;
-        $log->op_time = date('Y-m-d H:i:s', strtotime($this->review->design_review_time));
-        $log->save();
-    }
-
-    protected function devdPassLog()
-    {
-        $log = new ReviewLog();
-        $log->review_id = $this->review->id;
-        $log->action = '审核通过';
-        $log->op_staff_id = $this->review->devd_id;
-        $log->op_staff_name = $this->review->devd_name;
-        $log->op_time = date('Y-m-d H:i:s', strtotime($this->review->devd_review_time));
-        $log->save();
-    }
-
-    protected function devdRejectLog()
-    {
-        $log = new ReviewLog();
-        $log->review_id = $this->review->id;
-        $log->action = '驳回';
-        $log->op_staff_id = $this->review->devd_id;
-        $log->op_staff_name = $this->review->devd_name;
-        $log->op_time = date('Y-m-d H:i:s', strtotime($this->review->devd_review_time));
-        $log->save();
-    }
-
-    protected function oplPassLog()
-    {
-        $log = new ReviewLog();
-        $log->review_id = $this->review->id;
-        $log->action = '审核通过';
-        $log->op_staff_id = $this->review->opl_id;
-        $log->op_staff_name = $this->review->opl_name;
-        $log->op_time = date('Y-m-d H:i:s', strtotime($this->review->opl_review_time));
-        $log->save();
-    }
-
-    protected function oplRejectLog()
-    {
-        $log = new ReviewLog();
-        $log->review_id = $this->review->id;
-        $log->action = '驳回';
-        $log->op_staff_id = $this->review->opl_id;
-        $log->op_staff_name = $this->review->opl_name;
-        $log->op_time = date('Y-m-d H:i:s', strtotime($this->review->opl_review_time));
-        $log->save();
-    }
-
-    protected function opdPassLog()
-    {
-        $log = new ReviewLog();
-        $log->review_id = $this->review->id;
-        $log->action = '审核通过';
-        $log->op_staff_id = $this->review->opd_id;
-        $log->op_staff_name = $this->review->opd_name;
-        $log->op_time = date('Y-m-d H:i:s', strtotime($this->review->opd_review_time));
-        $log->save();
-    }
-
-    protected function opdRejectLog()
-    {
-        $log = new ReviewLog();
-        $log->review_id = $this->review->id;
-        $log->action = '驳回';
-        $log->op_staff_id = $this->review->opd_id;
-        $log->op_staff_name = $this->review->opd_name;
-        $log->op_time = date('Y-m-d H:i:s', strtotime($this->review->opd_review_time));
+        $log->op_staff_id = $review->dev_reviewer_id;
+        $log->op_staff_name = $review->dev_reviewer_name;
+        $log->op_time = date('Y-m-d H:i:s', strtotime($review->dev_review_time));
         $log->save();
     }
 
     /**
-     * @param object $record
+     * @param SkuReview $review
      */
-    protected function devReview($record)
+    protected function devRejectLog(SkuReview $review)
     {
-        if (3 == $this->review->status) {
-            $this->review->dev_review_time = date('Y-m-d H:i:s', strtotime($record->date));
+        $log = new ReviewLog();
+        $log->review_id = $review->id;
+        $log->action = '驳回';
+        $log->op_staff_id = $review->dev_reviewer_id;
+        $log->op_staff_name = $review->dev_reviewer_name;
+        $log->op_time = date('Y-m-d H:i:s', strtotime($review->dev_review_time));
+        $log->save();
+    }
+
+    /**
+     * @param SkuReview $review
+     */
+    protected function opPassLog(SkuReview $review)
+    {
+        $log = new ReviewLog();
+        $log->review_id = $review->id;
+        $log->action = '审核通过';
+        $log->op_staff_id = $review->op_reviewer_id;
+        $log->op_staff_name = $review->op_reviewer_name;
+        $log->op_time = date('Y-m-d H:i:s', strtotime($review->op_review_time));
+        $log->save();
+    }
+
+    /**
+     * @param SkuReview $review
+     */
+    protected function opRejectLog(SkuReview $review)
+    {
+        $log = new ReviewLog();
+        $log->review_id = $review->id;
+        $log->action = '驳回';
+        $log->op_staff_id = $review->op_reviewer_id;
+        $log->op_staff_name = $review->op_reviewer_name;
+        $log->op_time = date('Y-m-d H:i:s', strtotime($review->op_review_time));
+        $log->save();
+    }
+
+    /**
+     * @param SkuReview $review
+     */
+    protected function designPassLog(SkuReview $review)
+    {
+        $log = new ReviewLog();
+        $log->review_id = $review->id;
+        $log->action = '审核通过';
+        $log->op_staff_id = $review->design_reviewer_id;
+        $log->op_staff_name = $review->design_reviewer_name;
+        $log->op_time = date('Y-m-d H:i:s', strtotime($review->design_review_time));
+        $log->save();
+    }
+
+    /**
+     * @param SkuReview $review
+     */
+    protected function designRejectLog(SkuReview $review)
+    {
+        $log = new ReviewLog();
+        $log->review_id = $review->id;
+        $log->action = '驳回';
+        $log->op_staff_id = $review->design_reviewer_id;
+        $log->op_staff_name = $review->design_reviewer_name;
+        $log->op_time = date('Y-m-d H:i:s', strtotime($review->design_review_time));
+        $log->save();
+    }
+
+    /**
+     * @param SkuReview $review
+     */
+    protected function devdPassLog(SkuReview $review)
+    {
+        $log = new ReviewLog();
+        $log->review_id = $review->id;
+        $log->action = '审核通过';
+        $log->op_staff_id = $review->devd_id;
+        $log->op_staff_name = $review->devd_name;
+        $log->op_time = date('Y-m-d H:i:s', strtotime($review->devd_review_time));
+        $log->save();
+    }
+
+    /**
+     * @param SkuReview $review
+     */
+    protected function devdRejectLog(SkuReview $review)
+    {
+        $log = new ReviewLog();
+        $log->review_id = $review->id;
+        $log->action = '驳回';
+        $log->op_staff_id = $review->devd_id;
+        $log->op_staff_name = $review->devd_name;
+        $log->op_time = date('Y-m-d H:i:s', strtotime($review->devd_review_time));
+        $log->save();
+    }
+
+    /**
+     * @param SkuReview $review
+     */
+    protected function oplPassLog(SkuReview $review)
+    {
+        $log = new ReviewLog();
+        $log->review_id = $review->id;
+        $log->action = '审核通过';
+        $log->op_staff_id = $review->opl_id;
+        $log->op_staff_name = $review->opl_name;
+        $log->op_time = date('Y-m-d H:i:s', strtotime($review->opl_review_time));
+        $log->save();
+    }
+
+    /**
+     * @param SkuReview $review
+     */
+    protected function oplRejectLog(SkuReview $review)
+    {
+        $log = new ReviewLog();
+        $log->review_id = $review->id;
+        $log->action = '驳回';
+        $log->op_staff_id = $review->opl_id;
+        $log->op_staff_name = $review->opl_name;
+        $log->op_time = date('Y-m-d H:i:s', strtotime($review->opl_review_time));
+        $log->save();
+    }
+
+    /**
+     * @param SkuReview $review
+     */
+    protected function opdPassLog(SkuReview $review)
+    {
+        $log = new ReviewLog();
+        $log->review_id = $review->id;
+        $log->action = '审核通过';
+        $log->op_staff_id = $review->opd_id;
+        $log->op_staff_name = $review->opd_name;
+        $log->op_time = date('Y-m-d H:i:s', strtotime($review->opd_review_time));
+        $log->save();
+    }
+
+    /**
+     * @param SkuReview $review
+     */
+    protected function opdRejectLog(SkuReview $review)
+    {
+        $log = new ReviewLog();
+        $log->review_id = $review->id;
+        $log->action = '驳回';
+        $log->op_staff_id = $review->opd_id;
+        $log->op_staff_name = $review->opd_name;
+        $log->op_time = date('Y-m-d H:i:s', strtotime($review->opd_review_time));
+        $log->save();
+    }
+
+    /**
+     * @param SkuReview $review
+     * @param object    $record
+     */
+    protected function devReview(SkuReview $review, $record)
+    {
+        if (3 == $review->status) {
+            $review->dev_review_time = date('Y-m-d H:i:s', strtotime($record->date));
+            $review->save();
+
             if (self::agreed($record->operation_result)) {
-                $this->review->status = 7;
-                $this->review->save();
-
-                $this->devPassLog();
+                $this->devPass($review);
             } elseif (self::refused($record->operation_result)) {
-                $this->review->status = 4;
-                $this->review->dev_reject_reason = $record->remark ?? '';
-                $this->review->save();
-
-                $this->devRejectLog();
+                $this->devReject($review, $record->remark ?? '');
             }
         }
     }
 
     /**
-     * @param object $record
+     * @param SkuReview $review
+     * @param string    $reason
      */
-    protected function opReview($record)
+    protected function devReject(SkuReview $review, $reason)
     {
-        if (1 == $this->review->status) {
-            $this->review->op_review_time = date('Y-m-d H:i:s', strtotime($record->date));
+        $review->status = 4;
+        $review->dev_reject_reason = $reason;
+        $review->save();
+
+        $this->devRejectLog($review);
+    }
+
+    /**
+     * @param SkuReview $review
+     */
+    protected function devPass(SkuReview $review)
+    {
+        $review->status = 7;
+        $review->save();
+
+        $this->devPassLog($review);
+    }
+
+    /**
+     * @param SkuReview $review
+     * @param object    $record
+     */
+    protected function opReview(SkuReview $review, $record)
+    {
+        if (1 == $review->status) {
+            $review->op_review_time = date('Y-m-d H:i:s', strtotime($record->date));
+            $review->save();
+
             if (self::agreed($record->operation_result)) {
-                $this->review->status = 3;
-                $this->review->save();
-
-                $this->opPassLog();
+                $this->opPass($review);
             } elseif (self::refused($record->operation_result)) {
-                $this->review->status = 2;
-                $this->review->op_reject_reason = $record->remark ?? '';
-                $this->review->save();
-
-                $this->opRejectLog();
+                $this->opReject($review, $record->remark ?? '');
             }
         }
     }
 
     /**
-     * @param object $record
+     * @param SkuReview $review
      */
-    protected function designReview($record)
+    protected function opPass(SkuReview $review)
     {
-        if (5 == $this->review->status) {
-            $this->review->design_review_time = date('Y-m-d H:i:s', strtotime($record->date));
+        $review->status = 3;
+        $review->save();
+
+        $this->opPassLog($review);
+    }
+
+    /**
+     * @param SkuReview $review
+     * @param string    $reason
+     */
+    protected function opReject(SkuReview $review, $reason)
+    {
+        $review->stataus = 2;
+        $review->op_reject_reason = $reason;
+        $review->save();
+
+        $this->opRejectLog($review);
+    }
+
+    /**
+     * @param SkuReview $review
+     * @param object    $record
+     */
+    protected function designReview(SkuReview $review, $record)
+    {
+        if (5 == $review->status) {
+            $review->design_review_time = date('Y-m-d H:i:s', strtotime($record->date));
+            $review->save();
+
             if (self::agreed($record->operation_result)) {
-                $this->review->status = 7;
-                $this->review->save();
-
-                $this->designPassLog();
+                $this->designPass($review);
             } elseif (self::refused($record->operation_result)) {
-                $this->review->status = 6;
-                $this->review->design_reject_reason = $record->remark ?? '';
-                $this->review->save();
-
-                $this->designRejectLog();
+                $this->designReject($review, $record->remark ?? '');
             }
         }
     }
 
     /**
-     * @param object $record
+     * @param SkuReview $review
+     * @param string    $reason
      */
-    protected function devdReview($record)
+    protected function designReject(SkuReview $review, $reason)
     {
-        if (8 == $this->review->status) {
-            $this->review->devd_review_time = date('Y-m-d H:i:s', strtotime($record->date));
+        $review->status = 6;
+        $review->design_reject_reason = $reason;
+        $review->save();
+
+        $this->designRejectLog($review);
+    }
+
+    /**
+     * @param SkuReview $review
+     */
+    protected function designPass(SkuReview $review)
+    {
+        $review->status = 7;
+        $review->save();
+
+        $this->designPassLog($review);
+    }
+
+    /**
+     * @param SkuReview $review
+     * @param object    $record
+     */
+    protected function devdReview(SkuReview $review, $record)
+    {
+        if (8 == $review->status) {
+            $review->devd_review_time = date('Y-m-d H:i:s', strtotime($record->date));
+            $review->save();
+
             if (self::agreed($record->operation_result)) {
-                $this->review->status = 10;
-                $this->review->save();
-
-                $this->devdPassLog();
+                $this->devdPass($review);
             } elseif (self::refused($record->operation_result)) {
-                $this->review->status = 9;
-                $this->review->devd_reject_reason = $record->remark ?? '';
-                $this->review->save();
-
-                $this->devdRejectLog();
+                $this->devdReject($review, $record->remark ?? '');
             }
         }
     }
 
     /**
-     * @param object $record
+     * @param SkuReview $review
+     * @param string    $reason
      */
-    protected function oplReview($record)
+    protected function devdReject(SkuReview $review, $reason)
     {
-        if (10 == $this->review->status) {
-            $this->review->opl_review_time = date('Y-m-d H:i:s', strtotime($record->date));
+        $review->status = 9;
+        $review->devd_reject_reason = $reason;
+        $review->save();
+
+        $this->devdRejectLog($review);
+    }
+
+    /**
+     * @param SkuReview $review
+     */
+    protected function devdPass(SkuReview $review)
+    {
+        $review->status = 10;
+        $review->save();
+
+        $this->devdPassLog($review);
+    }
+
+    /**
+     * @param SkuReview $review
+     * @param object    $record
+     */
+    protected function oplReview(SkuReview $review, $record)
+    {
+        if (10 == $review->status) {
+            $review->opl_review_time = date('Y-m-d H:i:s', strtotime($record->date));
+            $review->save();
+
             if (self::agreed($record->operation_result)) {
-                $this->review->status = 12;
-                $this->review->save();
-
-                $this->oplPassLog();
+                $this->oplPass($review);
             } elseif (self::refused($record->operation_result)) {
-                $this->review->status = 11;
-                $this->review->opl_reject_reason = $record->remark ?? '';
-                $this->review->save();
-
-                $this->oplRejectLog();
+                $this->oplReject($review, $record->remark ?? '');
             }
         }
     }
 
     /**
-     * @param object $record
+     * @param SkuReview $review
+     * @param string    $reason
      */
-    protected function opdReview($record)
+    protected function oplReject(SkuReview $review, $reason)
     {
-        if (12 == $this->review->status) {
-            $this->review->opd_review_time = date('Y-m-d H:i:s', strtotime($record->date));
+        $review->status = 11;
+        $review->opl_reject_reason = $reason;
+        $review->save();
+
+        $this->oplRejectLog($review);
+    }
+
+    /**
+     * @param SkuReview $review
+     */
+    protected function oplPass(SkuReview $review)
+    {
+        $review->status = 12;
+        $review->save();
+
+        $this->oplPassLog($review);
+    }
+
+    /**
+     * @param SkuReview $review
+     * @param object    $record
+     */
+    protected function opdReview(SkuReview $review, $record)
+    {
+        if (12 == $review->status) {
+            $review->opd_review_time = date('Y-m-d H:i:s', strtotime($record->date));
+            $review->save();
+
             if (self::agreed($record->operation_result)) {
-                $this->review->status = 14;
-                $this->review->save();
-
-                $this->opdPassLog();
+                $this->opdPass($review);
             } elseif (self::refused($record->operation_result)) {
-                $this->review->status = 13;
-                $this->review->opd_reject_reason = $record->remark ?? '';
-                $this->review->save();
-
-                $this->opdRejectLog();
+                $this->opdReject($review, $record->remark ?? '');
             }
         }
     }
 
     /**
-     * @param array $operationRecords
+     * @param SkuReview $review
+     * @param string    $reason
      */
-    protected function reviewLog($operationRecords)
+    protected function opdReject(SkuReview $review, $reason)
+    {
+        $review->status = 13;
+        $review->opd_reject_reason = $reason;
+        $review->save();
+
+        $this->opdRejectLog($review);
+    }
+
+    /**
+     * @param SkuReview $review
+     */
+    protected function opdPass(SkuReview $review)
+    {
+        $review->status = 14;
+        $review->save();
+
+        $this->opdPassLog($review);
+    }
+
+    /**
+     * @param SkuReview $review
+     * @param array     $operationRecords
+     */
+    protected function reviewLog(SkuReview $review, $operationRecords)
     {
         if (!empty($operationRecords)) {
             foreach ($operationRecords as $item) {
@@ -327,22 +474,28 @@ abstract class ReviewAbstract
                     continue;
                 }
 
-                if ($this->review->dev_reviewer_id == $item->userid) {
-                    $this->devReview($item);
+                if ($review->dev_reviewer_id == $item->userid) {
+                    $this->devReview($review, $item);
                 }
             }
         }
     }
 
-    protected function pushAgreedMessage()
+    /**
+     * @param SkuReview $review
+     */
+    protected function pushAgreedMessage(SkuReview $review)
     {
-        $message = sprintf('提交人你好，你在 %s 提交的sku信息修改审核已通过，请登录系统查看。', $this->review->create_time);
-        (new DingTalk())->push('sku信息修改审核已通过', $message, $this->review->submitter_id);
+        $message = sprintf('提交人你好，你在 %s 提交的sku信息修改审核已通过，请登录系统查看。', $review->create_time);
+        (new DingTalk())->push('sku信息修改审核已通过', $message, $review->submitter_id);
     }
 
-    protected function pushRefusedMessage()
+    /**
+     * @param SkuReview $review
+     */
+    protected function pushRefusedMessage(SkuReview $review)
     {
-        $message = sprintf('提交人你好，你在 %s 提交的sku信息修改审核被驳回。', $this->review->create_time);
-        (new DingTalk())->push('sku信息修改审核被驳回', $message, $this->review->submitter_id);
+        $message = sprintf('提交人你好，你在 %s 提交的sku信息修改审核被驳回。', $review->create_time);
+        (new DingTalk())->push('sku信息修改审核被驳回', $message, $review->submitter_id);
     }
 }
