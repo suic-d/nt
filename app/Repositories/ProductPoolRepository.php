@@ -133,10 +133,12 @@ class ProductPoolRepository
     public static function updateStepPrice($sku, $price)
     {
         $stepPrice = SkuStepPrice::where('sku', $sku)->where('field_num', 1)->first();
-        if (!is_null($stepPrice)) {
-            $stepPrice->step_price = $price;
-            $stepPrice->save();
+        if (is_null($stepPrice)) {
+            return;
         }
+
+        $stepPrice->step_price = $price;
+        $stepPrice->save();
     }
 
     public static function pushMessage($sku, $changes, $updaterName = '')
