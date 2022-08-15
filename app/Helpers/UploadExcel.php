@@ -920,6 +920,7 @@ class UploadExcel
 
         $logTypeId = 26;
 
+        /** @var ProductPool[] $skuPoolInfo */
         $skuPoolInfo = ProductPool::whereIn('sku', array_unique(array_column($data, 'sku')))
             ->get()
             ->keyBy(function ($item) {
@@ -936,14 +937,13 @@ class UploadExcel
                     throw new Exception('sku('.$item['sku'].')不存在产品池中;');
                 }
 
-                $infoPoolSku = $skuPoolInfo[$item['sku']];
+                $product = $skuPoolInfo[$item['sku']];
                 $sku = Sku::find($item['sku']);
-                $product = ProductPool::find($item['sku']);
-                $spu = Spu::find($infoPoolSku['spu']);
-                $spuInfo = SpuInfo::find($infoPoolSku['spu']);
+                $spu = Spu::find($product->spu);
+                $spuInfo = SpuInfo::find($product->spu);
 
                 // 记录产品修改日志
-                if (!empty($logSku = SkuLog::skuChangeLog($item['sku'], $item, $infoPoolSku['spu']))) {
+                if (!empty($logSku = SkuLog::skuChangeLog($item['sku'], $item, $product->spu))) {
                     SkuLog::saveLog($item['sku'], $logTypeId, $logSku, $staffId, $staffName, true);
                 }
 
@@ -963,10 +963,10 @@ class UploadExcel
                         }
                         $fieldSpu['quality_type'] = $qualityTypeSwap;
                     }
-                    if (!empty($logSpu = SkuLog::skuChangeLog($item['sku'], $fieldSpu, $infoPoolSku['spu']))) {
-                        $arrSku = Sku::where('spu', $infoPoolSku['spu'])->get();
+                    if (!empty($logSpu = SkuLog::skuChangeLog($item['sku'], $fieldSpu, $product->spu))) {
+                        $arrSku = Sku::where('spu', $product->spu)->get();
                         if ($arrSku->isEmpty()) {
-                            throw new Exception('spu('.$infoPoolSku['spu'].')的sku表信息获取错误;');
+                            throw new Exception('spu('.$product->spu.')的sku表信息获取错误;');
                         }
                         foreach ($arrSku as $s) {
                             SkuLog::saveLog($s->sku, $logTypeId, $logSpu, $staffId, $staffName, true);
@@ -990,37 +990,29 @@ class UploadExcel
                 }
 
                 // 更新 product_pool 表
-                if (!is_null($product)) {
-                    $dataPool = [];
-                    if (isset($tables['product_pool']) && !empty($tables['product_pool'])) {
-                        foreach ($tables['product_pool'] as $field) {
-                            if (isset($item[$field])) {
-                                $dataPool[$field] = $item[$field];
-                            }
+                $dataPool = [];
+                if (isset($tables['product_pool']) && !empty($tables['product_pool'])) {
+                    foreach ($tables['product_pool'] as $field) {
+                        if (isset($item[$field])) {
+                            $dataPool[$field] = $item[$field];
                         }
-                        if (!empty($dataPool)) {
-                            if ($isSync) {
-                                $dataPool['is_sync'] = 1;
-                            }
-                            $product->update($dataPool);
+                    }
+                    if (!empty($dataPool)) {
+                        if ($isSync) {
+                            $dataPool['is_sync'] = 1;
                         }
-                    } else {
-                        $dataPool['is_sync'] = 1;
                         $product->update($dataPool);
                     }
+                } else {
+                    $dataPool['is_sync'] = 1;
+                    $product->update($dataPool);
                 }
 
                 // 更新 sku_trans_attr 表
                 if (isset($tables['sku_trans_attr'])
                     && !empty($tables['sku_trans_attr'])
                     && isset($item['sku_trans_attr'])) {
-                    SkuTransAttr::where('sku', $item['sku'])->delete();
-                    foreach ($item['sku_trans_attr'] as $attr) {
-                        $skuTransAttr = new SkuTransAttr();
-                        $skuTransAttr->sku = $item['sku'];
-                        $skuTransAttr->attr_name = $attr;
-                        $skuTransAttr->save();
-                    }
+                    self::updateSkuTransAttr($item['sku'], $item['sku_trans_attr']);
                 }
 
                 // 更新 spu 表
@@ -1060,11 +1052,11 @@ class UploadExcel
                             continue;
                         }
 
-                        SpuSub::where('spu', $infoPoolSku['spu'])->delete();
+                        SpuSub::where('spu', $product->spu)->delete();
                         foreach ($item[$subName] as $sn) {
                             $spuSub = new SpuSub();
                             $spuSub->sub_name = $subName;
-                            $spuSub->spu = $infoPoolSku['spu'];
+                            $spuSub->spu = $product->spu;
                             $spuSub->dic_id = $sn['dic_id'];
                             $spuSub->sub_value = $sn['sub_value'];
                             $spuSub->save();
@@ -1084,14 +1076,14 @@ class UploadExcel
                         if ($isSyncSpuPool) {
                             $dataSpuPool['is_sync'] = 1;
                         }
-                        $productPools = ProductPool::where('spu', $infoPoolSku['spu'])->get();
+                        $productPools = ProductPool::where('spu', $product->spu)->get();
                         foreach ($productPools as $v) {
                             $v->update($dataSpuPool);
                         }
                     }
                 } else {
                     $dataSpuPool['is_sync'] = 1;
-                    $productPools = ProductPool::where('spu', $infoPoolSku['spu'])->get();
+                    $productPools = ProductPool::where('spu', $product->spu)->get();
                     foreach ($productPools as $v) {
                         $v->update($dataSpuPool);
                     }
@@ -1099,20 +1091,26 @@ class UploadExcel
 
                 //销售状态变更
                 if (isset($item['sale_state']) && 1 != $item['sale_state']) {
-                    $sendInfo = [
+                    $res = OaModel::sendSaleStateToDev([
                         'sku' => $item['sku'],
-                        'developer' => $infoPoolSku['developer_name'] ?? '',
-                        'developer_id' => $infoPoolSku['developer'] ?? '',
-                        'depart_name' => $infoPoolSku['depart_name'] ?? '',
+                        'developer' => $product->developer_name ?? '',
+                        'developer_id' => $product->developer ?? '',
+                        'depart_name' => $product->depart_name ?? '',
                         'update_by' => $staffName,
                         'update_time' => date('Y-m-d H:i:s'),
-                        'stop_sale_reason' => $iteme['stop_sale_reason'] ?? '',
-                    ];
-                    $res = OaModel::sendSaleStateToDev($sendInfo);
-                    $sendInfo['send_status'] = isset($res['code']) ? 1 : 2;
-                    $sendInfo['error_reason'] = $res['msg'];
-                    unset($sendInfo['developer_id']);
-                    StopSalePush::create($sendInfo);
+                        'stop_sale_reason' => $item['stop_sale_reason'] ?? '',
+                    ]);
+
+                    $stopSalePush = new StopSalePush();
+                    $stopSalePush->sku = $item['sku'];
+                    $stopSalePush->developer = $product->developer_name;
+                    $stopSalePush->depart_name = $product->depart_name;
+                    $stopSalePush->update_by = $staffName;
+                    $stopSalePush->update_time = date('Y-m-d H:i:s');
+                    $stopSalePush->stop_sale_reason = $item['stop_sale_reason'];
+                    $stopSalePush->send_status = isset($res['code']) ? 1 : 2;
+                    $stopSalePush->error_reason = $res['msg'] ?? '';
+                    $stopSalePush->save();
                 }
             }
 
@@ -1715,11 +1713,7 @@ class UploadExcel
 
             $headFields = array_merge($headFields, $value['head_fields']);
             foreach ($value['tables'] as $key => $row) {
-                if (isset($tables[$key])) {
-                    $tables[$key] = array_merge($tables[$key], $row);
-                } else {
-                    $tables[$key] = $row;
-                }
+                $tables[$key] = isset($tables[$key]) ? array_merge($tables[$key], $row) : $row;
             }
             $isSync = $isSync || $value['is_sync'];
             // 是否spu下所有sku是否更新到普源
@@ -1730,11 +1724,7 @@ class UploadExcel
         if (isset($tables['sku']) && is_array($tables['sku'])) {
             foreach ($tables['sku'] as $value) {
                 if (in_array($value, ['buy_price', 'tax_price', 'usd_price'])) {
-                    if (isset($tables['spu'])) {
-                        $tables['spu'][] = 'adjust_reason';
-                    } else {
-                        $tables['spu'] = ['adjust_reason'];
-                    }
+                    isset($tables['spu']) ? $tables['spu'][] = 'adjust_reason' : $tables['spu'] = ['adjust_reason'];
 
                     $headFields[] = ['adjust_reason', '调价原因'];
 
@@ -1761,5 +1751,20 @@ class UploadExcel
         $category = Category::where('full_name', $name)->findOrEmpty();
 
         return $category->id ?? 0;
+    }
+
+    /**
+     * @param string $sku
+     * @param array  $transAttrs
+     */
+    public static function updateSkuTransAttr($sku, $transAttrs)
+    {
+        SkuTransAttr::where('sku', $sku)->delete();
+        foreach ($transAttrs as $v) {
+            $skuTransAttr = new SkuTransAttr();
+            $skuTransAttr->sku = $sku;
+            $skuTransAttr->attr_name = $v;
+            $skuTransAttr->save();
+        }
     }
 }
