@@ -18,29 +18,31 @@ class AddDrawingScore extends ReviewAbstract
     public function handle(SkuReview $review)
     {
         $instance = new DingApproval();
-        if ($instance->getProcessInstance($review->process_instance_id)) {
-            DB::beginTransaction();
+        if (!$instance->getProcessInstance($review->process_instance_id)) {
+            return;
+        }
 
-            try {
-                $review->process_status = $instance->getProcessStatus();
-                $review->save();
+        DB::beginTransaction();
 
-                $this->reviewLog($review, $instance->getOperationRecords());
+        try {
+            $review->process_status = $instance->getProcessStatus();
+            $review->save();
 
-                if ($instance->isAgree()) {
-                    $this->updateDrawingScore($review);
-                }
-
-                DB::commit();
-            } catch (Exception $exception) {
-                DB::rollBack();
-            }
+            $this->reviewLog($review, $instance->getOperationRecords());
 
             if ($instance->isAgree()) {
-                $this->pushAgreedMessage($review);
-            } elseif ($instance->isRefuse()) {
-                $this->pushRefusedMessage($review);
+                $this->updateDrawingScore($review);
             }
+
+            DB::commit();
+        } catch (Exception $exception) {
+            DB::rollBack();
+        }
+
+        if ($instance->isAgree()) {
+            $this->pushAgreedMessage($review);
+        } elseif ($instance->isRefuse()) {
+            $this->pushRefusedMessage($review);
         }
     }
 
@@ -61,19 +63,21 @@ class AddDrawingScore extends ReviewAbstract
      */
     protected function reviewLog(SkuReview $review, $operationRecords)
     {
-        if (!empty($operationRecords)) {
-            foreach ($operationRecords as $item) {
-                if (!self::executeTaskNormal($item->operation_type)) {
-                    continue;
-                }
+        if (empty($operationRecords)) {
+            return;
+        }
 
-                if ($review->op_reviewer_id == $item->userid) {
-                    $this->opReview($review, $item);
-                } elseif ($review->dev_reviewer_id == $item->userid) {
-                    $this->devReview($review, $item);
-                } elseif ($review->design_reviewer_id == $item->userid) {
-                    $this->designReview($review, $item);
-                }
+        foreach ($operationRecords as $item) {
+            if (!self::executeTaskNormal($item->operation_type)) {
+                continue;
+            }
+
+            if ($review->op_reviewer_id == $item->userid) {
+                $this->opReview($review, $item);
+            } elseif ($review->dev_reviewer_id == $item->userid) {
+                $this->devReview($review, $item);
+            } elseif ($review->design_reviewer_id == $item->userid) {
+                $this->designReview($review, $item);
             }
         }
     }
@@ -106,12 +110,14 @@ class AddDrawingScore extends ReviewAbstract
     private function updateDrawingScore(SkuReview $review)
     {
         $sku = Sku::find($review->sku);
-        if (!is_null($sku)) {
-            $sku->drawing_score += $review->score;
-            $sku->save();
-
-            $this->skuLog($review);
+        if (is_null($sku)) {
+            return;
         }
+
+        $sku->drawing_score += $review->score;
+        $sku->save();
+
+        $this->skuLog($review);
     }
 
     /**

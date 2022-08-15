@@ -17,34 +17,36 @@ class SaveBaseInfo extends ReviewAbstract
     public function handle(SkuReview $review)
     {
         $instance = new DingApproval();
-        if ($instance->getProcessInstance($review->process_instance_id)) {
-            DB::beginTransaction();
+        if (!$instance->getProcessInstance($review->process_instance_id)) {
+            return;
+        }
 
-            try {
-                $review->process_status = $instance->getProcessStatus();
-                $review->save();
+        DB::beginTransaction();
 
-                $this->reviewLog($review, $instance->getOperationRecords());
+        try {
+            $review->process_status = $instance->getProcessStatus();
+            $review->save();
 
-                if ($instance->isAgree()) {
-                    Sku::updateBaseInfo(
-                        $review->sku,
-                        json_decode($review->changes, true),
-                        $review->submitter_id,
-                        $review->submitter_name
-                    );
-                }
-
-                DB::commit();
-            } catch (Exception $exception) {
-                DB::rollBack();
-            }
+            $this->reviewLog($review, $instance->getOperationRecords());
 
             if ($instance->isAgree()) {
-                $this->pushAgreedMessage($review);
-            } elseif ($instance->isRefuse()) {
-                $this->pushRefusedMessage($review);
+                Sku::updateBaseInfo(
+                    $review->sku,
+                    json_decode($review->changes, true),
+                    $review->submitter_id,
+                    $review->submitter_name
+                );
             }
+
+            DB::commit();
+        } catch (Exception $exception) {
+            DB::rollBack();
+        }
+
+        if ($instance->isAgree()) {
+            $this->pushAgreedMessage($review);
+        } elseif ($instance->isRefuse()) {
+            $this->pushRefusedMessage($review);
         }
     }
 }

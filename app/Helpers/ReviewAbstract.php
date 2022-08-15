@@ -216,15 +216,17 @@ abstract class ReviewAbstract
      */
     protected function devReview(SkuReview $review, $record)
     {
-        if (3 == $review->status) {
-            $review->dev_review_time = date('Y-m-d H:i:s', strtotime($record->date));
-            $review->save();
+        if (3 != $review->status) {
+            return;
+        }
 
-            if (self::agreed($record->operation_result)) {
-                $this->devPass($review);
-            } elseif (self::refused($record->operation_result)) {
-                $this->devReject($review, $record->remark ?? '');
-            }
+        $review->dev_review_time = date('Y-m-d H:i:s', strtotime($record->date));
+        $review->save();
+
+        if (self::agreed($record->operation_result)) {
+            $this->devPass($review);
+        } elseif (self::refused($record->operation_result)) {
+            $this->devReject($review, $record->remark ?? '');
         }
     }
 
@@ -258,15 +260,15 @@ abstract class ReviewAbstract
      */
     protected function opReview(SkuReview $review, $record)
     {
-        if (1 == $review->status) {
-            $review->op_review_time = date('Y-m-d H:i:s', strtotime($record->date));
-            $review->save();
+        if (1 != $review->status) {
+            return;
+        }
 
-            if (self::agreed($record->operation_result)) {
-                $this->opPass($review);
-            } elseif (self::refused($record->operation_result)) {
-                $this->opReject($review, $record->remark ?? '');
-            }
+        $review->op_review_time = date('Y-m-d H:i:s', strtotime($record->date));
+        if (self::agreed($record->operation_result)) {
+            $this->opPass($review);
+        } elseif (self::refused($record->operation_result)) {
+            $this->opReject($review, $record->remark ?? '');
         }
     }
 
@@ -300,15 +302,17 @@ abstract class ReviewAbstract
      */
     protected function designReview(SkuReview $review, $record)
     {
-        if (5 == $review->status) {
-            $review->design_review_time = date('Y-m-d H:i:s', strtotime($record->date));
-            $review->save();
+        if (5 != $review->status) {
+            return;
+        }
 
-            if (self::agreed($record->operation_result)) {
-                $this->designPass($review);
-            } elseif (self::refused($record->operation_result)) {
-                $this->designReject($review, $record->remark ?? '');
-            }
+        $review->design_review_time = date('Y-m-d H:i:s', strtotime($record->date));
+        $review->save();
+
+        if (self::agreed($record->operation_result)) {
+            $this->designPass($review);
+        } elseif (self::refused($record->operation_result)) {
+            $this->designReject($review, $record->remark ?? '');
         }
     }
 
@@ -342,15 +346,17 @@ abstract class ReviewAbstract
      */
     protected function devdReview(SkuReview $review, $record)
     {
-        if (8 == $review->status) {
-            $review->devd_review_time = date('Y-m-d H:i:s', strtotime($record->date));
-            $review->save();
+        if (8 != $review->status) {
+            return;
+        }
 
-            if (self::agreed($record->operation_result)) {
-                $this->devdPass($review);
-            } elseif (self::refused($record->operation_result)) {
-                $this->devdReject($review, $record->remark ?? '');
-            }
+        $review->devd_review_time = date('Y-m-d H:i:s', strtotime($record->date));
+        $review->save();
+
+        if (self::agreed($record->operation_result)) {
+            $this->devdPass($review);
+        } elseif (self::refused($record->operation_result)) {
+            $this->devdReject($review, $record->remark ?? '');
         }
     }
 
@@ -384,15 +390,17 @@ abstract class ReviewAbstract
      */
     protected function oplReview(SkuReview $review, $record)
     {
-        if (10 == $review->status) {
-            $review->opl_review_time = date('Y-m-d H:i:s', strtotime($record->date));
-            $review->save();
+        if (10 != $review->status) {
+            return;
+        }
 
-            if (self::agreed($record->operation_result)) {
-                $this->oplPass($review);
-            } elseif (self::refused($record->operation_result)) {
-                $this->oplReject($review, $record->remark ?? '');
-            }
+        $review->opl_review_time = date('Y-m-d H:i:s', strtotime($record->date));
+        $review->save();
+
+        if (self::agreed($record->operation_result)) {
+            $this->oplPass($review);
+        } elseif (self::refused($record->operation_result)) {
+            $this->oplReject($review, $record->remark ?? '');
         }
     }
 
@@ -426,15 +434,17 @@ abstract class ReviewAbstract
      */
     protected function opdReview(SkuReview $review, $record)
     {
-        if (12 == $review->status) {
-            $review->opd_review_time = date('Y-m-d H:i:s', strtotime($record->date));
-            $review->save();
+        if (12 != $review->status) {
+            return;
+        }
 
-            if (self::agreed($record->operation_result)) {
-                $this->opdPass($review);
-            } elseif (self::refused($record->operation_result)) {
-                $this->opdReject($review, $record->remark ?? '');
-            }
+        $review->opd_review_time = date('Y-m-d H:i:s', strtotime($record->date));
+        $review->save();
+
+        if (self::agreed($record->operation_result)) {
+            $this->opdPass($review);
+        } elseif (self::refused($record->operation_result)) {
+            $this->opdReject($review, $record->remark ?? '');
         }
     }
 
@@ -468,15 +478,17 @@ abstract class ReviewAbstract
      */
     protected function reviewLog(SkuReview $review, $operationRecords)
     {
-        if (!empty($operationRecords)) {
-            foreach ($operationRecords as $item) {
-                if (!self::executeTaskNormal($item->operation_type)) {
-                    continue;
-                }
+        if (empty($operationRecords)) {
+            return;
+        }
 
-                if ($review->dev_reviewer_id == $item->userid) {
-                    $this->devReview($review, $item);
-                }
+        foreach ($operationRecords as $item) {
+            if (!self::executeTaskNormal($item->operation_type)) {
+                continue;
+            }
+
+            if ($review->dev_reviewer_id == $item->userid) {
+                $this->devReview($review, $item);
             }
         }
     }

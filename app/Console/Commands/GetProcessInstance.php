@@ -77,18 +77,20 @@ class GetProcessInstance extends Command
             ->forPage(1, 200)
             ->get(['id'])
         ;
-        if ($reviews->isNotEmpty()) {
-            foreach ($reviews as $v) {
-                try {
-                    $response = $this->client->request('GET', 'index.php/api/v1/ExternalAPI/getProcessInstance', [
-                        RequestOptions::QUERY => ['review_id' => $v->id],
-                    ]);
-                    $this->log($contents = $response->getBody()->getContents());
-                    dump($contents);
-                } catch (GuzzleException $exception) {
-                    $this->log($msg = $exception->getMessage());
-                    dump($msg);
-                }
+        if ($reviews->isEmpty()) {
+            return;
+        }
+
+        foreach ($reviews as $v) {
+            try {
+                $response = $this->client->request('GET', 'index.php/api/v1/ExternalAPI/getProcessInstance', [
+                    RequestOptions::QUERY => ['review_id' => $v->id],
+                ]);
+                $this->log($contents = $response->getBody()->getContents());
+                dump($contents);
+            } catch (GuzzleException $exception) {
+                $this->log($msg = $exception->getMessage());
+                dump($msg);
             }
         }
     }
