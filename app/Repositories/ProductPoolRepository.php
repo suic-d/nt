@@ -104,15 +104,26 @@ class ProductPoolRepository
         }
 
         if (isset($priceOld)) {
-            $log = new SkuLog();
-            $log->sku = $sku;
-            $log->log_type_id = 38;
-            $log->remark = $remark;
-            $log->create_at = date('Y-m-d H:i:s');
-            $log->create_id = $creatorId;
-            $log->create_name = $creatorName;
-            $log->save();
+            self::skuLog($sku, $remark, $creatorId, $creatorName);
         }
+    }
+
+    /**
+     * @param string $sku
+     * @param string $remark
+     * @param string $creatorId
+     * @param string $creatorName
+     */
+    public static function skuLog($sku, $remark, $creatorId, $creatorName)
+    {
+        $log = new SkuLog();
+        $log->sku = $sku;
+        $log->log_type_id = 38;
+        $log->remark = $remark;
+        $log->create_at = date('Y-m-d H:i:s');
+        $log->create_id = $creatorId;
+        $log->create_name = $creatorName;
+        $log->save();
     }
 
     /**
