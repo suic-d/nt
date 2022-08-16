@@ -122,7 +122,7 @@ class UploadExcel
 
                             break;
                         }
-                        $dataLine['sku'] = $fieldValue;
+                        $dataLine['sku'] = $productPool->sku;
 
                         break;
 
@@ -893,8 +893,8 @@ class UploadExcel
                 continue;
             }
 
-            $skuModel = Sku::findOrEmpty($row['sku']);
-            if (!$skuModel->isExists()) {
+            $skuModel = Sku::find($row['sku']);
+            if (is_null($skuModel)) {
                 continue;
             }
 
@@ -918,8 +918,6 @@ class UploadExcel
         // 删除文件
         unlink($file);
 
-        $logTypeId = 26;
-
         /** @var ProductPool[] $skuPoolInfo */
         $skuPoolInfo = ProductPool::whereIn('sku', array_unique(array_column($data, 'sku')))
             ->get()
@@ -938,13 +936,13 @@ class UploadExcel
                 }
 
                 $product = $skuPoolInfo[$item['sku']];
-                $sku = Sku::find($item['sku']);
+                $sku = Sku::find($product->sku);
                 $spu = Spu::find($product->spu);
                 $spuInfo = SpuInfo::find($product->spu);
 
                 // 记录产品修改日志
-                if (!empty($logSku = SkuLog::skuChangeLog($item['sku'], $item, $product->spu))) {
-                    SkuLog::saveLog($item['sku'], $logTypeId, $logSku, $staffId, $staffName, true);
+                if (!empty($logSku = SkuLog::skuChangeLog($product->sku, $item, $product->spu))) {
+                    SkuLog::saveLog($product->sku, 26, $logSku, $staffId, $staffName, true);
                 }
 
                 // spu字段修改日志记录
@@ -963,14 +961,13 @@ class UploadExcel
                         }
                         $fieldSpu['quality_type'] = $qualityTypeSwap;
                     }
-                    if (!empty($logSpu = SkuLog::skuChangeLog($item['sku'], $fieldSpu, $product->spu))) {
-                        $arrSku = Sku::where('spu', $product->spu)->get();
-                        if ($arrSku->isEmpty()) {
-                            throw new Exception('spu('.$product->spu.')的sku表信息获取错误;');
-                        }
-                        foreach ($arrSku as $s) {
-                            SkuLog::saveLog($s->sku, $logTypeId, $logSpu, $staffId, $staffName, true);
-                        }
+                    if (!empty($logSpu = SkuLog::skuChangeLog($product->sku, $fieldSpu, $product->spu))) {
+                        Sku::where('spu', $product->spu)
+                            ->get()
+                            ->each(function ($v) use ($logSpu, $staffId, $staffName) {
+                                SkuLog::saveLog($v->sku, 26, $logSpu, $staffId, $staffName, true);
+                            })
+                        ;
                     }
                 }
 
@@ -1012,7 +1009,7 @@ class UploadExcel
                 if (isset($tables['sku_trans_attr'])
                     && !empty($tables['sku_trans_attr'])
                     && isset($item['sku_trans_attr'])) {
-                    self::updateSkuTransAttr($item['sku'], $item['sku_trans_attr']);
+                    self::updateSkuTransAttr($product->sku, $item['sku_trans_attr']);
                 }
 
                 // 更新 spu 表
@@ -1076,23 +1073,21 @@ class UploadExcel
                         if ($isSyncSpuPool) {
                             $dataSpuPool['is_sync'] = 1;
                         }
-                        $productPools = ProductPool::where('spu', $product->spu)->get();
-                        foreach ($productPools as $v) {
+                        ProductPool::where('spu', $product->spu)->get()->each(function ($v) use ($dataSpuPool) {
                             $v->update($dataSpuPool);
-                        }
+                        });
                     }
                 } else {
                     $dataSpuPool['is_sync'] = 1;
-                    $productPools = ProductPool::where('spu', $product->spu)->get();
-                    foreach ($productPools as $v) {
+                    ProductPool::where('spu', $product->spu)->get()->each(function ($v) use ($dataSpuPool) {
                         $v->update($dataSpuPool);
-                    }
+                    });
                 }
 
                 //销售状态变更
                 if (isset($item['sale_state']) && 1 != $item['sale_state']) {
                     $res = OaModel::sendSaleStateToDev([
-                        'sku' => $item['sku'],
+                        'sku' => $product->sku,
                         'developer' => $product->developer_name ?? '',
                         'developer_id' => $product->developer ?? '',
                         'depart_name' => $product->depart_name ?? '',
@@ -1102,7 +1097,7 @@ class UploadExcel
                     ]);
 
                     $stopSalePush = new StopSalePush();
-                    $stopSalePush->sku = $item['sku'];
+                    $stopSalePush->sku = $product->sku;
                     $stopSalePush->developer = $product->developer_name;
                     $stopSalePush->depart_name = $product->depart_name;
                     $stopSalePush->update_by = $staffName;
@@ -1170,10 +1165,8 @@ class UploadExcel
                 'desc' => '非含税RMB',
                 'head_fields' => [
                     ['buy_price', '非含税RMB'],
-                    //                ["currency","币种"],
                 ],
                 'tables' => [
-                    //                "spu_info" => ["currency"],
                 ],
                 'is_sync' => true,
             ];
