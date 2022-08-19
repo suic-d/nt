@@ -67,10 +67,10 @@ class ShopGrantAuthorization extends Command
         $worksheet = IOFactory::load($file)->getActiveSheet();
         $highestRow = $worksheet->getHighestDataRow();
         for ($row = $this->argument('offset'); $row <= $highestRow; ++$row) {
-            $account = $worksheet->getCell('A'.$row)->getValue();
-            $area = $worksheet->getCell('B'.$row)->getValue();
-            $merchantId = $worksheet->getCell('C'.$row)->getValue();
-            $refreshToken = $worksheet->getCell('D'.$row)->getValue();
+            $account = trim($worksheet->getCell('A'.$row)->getValue());
+            $area = trim($worksheet->getCell('B'.$row)->getValue());
+            $merchantId = trim($worksheet->getCell('C'.$row)->getValue());
+            $refreshToken = trim($worksheet->getCell('D'.$row)->getValue());
 
             echo str_repeat('=', 50).' 亚马逊'.$account.$area.' '.str_repeat('=', 50), PHP_EOL;
             ShopGrantAuthAbstract::save('-- 亚马逊'.$account.$area.PHP_EOL);
@@ -100,11 +100,11 @@ class ShopGrantAuthorization extends Command
         $worksheet = IOFactory::load($file)->getActiveSheet();
         $highestRow = $worksheet->getHighestDataRow();
         for ($row = $this->argument('offset'); $row <= $highestRow; ++$row) {
-            $account = $worksheet->getCell('A'.$row)->getValue();
-            $area = $worksheet->getCell('B'.$row)->getValue();
-            $merchantId = $worksheet->getCell('C'.$row)->getValue();
-            $token = $worksheet->getCell('D'.$row)->getValue();
-            $id = $worksheet->getCell('E'.$row)->getValue();
+            $account = trim($worksheet->getCell('A'.$row)->getValue());
+            $area = trim($worksheet->getCell('B'.$row)->getValue());
+            $merchantId = trim($worksheet->getCell('C'.$row)->getValue());
+            $token = trim($worksheet->getCell('D'.$row)->getValue());
+            $id = trim($worksheet->getCell('E'.$row)->getValue());
             if (!isset($this->accessKey[$id])) {
                 continue;
             }
