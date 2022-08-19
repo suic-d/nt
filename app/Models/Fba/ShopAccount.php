@@ -22,4 +22,11 @@ class ShopAccount extends Model
      * @var string
      */
     protected $table = 'shop_account';
+
+    /**
+     * The connection name for the model.
+     *
+     * @var string
+     */
+    protected $connection = 'fba';
 }
