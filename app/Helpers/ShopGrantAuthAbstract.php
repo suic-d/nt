@@ -72,7 +72,7 @@ abstract class ShopGrantAuthAbstract
         }
 
         foreach ($shops as $v) {
-            $query = $v->newModelQuery()->where('id', new Expression($v->shop_id))->toBase();
+            $query = $v->newModelQuery()->where('shop_id', new Expression($v->shop_id))->toBase();
             $grammar = $query->getGrammar();
             $update = $grammar->compileUpdate($query, [
                 'ia_auth' => new Expression(1),
