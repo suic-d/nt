@@ -29,4 +29,11 @@ class ShopAccount extends Model
      * @var string
      */
     protected $connection = 'fba';
+
+    /**
+     * The primary key for the model.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'shop_id';
 }
