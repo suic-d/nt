@@ -158,49 +158,51 @@ class Sku extends Model
             }
 
             // 物流基础信息 是否同步
-            if (0 == $data['update_sku_trans']) {
-                // sku修改日志
-                $arrSkuChanges[$skuModel->sku] = array_merge(
-                    $arrSkuChanges[$skuModel->sku],
-                    SkuLog::skuChangeLog($skuModel->sku, ['arr_trans' => $data['arr_trans']], $skuModel->spu)
-                );
-
-                // 更新sku运输特性
-                SkuTransAttr::where('sku', $skuModel->sku)->delete();
-                foreach ($data['arr_trans'] as $trans) {
-                    $skuTransAttr = new SkuTransAttr();
-                    $skuTransAttr->sku = $skuModel->sku;
-                    $skuTransAttr->attr_name = $trans;
-                    $skuTransAttr->save();
-                }
-
-                $product = ProductPool::find($skuModel->sku);
-                if (!is_null($product)) {
-                    $product->attr_trans = join(',', $data['arr_trans']);
-                    $product->save();
-                }
-            } else {
-                // 更新全款sku的运输特性
-                foreach ($skuList as $v) {
-                    // sku 修改日志
-                    $arrSkuChanges[$v->sku] = array_merge(
-                        $arrSkuChanges[$v->sku],
-                        SkuLog::skuChangeLog($v->sku, ['arr_trans' => $data['arr_trans']], $v->spu)
+            if (isset($data['arr_trans'])) {
+                if (0 == $data['update_sku_trans']) {
+                    // sku修改日志
+                    $arrSkuChanges[$skuModel->sku] = array_merge(
+                        $arrSkuChanges[$skuModel->sku],
+                        SkuLog::skuChangeLog($skuModel->sku, ['arr_trans' => $data['arr_trans']], $skuModel->spu)
                     );
 
-                    // sku运输特性
-                    SkuTransAttr::where('sku', $v->sku)->delete();
+                    // 更新sku运输特性
+                    SkuTransAttr::where('sku', $skuModel->sku)->delete();
                     foreach ($data['arr_trans'] as $trans) {
                         $skuTransAttr = new SkuTransAttr();
-                        $skuTransAttr->sku = $v->sku;
+                        $skuTransAttr->sku = $skuModel->sku;
                         $skuTransAttr->attr_name = $trans;
                         $skuTransAttr->save();
                     }
 
-                    $product = ProductPool::find($v->sku);
+                    $product = ProductPool::find($skuModel->sku);
                     if (!is_null($product)) {
                         $product->attr_trans = join(',', $data['arr_trans']);
                         $product->save();
+                    }
+                } else {
+                    // 更新全款sku的运输特性
+                    foreach ($skuList as $v) {
+                        // sku 修改日志
+                        $arrSkuChanges[$v->sku] = array_merge(
+                            $arrSkuChanges[$v->sku],
+                            SkuLog::skuChangeLog($v->sku, ['arr_trans' => $data['arr_trans']], $v->spu)
+                        );
+
+                        // sku运输特性
+                        SkuTransAttr::where('sku', $v->sku)->delete();
+                        foreach ($data['arr_trans'] as $trans) {
+                            $skuTransAttr = new SkuTransAttr();
+                            $skuTransAttr->sku = $v->sku;
+                            $skuTransAttr->attr_name = $trans;
+                            $skuTransAttr->save();
+                        }
+
+                        $product = ProductPool::find($v->sku);
+                        if (!is_null($product)) {
+                            $product->attr_trans = join(',', $data['arr_trans']);
+                            $product->save();
+                        }
                     }
                 }
             }
