@@ -24,15 +24,14 @@ class StockRepository
 
         try {
             $response = $client->request('GET', 'warehouse/stock/sku/'.$sku);
-            if (200 == $response->getStatusCode()) {
-                $json = json_decode($response->getBody()->getContents());
-                if (isset($json->data) && is_array($json->data) && !empty($json->data)) {
-                    foreach ($json->data as $value) {
-                        if (false === mb_strpos($value->whouseName, '直发仓', 0, 'UTF-8')) {
-                            continue;
-                        }
-                        $stock += isset($value->skuUsableCount) ? (int) $value->skuUsableCount : 0;
+            $json = json_decode($response->getBody()->getContents(), true);
+            if (isset($json['data']) && !empty($json['data'])) {
+                foreach ($json['data'] as $value) {
+                    if (false === mb_strpos($value['whouseName'], '直发仓', 0, 'UTF-8')) {
+                        continue;
                     }
+
+                    $stock += $value['skuUsableCount'];
                 }
             }
         } catch (Exception | GuzzleException $exception) {
@@ -54,7 +53,7 @@ class StockRepository
         try {
             $response = $client->request('GET', 'warehouse/stock/sku/'.$sku);
             $json = json_decode($response->getBody()->getContents(), true);
-            if (isset($json['data']) && is_array($json['data']) && !empty($json['data'])) {
+            if (isset($json['data']) && !empty($json['data'])) {
                 foreach ($json['data'] as $value) {
                     $stock += $value['skuUsableCount'];
                 }
