@@ -64,7 +64,7 @@ class LevelReport extends Command
      */
     public function handle()
     {
-        $this->url();
+        $this->rl();
     }
 
     public function rl()
