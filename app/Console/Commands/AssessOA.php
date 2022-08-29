@@ -79,11 +79,14 @@ class AssessOA extends Command
      */
     public function syncDeptUser($deptId = null)
     {
-        $deptIdArr = is_null($deptId) ? DeptList::get(['dept_id'])->pluck('dept_id') : [$deptId];
-
-        $requests = function () use ($deptIdArr) {
+        $requests = function () use ($deptId) {
+            if (is_null($deptId)) {
+                $deptIdArr = DeptList::get(['dept_id'])->pluck('dept_id');
+            } else {
+                $deptIdArr = [$deptId];
+            }
             foreach ($deptIdArr as $value) {
-                yield new Request('GET', 'index.php/oaapi/oaapi/deptUser?id='.$value);
+                yield $value => new Request('GET', 'index.php/oaapi/oaapi/deptUser?id='.$value);
             }
         };
         $pool = new Pool($this->client, $requests(), [
@@ -105,13 +108,14 @@ class AssessOA extends Command
      */
     public function syncStaffDetail($staffId = null)
     {
-        $staffIdArr = is_null($staffId) ? StaffList::where('is_dimission', '!=', 2)
-            ->get(['staff_id'])
-            ->pluck('staff_id') : [$staffId];
-
-        $requests = function () use ($staffIdArr) {
+        $requests = function () use ($staffId) {
+            if (is_null($staffId)) {
+                $staffIdArr = StaffList::where('is_dimission', 1)->get(['staff_id'])->pluck('staff_id');
+            } else {
+                $staffIdArr = [$staffId];
+            }
             foreach ($staffIdArr as $value) {
-                yield new Request('GET', 'index.php/oaapi/oaapi/staffDetail?id='.$value);
+                yield $value => new Request('GET', 'index.php/oaapi/oaapi/staffDetail?id='.$value);
             }
         };
         $pool = new Pool($this->client, $requests(), [
@@ -131,8 +135,8 @@ class AssessOA extends Command
      */
     public function syncShopList()
     {
-        $platforms = ['Amazon', 'eBay', 'Aliexpress', 'shopify', 'Lazada'];
-        $requests = function () use ($platforms) {
+        $requests = function () {
+            $platforms = ['Amazon', 'eBay', 'Aliexpress', 'shopify', 'Lazada'];
             foreach ($platforms as $value) {
                 yield new Request('GET', 'index.php/oaapi/oaapi/getShopList?id='.$value);
             }
@@ -173,10 +177,10 @@ class AssessOA extends Command
         }
 
         // 获取部门下用户
-        $deptIdArr = DeptList::get(['dept_id'])->pluck('dept_id');
-        $requests = function () use ($deptIdArr) {
+        $requests = function () {
+            $deptIdArr = DeptList::get(['dept_id'])->pluck('dept_id');
             foreach ($deptIdArr as $value) {
-                yield new Request('GET', 'index.php/oaapi/oaapi/deptUser?id='.$value);
+                yield $value => new Request('GET', 'index.php/oaapi/oaapi/deptUser?id='.$value);
             }
         };
         (new Pool($client, $requests(), [
@@ -184,13 +188,10 @@ class AssessOA extends Command
         ]))->promise()->wait();
 
         // 获取员工详情
-        $staffIdArr = StaffList::where('is_dimission', '!=', 2)
-            ->get(['staff_id'])
-            ->pluck('staff_id')
-        ;
-        $requests = function () use ($staffIdArr) {
+        $requests = function () {
+            $staffIdArr = StaffList::where('is_dimission', 1)->get(['staff_id'])->pluck('staff_id');
             foreach ($staffIdArr as $value) {
-                yield new Request('GET', 'index.php/oaapi/oaapi/staffDetail?id='.$value);
+                yield $value => new Request('GET', 'index.php/oaapi/oaapi/staffDetail?id='.$value);
             }
         };
         (new Pool($client, $requests(), [
@@ -198,8 +199,8 @@ class AssessOA extends Command
         ]))->promise()->wait();
 
         // 拉取店铺信息
-        $platforms = ['Amazon', 'eBay', 'Aliexpress', 'shopify', 'Lazada'];
-        $requests = function () use ($platforms) {
+        $requests = function () {
+            $platforms = ['Amazon', 'eBay', 'Aliexpress', 'shopify', 'Lazada'];
             foreach ($platforms as $value) {
                 yield new Request('GET', 'index.php/oaapi/oaapi/getShopList?id='.$value);
             }
