@@ -98,11 +98,14 @@ class OACommand extends Command
      */
     public function syncDeptUser($deptId = null)
     {
-        $deptIdArr = is_null($deptId) ? DeptList::get(['dept_id'])->pluck('dept_id') : [$deptId];
-
-        $requests = function () use ($deptIdArr) {
+        $requests = function () use ($deptId) {
+            if (is_null($deptId)) {
+                $deptIdArr = DeptList::get(['dept_id'])->pluck('dept_id');
+            } else {
+                $deptIdArr = [$deptId];
+            }
             foreach ($deptIdArr as $value) {
-                yield $value => new Request('GET', 'index.php/oaapi/oaapi/deptUser?id='.$value);
+                yield new $value() => new Request('GET', 'index.php/oaapi/oaapi/deptUser?id='.$value);
             }
         };
         $pool = new Pool($this->client, $requests(), [
@@ -124,11 +127,12 @@ class OACommand extends Command
      */
     public function syncStaffDetail($staffId = null)
     {
-        $staffIdArr = is_null($staffId) ? StaffList::where('is_dimission', '!=', 2)
-            ->get(['staff_id'])
-            ->pluck('staff_id') : [$staffId];
-
-        $requests = function () use ($staffIdArr) {
+        $requests = function () use ($staffId) {
+            if (is_null($staffId)) {
+                $staffIdArr = StaffList::where('is_dimission', 1)->get(['staff_id'])->pluck('staff_id');
+            } else {
+                $staffIdArr = [$staffId];
+            }
             foreach ($staffIdArr as $value) {
                 yield $value => new Request('GET', 'index.php/oaapi/oaapi/staffDetail?id='.$value);
             }
@@ -165,18 +169,18 @@ class OACommand extends Command
      */
     public function syncSupplier($supplierId = null)
     {
-        $supplierIdArr = is_null($supplierId) ? Supplier::where('is_sync', 1)
-            ->where('py_id', 0)
-            ->get(['id'])
-            ->pluck('id') : [$supplierId];
-
-        $requests = function () use ($supplierIdArr) {
+        $requests = function () use ($supplierId) {
+            if (is_null($supplierId)) {
+                $supplierIdArr = Supplier::where('is_sync', 1)->where('py_id', 0)->get(['id'])->pluck('id');
+            } else {
+                $supplierIdArr = [$supplierId];
+            }
             foreach ($supplierIdArr as $value) {
-                yield new Request('GET', 'index.php/pyapi/pyapi/syncSupplierInfo?id='.$value);
+                yield $value => new Request('GET', 'index.php/pyapi/pyapi/syncSupplierInfo?id='.$value);
             }
         };
         $pool = new Pool($this->client, $requests(), [
-            //            'concurrency' => 5,
+            'concurrency' => 5,
             'fulfilled' => function ($response) {
                 echo $response->getBody()->getContents(), PHP_EOL;
             },
@@ -194,18 +198,18 @@ class OACommand extends Command
      */
     public function syncProductCategory($categoryId = null)
     {
-        $categoryIdArr = is_null($categoryId) ? ProductCategory::where('is_sync', 1)
-            ->where('py_id', 0)
-            ->get(['id'])
-            ->pluck('id') : [$categoryId];
-
-        $requests = function () use ($categoryIdArr) {
+        $requests = function () use ($categoryId) {
+            if (is_null($categoryId)) {
+                $categoryIdArr = ProductCategory::where('is_sync', 1)->where('py_id', 0)->get(['id'])->pluck('id');
+            } else {
+                $categoryIdArr = [$categoryId];
+            }
             foreach ($categoryIdArr as $value) {
-                yield new Request('GET', 'index.php/pyapi/pyapi/syncProductCategory?id='.$value);
+                yield $value => new Request('GET', 'index.php/pyapi/pyapi/syncProductCategory?id='.$value);
             }
         };
         $pool = new Pool($this->client, $requests(), [
-            //            'concurrency' => 5,
+            'concurrency' => 5,
             'fulfilled' => function ($response) {
                 echo $response->getBody()->getContents(), PHP_EOL;
             },
@@ -223,18 +227,18 @@ class OACommand extends Command
      */
     public function syncGood($sku = null)
     {
-        $skuArr = is_null($sku) ? ProductPool::where('is_sync', 1)
-            ->where('py_id', 0)
-            ->get(['sku'])
-            ->pluck('sku') : [$sku];
-
-        $requests = function () use ($skuArr) {
+        $requests = function () use ($sku) {
+            if (is_null($sku)) {
+                $skuArr = ProductPool::where('is_sync', 1)->where('py_id', 0)->get(['sku'])->pluck('sku');
+            } else {
+                $skuArr = [$sku];
+            }
             foreach ($skuArr as $value) {
-                yield new Request('GET', 'index.php/pyapi/pyapi/syncGoodInfo?sku='.$value);
+                yield $value => new Request('GET', 'index.php/pyapi/pyapi/syncGoodInfo?sku='.$value);
             }
         };
         $pool = new Pool($this->client, $requests(), [
-            //            'concurrency' => 5,
+            'concurrency' => 5,
             'fulfilled' => function ($response) {
                 echo $response->getBody()->getContents(), PHP_EOL;
             },
@@ -252,18 +256,18 @@ class OACommand extends Command
      */
     public function updateSupplier($supplierId = null)
     {
-        $supplierIdArr = is_null($supplierId) ? Supplier::where('is_sync', 1)
-            ->where('py_id', '!=', 0)
-            ->get(['id'])
-            ->pluck('id') : [$supplierId];
-
-        $requests = function () use ($supplierIdArr) {
+        $requests = function () use ($supplierId) {
+            if (is_null($supplierId)) {
+                $supplierIdArr = Supplier::where('is_sync', 1)->where('py_id', '!=', 0)->get(['id'])->pluck('id');
+            } else {
+                $supplierIdArr = [$supplierId];
+            }
             foreach ($supplierIdArr as $value) {
-                yield new Request('GET', 'index.php/pyapi/pyapi/updateSupplierInfo?id='.$value);
+                yield $value => new Request('GET', 'index.php/pyapi/pyapi/updateSupplierInfo?id='.$value);
             }
         };
         $pool = new Pool($this->client, $requests(), [
-            //            'concurrency' => 5,
+            'concurrency' => 5,
             'fulfilled' => function ($response) {
                 echo $response->getBody()->getContents(), PHP_EOL;
             },
@@ -281,18 +285,22 @@ class OACommand extends Command
      */
     public function updateProductCategory($categoryId = null)
     {
-        $categoryIdArr = is_null($categoryId) ? ProductCategory::where('is_sync', 1)
-            ->where('py_id', '!=', 0)
-            ->get(['id'])
-            ->pluck('id') : [$categoryId];
-
-        $requests = function () use ($categoryIdArr) {
+        $requests = function () use ($categoryId) {
+            if (is_null($categoryId)) {
+                $categoryIdArr = ProductCategory::where('is_sync', 1)
+                    ->where('py_id', '!=', 0)
+                    ->get(['id'])
+                    ->pluck('id')
+                ;
+            } else {
+                $categoryIdArr = [$categoryId];
+            }
             foreach ($categoryIdArr as $value) {
-                yield new Request('GET', 'index.php/pyapi/pyapi/syncProductCategory?id='.$value);
+                yield $value => new Request('GET', 'index.php/pyapi/pyapi/syncProductCategory?id='.$value);
             }
         };
         $pool = new Pool($this->client, $requests(), [
-            //            'concurrency' => 5,
+            'concurrency' => 5,
             'fulfilled' => function ($response) {
                 echo $response->getBody()->getContents(), PHP_EOL;
             },
@@ -310,18 +318,18 @@ class OACommand extends Command
      */
     public function updateGood($sku = null)
     {
-        $skuArr = is_null($sku) ? ProductPool::where('is_sync', 1)
-            ->where('py_id', '!=', 0)
-            ->get(['sku'])
-            ->pluck('sku') : [$sku];
-
-        $requests = function () use ($skuArr) {
+        $requests = function () use ($sku) {
+            if (is_null($sku)) {
+                $skuArr = ProductPool::where('is_sync', 1)->where('py_id', '!=', 0)->get(['sku'])->pluck('sku');
+            } else {
+                $skuArr = [$sku];
+            }
             foreach ($skuArr as $value) {
-                yield new Request('GET', 'index.php/pyapi/pyapi/updateGoodInfo?sku='.$value);
+                yield $value => new Request('GET', 'index.php/pyapi/pyapi/updateGoodInfo?sku='.$value);
             }
         };
         $pool = new Pool($this->client, $requests(), [
-            //            'concurrency' => 5,
+            'concurrency' => 5,
             'fulfilled' => function ($response) {
                 echo $response->getBody()->getContents(), PHP_EOL;
             },
