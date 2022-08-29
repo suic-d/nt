@@ -58,15 +58,18 @@ class UpdateCompanyInfo extends Command
      */
     public function updateCompanyStatus($companyId = null)
     {
-        $companyIds = is_null($companyId) ? Company::get(['id'])->pluck('id') : [$companyId];
-
-        $requests = function () use ($companyIds) {
+        $requests = function () use ($companyId) {
+            if (is_null($companyId)) {
+                $companyIds = Company::get(['id'])->pluck('id');
+            } else {
+                $companyIds = [$companyId];
+            }
             foreach ($companyIds as $value) {
-                yield new Request('GET', 'listing/test/set_company_status?id='.$value);
+                yield $value => new Request('GET', 'listing/test/set_company_status?id='.$value);
             }
         };
         $pool = new Pool($this->client, $requests(), [
-            //            'concurrency' => 5,
+            'concurrency' => 5,
             'fulfilled' => function ($response) {
                 dump(json_decode($response->getBody()->getContents()));
             },
