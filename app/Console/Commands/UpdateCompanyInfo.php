@@ -71,10 +71,10 @@ class UpdateCompanyInfo extends Command
         $pool = new Pool($this->client, $requests(), [
             'concurrency' => 5,
             'fulfilled' => function ($response) {
-                dump(json_decode($response->getBody()->getContents()));
+                dump($response->getBody()->getContents());
             },
             'rejected' => function ($reason) {
-                echo $reason->getMessage(), PHP_EOL;
+                dump($reason->getMessage());
             },
         ]);
         $pool->promise()->wait();
