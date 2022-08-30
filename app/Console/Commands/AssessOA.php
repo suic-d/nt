@@ -185,6 +185,12 @@ class AssessOA extends Command
         };
         (new Pool($client, $requests(), [
             'concurrency' => 5,
+            'fulfilled' => function ($response) {
+                dump($response->getBody()->getContents());
+            },
+            'rejected' => function ($exception) {
+                dump($exception->getMessage());
+            },
         ]))->promise()->wait();
 
         // 获取员工详情
@@ -196,6 +202,12 @@ class AssessOA extends Command
         };
         (new Pool($client, $requests(), [
             'concurrency' => 5,
+            'fulfilled' => function ($response) {
+                dump($response->getBody()->getContents());
+            },
+            'rejected' => function ($exception) {
+                dump($exception->getMessage());
+            },
         ]))->promise()->wait();
 
         // 拉取店铺信息
@@ -207,6 +219,12 @@ class AssessOA extends Command
         };
         (new Pool($client, $requests(), [
             'concurrency' => 5,
+            'fulfilled' => function ($response) {
+                dump($response->getBody()->getContents());
+            },
+            'rejected' => function ($exception) {
+                dump($exception->getMessage());
+            },
         ]))->promise()->wait();
 
         // 测评用户
