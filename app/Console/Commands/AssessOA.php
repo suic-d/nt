@@ -79,17 +79,13 @@ class AssessOA extends Command
      */
     public function syncDeptUser($deptId = null)
     {
-        $requests = function () use ($deptId) {
-            if (is_null($deptId)) {
-                $deptIdArr = DeptList::get(['dept_id'])->pluck('dept_id');
-            } else {
-                $deptIdArr = [$deptId];
-            }
+        $requests = function ($deptId) {
+            $deptIdArr = !is_null($deptId) ? [$deptId] : DeptList::get(['dept_id'])->pluck('dept_id');
             foreach ($deptIdArr as $value) {
                 yield $value => new Request('GET', 'index.php/oaapi/oaapi/deptUser?id='.$value);
             }
         };
-        $pool = new Pool($this->client, $requests(), [
+        $pool = new Pool($this->client, $requests($deptId), [
             'concurrency' => 5,
             'fulfilled' => function ($response) {
                 echo $response->getBody()->getContents(), PHP_EOL;
@@ -108,17 +104,16 @@ class AssessOA extends Command
      */
     public function syncStaffDetail($staffId = null)
     {
-        $requests = function () use ($staffId) {
-            if (is_null($staffId)) {
-                $staffIdArr = StaffList::where('is_dimission', 1)->get(['staff_id'])->pluck('staff_id');
-            } else {
-                $staffIdArr = [$staffId];
-            }
+        $requests = function ($staffId) {
+            $staffIdArr = !is_null($staffId) ? [$staffId] : StaffList::where('is_dimission', 1)
+                ->get(['staff_id'])
+                ->pluck('staff_id')
+            ;
             foreach ($staffIdArr as $value) {
                 yield $value => new Request('GET', 'index.php/oaapi/oaapi/staffDetail?id='.$value);
             }
         };
-        $pool = new Pool($this->client, $requests(), [
+        $pool = new Pool($this->client, $requests($staffId), [
             'concurrency' => 5,
             'fulfilled' => function ($response) {
                 echo $response->getBody()->getContents(), PHP_EOL;
