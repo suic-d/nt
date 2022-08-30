@@ -105,7 +105,7 @@ class OACommand extends Command
                 $deptIdArr = [$deptId];
             }
             foreach ($deptIdArr as $value) {
-                yield new $value() => new Request('GET', 'index.php/oaapi/oaapi/deptUser?id='.$value);
+                yield $value => new Request('GET', 'index.php/oaapi/oaapi/deptUser?id='.$value);
             }
         };
         $pool = new Pool($this->client, $requests(), [
