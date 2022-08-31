@@ -6,7 +6,6 @@ use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
-use Throwable;
 
 class DingApproval
 {
@@ -208,7 +207,7 @@ class DingApproval
                     return true;
                 }
             }
-        } catch (Throwable $exception) {
+        } catch (GuzzleException | Exception $exception) {
             $this->errorMessage = $exception->getMessage();
         }
 
