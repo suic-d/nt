@@ -200,7 +200,7 @@ class DingApproval
             if (200 == $response->getStatusCode()) {
                 $json = json_decode($response->getBody()->getContents(), true);
                 $this->errorMessage = $json['errmsg'];
-                if (0 === $json['errcode']) {
+                if (0 == $json['errcode']) {
                     $this->processStatus = $json['process_instance']['status'];
                     $this->processResult = $json['process_instance']['result'];
                     $this->operationRecords = $json['process_instance']['operation_records'];
