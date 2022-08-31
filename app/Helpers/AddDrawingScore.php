@@ -67,18 +67,21 @@ class AddDrawingScore extends ReviewAbstract
             return;
         }
 
+        $records = [];
         foreach ($operationRecords as $item) {
-            if (!self::executeTaskNormal($item->operation_type)) {
-                continue;
+            if (self::executeTaskNormal($item->operation_type)) {
+                $records[] = $item;
             }
+        }
 
-            if ($review->op_reviewer_id == $item->userid) {
-                $this->opReview($review, $item);
-            } elseif ($review->dev_reviewer_id == $item->userid) {
-                $this->devReview($review, $item);
-            } elseif ($review->design_reviewer_id == $item->userid) {
-                $this->designReview($review, $item);
-            }
+        if (isset($records[0])) {
+            $this->opReview($review, $records[0]);
+        }
+        if (isset($records[1])) {
+            $this->devReview($review, $records[1]);
+        }
+        if (isset($records[2])) {
+            $this->designReview($review, $records[2]);
         }
     }
 

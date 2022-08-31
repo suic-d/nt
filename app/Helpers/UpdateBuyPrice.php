@@ -55,9 +55,10 @@ class UpdateBuyPrice extends ReviewAbstract
             return;
         }
 
+        $records = [];
         foreach ($operationRecords as $item) {
-            if (!self::executeTaskNormal($item->operation_type)) {
-                continue;
+            if (self::executeTaskNormal($item->operation_type)) {
+                $records[] = $item;
             }
 
             if ($review->devd_id == $item->userid) {
@@ -67,6 +68,16 @@ class UpdateBuyPrice extends ReviewAbstract
             } elseif ($review->opd_id == $item->userid) {
                 $this->opdReview($review, $item);
             }
+        }
+
+        if (isset($records[0])) {
+            $this->devdReview($review, $records[0]);
+        }
+        if (isset($records[1])) {
+            $this->oplReview($review, $records[1]);
+        }
+        if (isset($records[2])) {
+            $this->opdReview($review, $records[2]);
         }
     }
 

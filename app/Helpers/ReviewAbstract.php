@@ -19,7 +19,9 @@ abstract class ReviewAbstract
      */
     public static function executeTaskNormal($opType)
     {
-        return 'EXECUTE_TASK_NORMAL' == strtoupper($opType);
+        $opType = strtoupper($opType);
+
+        return 'EXECUTE_TASK_NORMAL' === $opType || 'EXECUTE_TASK_AGENT' === $opType;
     }
 
     /**
@@ -482,14 +484,15 @@ abstract class ReviewAbstract
             return;
         }
 
+        $records = [];
         foreach ($operationRecords as $item) {
-            if (!self::executeTaskNormal($item->operation_type)) {
-                continue;
+            if (self::executeTaskNormal($item->operation_type)) {
+                $records[] = $item;
             }
+        }
 
-            if ($review->dev_reviewer_id == $item->userid) {
-                $this->devReview($review, $item);
-            }
+        if (isset($records[0])) {
+            $this->devReview($review, $records[0]);
         }
     }
 
