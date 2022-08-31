@@ -26,6 +26,12 @@ class DingApproval
     // 审批状态，取消
     const PROCESS_STATUS_CANCELED = 'CANCELED';
 
+    const START = 'START';
+
+    const FINISH = 'FINISH';
+
+    const START_FINISH = 'START_FINISH';
+
     /**
      * 审批结果：同意.
      *
