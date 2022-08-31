@@ -228,13 +228,13 @@ abstract class ReviewAbstract
             return;
         }
 
-        $review->dev_review_time = date('Y-m-d H:i:s', strtotime($record->date));
+        $review->dev_review_time = date('Y-m-d H:i:s', strtotime($record['date']));
         $review->save();
 
-        if (self::agreed($record->operation_result)) {
+        if (self::agreed($record['operation_result'])) {
             $this->devPass($review);
-        } elseif (self::refused($record->operation_result)) {
-            $this->devReject($review, $record->remark ?? '');
+        } elseif (self::refused($record['operation_result'])) {
+            $this->devReject($review, $record['remark'] ?? '');
         }
     }
 
@@ -272,11 +272,13 @@ abstract class ReviewAbstract
             return;
         }
 
-        $review->op_review_time = date('Y-m-d H:i:s', strtotime($record->date));
-        if (self::agreed($record->operation_result)) {
+        $review->op_review_time = date('Y-m-d H:i:s', strtotime($record['date']));
+        $review->save();
+
+        if (self::agreed($record['operation_result'])) {
             $this->opPass($review);
-        } elseif (self::refused($record->operation_result)) {
-            $this->opReject($review, $record->remark ?? '');
+        } elseif (self::refused($record['operation_result'])) {
+            $this->opReject($review, $record['remark'] ?? '');
         }
     }
 
@@ -314,13 +316,13 @@ abstract class ReviewAbstract
             return;
         }
 
-        $review->design_review_time = date('Y-m-d H:i:s', strtotime($record->date));
+        $review->design_review_time = date('Y-m-d H:i:s', strtotime($record['date']));
         $review->save();
 
-        if (self::agreed($record->operation_result)) {
+        if (self::agreed($record['operation_result'])) {
             $this->designPass($review);
-        } elseif (self::refused($record->operation_result)) {
-            $this->designReject($review, $record->remark ?? '');
+        } elseif (self::refused($record['operation_result'])) {
+            $this->designReject($review, $record['remark'] ?? '');
         }
     }
 
@@ -358,13 +360,13 @@ abstract class ReviewAbstract
             return;
         }
 
-        $review->devd_review_time = date('Y-m-d H:i:s', strtotime($record->date));
+        $review->devd_review_time = date('Y-m-d H:i:s', strtotime($record['date']));
         $review->save();
 
-        if (self::agreed($record->operation_result)) {
+        if (self::agreed($record['operation_result'])) {
             $this->devdPass($review);
-        } elseif (self::refused($record->operation_result)) {
-            $this->devdReject($review, $record->remark ?? '');
+        } elseif (self::refused($record['operation_result'])) {
+            $this->devdReject($review, $record['remark'] ?? '');
         }
     }
 
@@ -402,13 +404,13 @@ abstract class ReviewAbstract
             return;
         }
 
-        $review->opl_review_time = date('Y-m-d H:i:s', strtotime($record->date));
+        $review->opl_review_time = date('Y-m-d H:i:s', strtotime($record['date']));
         $review->save();
 
-        if (self::agreed($record->operation_result)) {
+        if (self::agreed($record['operation_result'])) {
             $this->oplPass($review);
-        } elseif (self::refused($record->operation_result)) {
-            $this->oplReject($review, $record->remark ?? '');
+        } elseif (self::refused($record['operation_result'])) {
+            $this->oplReject($review, $record['remark'] ?? '');
         }
     }
 
@@ -446,13 +448,13 @@ abstract class ReviewAbstract
             return;
         }
 
-        $review->opd_review_time = date('Y-m-d H:i:s', strtotime($record->date));
+        $review->opd_review_time = date('Y-m-d H:i:s', strtotime($record['date']));
         $review->save();
 
-        if (self::agreed($record->operation_result)) {
+        if (self::agreed($record['operation_result'])) {
             $this->opdPass($review);
-        } elseif (self::refused($record->operation_result)) {
-            $this->opdReject($review, $record->remark ?? '');
+        } elseif (self::refused($record['operation_result'])) {
+            $this->opdReject($review, $record['remark'] ?? '');
         }
     }
 
@@ -492,7 +494,7 @@ abstract class ReviewAbstract
 
         $records = [];
         foreach ($operationRecords as $item) {
-            if (self::executeTaskNormal($item->operation_type)) {
+            if (self::executeTaskNormal($item['operation_type'])) {
                 $records[] = $item;
             }
         }

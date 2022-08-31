@@ -57,16 +57,8 @@ class UpdateBuyPrice extends ReviewAbstract
 
         $records = [];
         foreach ($operationRecords as $item) {
-            if (self::executeTaskNormal($item->operation_type)) {
+            if (self::executeTaskNormal($item['operation_type'])) {
                 $records[] = $item;
-            }
-
-            if ($review->devd_id == $item->userid) {
-                $this->devdReview($review, $item);
-            } elseif ($review->opl_id == $item->userid) {
-                $this->oplReview($review, $item);
-            } elseif ($review->opd_id == $item->userid) {
-                $this->opdReview($review, $item);
             }
         }
 

@@ -198,12 +198,12 @@ class DingApproval
                 RequestOptions::BODY => json_encode(['process_instance_id' => $processInstanceId]),
             ]);
             if (200 == $response->getStatusCode()) {
-                $json = json_decode($response->getBody()->getContents());
-                $this->errorMessage = $json->errmsg;
-                if (0 === $json->errcode) {
-                    $this->processStatus = $json->process_instance->status;
-                    $this->processResult = $json->process_instance->result;
-                    $this->operationRecords = $json->process_instance->operation_records;
+                $json = json_decode($response->getBody()->getContents(), true);
+                $this->errorMessage = $json['errmsg'];
+                if (0 === $json['errcode']) {
+                    $this->processStatus = $json['process_instance']['status'];
+                    $this->processResult = $json['process_instance']['result'];
+                    $this->operationRecords = $json['process_instance']['operation_records'];
 
                     return true;
                 }

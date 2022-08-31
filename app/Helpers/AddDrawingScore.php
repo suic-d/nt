@@ -69,7 +69,7 @@ class AddDrawingScore extends ReviewAbstract
 
         $records = [];
         foreach ($operationRecords as $item) {
-            if (self::executeTaskNormal($item->operation_type)) {
+            if (self::executeTaskNormal($item['operation_type'])) {
                 $records[] = $item;
             }
         }
