@@ -2,7 +2,9 @@
 
 namespace App\Helpers;
 
+use Exception;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use Throwable;
 
@@ -106,20 +108,6 @@ class DingApproval
      */
     private $errorMessage;
 
-    /**
-     * 抄送人.
-     *
-     * @var string
-     */
-    private $ccList;
-
-    /**
-     * 在什么节点抄送给抄送人.
-     *
-     * @var string
-     */
-    private $ccPosition;
-
     public function __construct($processCode = null)
     {
         if (!is_null($processCode)) {
@@ -132,28 +120,46 @@ class DingApproval
     /**
      * 发起审批实例.
      *
-     * @param string $originatorUserId
-     * @param string $deptId
-     * @param array  $approvers
-     * @param array  $formComponentValues
+     * @param $config
      *
      * @return bool
      */
-    public function createProcessInstance($originatorUserId, $deptId, $approvers, $formComponentValues)
+    public function createProcessInstance($config)
     {
+        $rules = [
+            'originator_user_id' => 'required|string',
+            'dept_id' => 'required|integer',
+            'approvers' => 'required|string',
+            'form_component_values' => 'required|array',
+            'cc_list' => 'nullable|string',
+            'cc_position' => 'nullable|string',
+        ];
+        $customAttributes = [
+            'originator_user_id' => '审批实例发起人',
+            'dept_id' => '发起人所在的部门',
+            'approvers' => '审批人列表',
+            'form_component_values' => '审批流表单',
+            'cc_list' => '抄送人',
+            'cc_position' => '抄送节点',
+        ];
+        $validator = validator($config, $rules, [], $customAttributes);
+        if ($validator->fails()) {
+            throw new Exception($validator->errors()->first());
+        }
+
         $body = [
             'agent_id' => $this->agentId,
             'process_code' => $this->processCode,
-            'originator_user_id' => $originatorUserId,
-            'dept_id' => $deptId,
-            'approvers' => join(',', $approvers),
-            'form_component_values' => $formComponentValues,
+            'originator_user_id' => $config['originator_user_id'],
+            'dept_id' => $config['dept_id'],
+            'approvers' => $config['approvers'],
+            'form_component_values' => $config['form_component_values'],
         ];
-        if (!empty($this->ccList)) {
-            $body['cc_list'] = $this->ccList;
+        if (isset($config['cc_list'])) {
+            $body['cc_list'] = $config['cc_list'];
         }
-        if (!empty($this->ccPosition)) {
-            $body['cc_position'] = $this->ccPosition;
+        if (isset($config['cc_position'])) {
+            $body['cc_position'] = $config['cc_position'];
         }
 
         try {
@@ -162,15 +168,15 @@ class DingApproval
                 RequestOptions::JSON => $body,
             ]);
             if (200 == $response->getStatusCode()) {
-                $json = json_decode($response->getBody()->getContents());
-                $this->errorMessage = $json->errmsg;
-                if (0 === $json->errcode) {
-                    $this->processInstanceId = $json->process_instance_id;
+                $json = json_decode($response->getBody()->getContents(), true);
+                $this->errorMessage = $json['errmsg'];
+                if (0 == $json['errcode']) {
+                    $this->processInstanceId = $json['process_instance_id'];
 
                     return true;
                 }
             }
-        } catch (Throwable $exception) {
+        } catch (GuzzleException | Exception $exception) {
             $this->errorMessage = $exception->getMessage();
         }
 
@@ -257,21 +263,5 @@ class DingApproval
     public function getOperationRecords()
     {
         return $this->operationRecords;
-    }
-
-    /**
-     * @param string $ccList
-     */
-    public function setCCList($ccList)
-    {
-        $this->ccList = $ccList;
-    }
-
-    /**
-     * @param string $ccPosition
-     */
-    public function setCCPosition($ccPosition)
-    {
-        $this->ccPosition = strtoupper($ccPosition);
     }
 }
