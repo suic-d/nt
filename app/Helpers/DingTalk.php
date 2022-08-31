@@ -43,8 +43,8 @@ class DingTalk
         try {
             $response = $this->client->request('POST', $this->url, [RequestOptions::FORM_PARAMS => $params]);
             if (200 == $response->getStatusCode()) {
-                $json = json_decode($response->getBody()->getContents());
-                if (isset($json->code) && '0' == $json->code) {
+                $json = json_decode($response->getBody()->getContents(), true);
+                if (isset($json['code']) && '0' == $json['code']) {
                     $success = true;
                 }
             }

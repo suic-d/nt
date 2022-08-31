@@ -130,7 +130,7 @@ abstract class PublishAbstract
             $toNtEbayApi = new ToNtEbayApi();
             $toNtEbayApi->post_data = substr(json_encode($postData, JSON_UNESCAPED_UNICODE), 0, 60000);
             $toNtEbayApi->return_msg = json_encode(
-                json_decode($response->getBody()->getContents()),
+                json_decode($response->getBody()->getContents(), true),
                 JSON_UNESCAPED_UNICODE
             );
             $toNtEbayApi->http_code = $response->getStatusCode();

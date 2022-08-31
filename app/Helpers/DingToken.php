@@ -80,9 +80,9 @@ class DingToken
                 ],
             ]);
             if (200 == $response->getStatusCode()) {
-                $json = json_decode($response->getBody()->getContents());
-                if (0 === $json->errcode) {
-                    $this->accessToken = $json->access_token;
+                $json = json_decode($response->getBody()->getContents(), true);
+                if (0 === $json['errcode']) {
+                    $this->accessToken = $json['access_token'];
 
                     return true;
                 }
