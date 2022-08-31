@@ -7,6 +7,14 @@ use App\Models\SkuReview;
 
 abstract class ReviewAbstract
 {
+    const EXECUTE_TASK_NORMAL = 'EXECUTE_TASK_NORMAL';
+
+    const EXECUTE_TASK_AGENT = 'EXECUTE_TASK_AGENT';
+
+    const AGREE = 'AGREE';
+
+    const REFUSE = 'REFUSE';
+
     /**
      * @param SkuReview $review
      */
@@ -19,9 +27,7 @@ abstract class ReviewAbstract
      */
     public static function executeTaskNormal($opType)
     {
-        $opType = strtoupper($opType);
-
-        return 'EXECUTE_TASK_NORMAL' === $opType || 'EXECUTE_TASK_AGENT' === $opType;
+        return self::EXECUTE_TASK_NORMAL === strtoupper($opType) || self::EXECUTE_TASK_AGENT === strtoupper($opType);
     }
 
     /**
@@ -31,7 +37,7 @@ abstract class ReviewAbstract
      */
     public static function agreed($opResult)
     {
-        return 'AGREE' == strtoupper($opResult);
+        return self::AGREE === strtoupper($opResult);
     }
 
     /**
@@ -41,7 +47,7 @@ abstract class ReviewAbstract
      */
     public static function refused($opResult)
     {
-        return 'REFUSE' == strtoupper($opResult);
+        return self::REFUSE === strtoupper($opResult);
     }
 
     /**
