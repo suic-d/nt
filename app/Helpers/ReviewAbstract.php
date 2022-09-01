@@ -224,7 +224,7 @@ abstract class ReviewAbstract
      */
     protected function devReview(SkuReview $review, $record)
     {
-        if (3 != $review->status) {
+        if (SkuReview::OP_AGREE != $review->status) {
             return;
         }
 
@@ -244,7 +244,7 @@ abstract class ReviewAbstract
      */
     protected function devReject(SkuReview $review, $reason)
     {
-        $review->status = 4;
+        $review->status = SkuReview::DEV_REFUSE;
         $review->dev_reject_reason = $reason;
         $review->save();
 
@@ -256,7 +256,7 @@ abstract class ReviewAbstract
      */
     protected function devPass(SkuReview $review)
     {
-        $review->status = 7;
+        $review->status = SkuReview::DESIGN_AGREE;
         $review->save();
 
         $this->devPassLog($review);
@@ -268,7 +268,7 @@ abstract class ReviewAbstract
      */
     protected function opReview(SkuReview $review, $record)
     {
-        if (1 != $review->status) {
+        if (SkuReview::OP_RUNNING != $review->status) {
             return;
         }
 
@@ -287,7 +287,7 @@ abstract class ReviewAbstract
      */
     protected function opPass(SkuReview $review)
     {
-        $review->status = 3;
+        $review->status = SkuReview::OP_AGREE;
         $review->save();
 
         $this->opPassLog($review);
@@ -299,7 +299,7 @@ abstract class ReviewAbstract
      */
     protected function opReject(SkuReview $review, $reason)
     {
-        $review->stataus = 2;
+        $review->status = SkuReview::OP_REFUSE;
         $review->op_reject_reason = $reason;
         $review->save();
 
@@ -312,7 +312,7 @@ abstract class ReviewAbstract
      */
     protected function designReview(SkuReview $review, $record)
     {
-        if (5 != $review->status) {
+        if (SkuReview::DEV_AGREE != $review->status) {
             return;
         }
 
@@ -332,7 +332,7 @@ abstract class ReviewAbstract
      */
     protected function designReject(SkuReview $review, $reason)
     {
-        $review->status = 6;
+        $review->status = SkuReview::DESIGN_REFUSE;
         $review->design_reject_reason = $reason;
         $review->save();
 
@@ -344,7 +344,7 @@ abstract class ReviewAbstract
      */
     protected function designPass(SkuReview $review)
     {
-        $review->status = 7;
+        $review->status = SkuReview::DESIGN_AGREE;
         $review->save();
 
         $this->designPassLog($review);
@@ -356,7 +356,7 @@ abstract class ReviewAbstract
      */
     protected function devdReview(SkuReview $review, $record)
     {
-        if (8 != $review->status) {
+        if (SkuReview::DEVD_RUNNING != $review->status) {
             return;
         }
 
@@ -376,7 +376,7 @@ abstract class ReviewAbstract
      */
     protected function devdReject(SkuReview $review, $reason)
     {
-        $review->status = 9;
+        $review->status = SkuReview::DEVD_REFUSE;
         $review->devd_reject_reason = $reason;
         $review->save();
 
@@ -388,7 +388,7 @@ abstract class ReviewAbstract
      */
     protected function devdPass(SkuReview $review)
     {
-        $review->status = 10;
+        $review->status = SkuReview::DEVD_AGREE;
         $review->save();
 
         $this->devdPassLog($review);
@@ -400,7 +400,7 @@ abstract class ReviewAbstract
      */
     protected function oplReview(SkuReview $review, $record)
     {
-        if (10 != $review->status) {
+        if (SkuReview::DEVD_AGREE != $review->status) {
             return;
         }
 
@@ -420,7 +420,7 @@ abstract class ReviewAbstract
      */
     protected function oplReject(SkuReview $review, $reason)
     {
-        $review->status = 11;
+        $review->status = SkuReview::OPL_REFUSE;
         $review->opl_reject_reason = $reason;
         $review->save();
 
@@ -432,7 +432,7 @@ abstract class ReviewAbstract
      */
     protected function oplPass(SkuReview $review)
     {
-        $review->status = 12;
+        $review->status = SkuReview::OPL_AGREE;
         $review->save();
 
         $this->oplPassLog($review);
@@ -444,7 +444,7 @@ abstract class ReviewAbstract
      */
     protected function opdReview(SkuReview $review, $record)
     {
-        if (12 != $review->status) {
+        if (SkuReview::OPL_AGREE != $review->status) {
             return;
         }
 
@@ -464,7 +464,7 @@ abstract class ReviewAbstract
      */
     protected function opdReject(SkuReview $review, $reason)
     {
-        $review->status = 13;
+        $review->status = SkuReview::OPD_REFUSE;
         $review->opd_reject_reason = $reason;
         $review->save();
 
@@ -476,7 +476,7 @@ abstract class ReviewAbstract
      */
     protected function opdPass(SkuReview $review)
     {
-        $review->status = 14;
+        $review->status = SkuReview::OPD_AGREE;
         $review->save();
 
         $this->opdPassLog($review);

@@ -51,7 +51,7 @@ class AddDrawingScore extends ReviewAbstract
      */
     protected function devPass(SkuReview $review)
     {
-        $review->status = 5;
+        $review->status = SkuReview::DEV_AGREE;
         $review->save();
 
         $this->devPassLog($review);
