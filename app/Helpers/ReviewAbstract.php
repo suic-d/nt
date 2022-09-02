@@ -18,7 +18,7 @@ abstract class ReviewAbstract
     /**
      * @param SkuReview $review
      */
-    abstract public function handle(SkuReview $review);
+    abstract public function handle($review);
 
     /**
      * @param string $opType
@@ -53,7 +53,7 @@ abstract class ReviewAbstract
     /**
      * @param SkuReview $review
      */
-    protected function devPassLog(SkuReview $review)
+    protected function devPassLog($review)
     {
         $log = new ReviewLog();
         $log->review_id = $review->id;
@@ -67,7 +67,7 @@ abstract class ReviewAbstract
     /**
      * @param SkuReview $review
      */
-    protected function devRejectLog(SkuReview $review)
+    protected function devRejectLog($review)
     {
         $log = new ReviewLog();
         $log->review_id = $review->id;
@@ -81,7 +81,7 @@ abstract class ReviewAbstract
     /**
      * @param SkuReview $review
      */
-    protected function opPassLog(SkuReview $review)
+    protected function opPassLog($review)
     {
         $log = new ReviewLog();
         $log->review_id = $review->id;
@@ -95,7 +95,7 @@ abstract class ReviewAbstract
     /**
      * @param SkuReview $review
      */
-    protected function opRejectLog(SkuReview $review)
+    protected function opRejectLog($review)
     {
         $log = new ReviewLog();
         $log->review_id = $review->id;
@@ -109,7 +109,7 @@ abstract class ReviewAbstract
     /**
      * @param SkuReview $review
      */
-    protected function designPassLog(SkuReview $review)
+    protected function designPassLog($review)
     {
         $log = new ReviewLog();
         $log->review_id = $review->id;
@@ -123,7 +123,7 @@ abstract class ReviewAbstract
     /**
      * @param SkuReview $review
      */
-    protected function designRejectLog(SkuReview $review)
+    protected function designRejectLog($review)
     {
         $log = new ReviewLog();
         $log->review_id = $review->id;
@@ -137,7 +137,7 @@ abstract class ReviewAbstract
     /**
      * @param SkuReview $review
      */
-    protected function devdPassLog(SkuReview $review)
+    protected function devdPassLog($review)
     {
         $log = new ReviewLog();
         $log->review_id = $review->id;
@@ -151,7 +151,7 @@ abstract class ReviewAbstract
     /**
      * @param SkuReview $review
      */
-    protected function devdRejectLog(SkuReview $review)
+    protected function devdRejectLog($review)
     {
         $log = new ReviewLog();
         $log->review_id = $review->id;
@@ -165,7 +165,7 @@ abstract class ReviewAbstract
     /**
      * @param SkuReview $review
      */
-    protected function oplPassLog(SkuReview $review)
+    protected function oplPassLog($review)
     {
         $log = new ReviewLog();
         $log->review_id = $review->id;
@@ -179,7 +179,7 @@ abstract class ReviewAbstract
     /**
      * @param SkuReview $review
      */
-    protected function oplRejectLog(SkuReview $review)
+    protected function oplRejectLog($review)
     {
         $log = new ReviewLog();
         $log->review_id = $review->id;
@@ -193,7 +193,7 @@ abstract class ReviewAbstract
     /**
      * @param SkuReview $review
      */
-    protected function opdPassLog(SkuReview $review)
+    protected function opdPassLog($review)
     {
         $log = new ReviewLog();
         $log->review_id = $review->id;
@@ -207,7 +207,7 @@ abstract class ReviewAbstract
     /**
      * @param SkuReview $review
      */
-    protected function opdRejectLog(SkuReview $review)
+    protected function opdRejectLog($review)
     {
         $log = new ReviewLog();
         $log->review_id = $review->id;
@@ -222,19 +222,17 @@ abstract class ReviewAbstract
      * @param SkuReview $review
      * @param object    $record
      */
-    protected function devReview(SkuReview $review, $record)
+    protected function devReview($review, $record)
     {
-        if (SkuReview::OP_AGREE != $review->status) {
-            return;
-        }
+        if (SkuReview::OP_AGREE == $review->status) {
+            $review->dev_review_time = date('Y-m-d H:i:s', strtotime($record['date']));
+            $review->save();
 
-        $review->dev_review_time = date('Y-m-d H:i:s', strtotime($record['date']));
-        $review->save();
-
-        if (self::agreed($record['operation_result'])) {
-            $this->devPass($review);
-        } elseif (self::refused($record['operation_result'])) {
-            $this->devReject($review, $record['remark'] ?? '');
+            if (self::agreed($record['operation_result'])) {
+                $this->devPass($review);
+            } elseif (self::refused($record['operation_result'])) {
+                $this->devReject($review, $record['remark'] ?? '');
+            }
         }
     }
 
@@ -242,7 +240,7 @@ abstract class ReviewAbstract
      * @param SkuReview $review
      * @param string    $reason
      */
-    protected function devReject(SkuReview $review, $reason)
+    protected function devReject($review, $reason)
     {
         $review->status = SkuReview::DEV_REFUSE;
         $review->dev_reject_reason = $reason;
@@ -254,7 +252,7 @@ abstract class ReviewAbstract
     /**
      * @param SkuReview $review
      */
-    protected function devPass(SkuReview $review)
+    protected function devPass($review)
     {
         $review->status = SkuReview::DESIGN_AGREE;
         $review->save();
@@ -266,26 +264,24 @@ abstract class ReviewAbstract
      * @param SkuReview $review
      * @param object    $record
      */
-    protected function opReview(SkuReview $review, $record)
+    protected function opReview($review, $record)
     {
-        if (SkuReview::OP_RUNNING != $review->status) {
-            return;
-        }
+        if (SkuReview::OP_RUNNING == $review->status) {
+            $review->op_review_time = date('Y-m-d H:i:s', strtotime($record['date']));
+            $review->save();
 
-        $review->op_review_time = date('Y-m-d H:i:s', strtotime($record['date']));
-        $review->save();
-
-        if (self::agreed($record['operation_result'])) {
-            $this->opPass($review);
-        } elseif (self::refused($record['operation_result'])) {
-            $this->opReject($review, $record['remark'] ?? '');
+            if (self::agreed($record['operation_result'])) {
+                $this->opPass($review);
+            } elseif (self::refused($record['operation_result'])) {
+                $this->opReject($review, $record['remark'] ?? '');
+            }
         }
     }
 
     /**
      * @param SkuReview $review
      */
-    protected function opPass(SkuReview $review)
+    protected function opPass($review)
     {
         $review->status = SkuReview::OP_AGREE;
         $review->save();
@@ -297,7 +293,7 @@ abstract class ReviewAbstract
      * @param SkuReview $review
      * @param string    $reason
      */
-    protected function opReject(SkuReview $review, $reason)
+    protected function opReject($review, $reason)
     {
         $review->status = SkuReview::OP_REFUSE;
         $review->op_reject_reason = $reason;
@@ -310,19 +306,17 @@ abstract class ReviewAbstract
      * @param SkuReview $review
      * @param object    $record
      */
-    protected function designReview(SkuReview $review, $record)
+    protected function designReview($review, $record)
     {
-        if (SkuReview::DEV_AGREE != $review->status) {
-            return;
-        }
+        if (SkuReview::DEV_AGREE == $review->status) {
+            $review->design_review_time = date('Y-m-d H:i:s', strtotime($record['date']));
+            $review->save();
 
-        $review->design_review_time = date('Y-m-d H:i:s', strtotime($record['date']));
-        $review->save();
-
-        if (self::agreed($record['operation_result'])) {
-            $this->designPass($review);
-        } elseif (self::refused($record['operation_result'])) {
-            $this->designReject($review, $record['remark'] ?? '');
+            if (self::agreed($record['operation_result'])) {
+                $this->designPass($review);
+            } elseif (self::refused($record['operation_result'])) {
+                $this->designReject($review, $record['remark'] ?? '');
+            }
         }
     }
 
@@ -330,7 +324,7 @@ abstract class ReviewAbstract
      * @param SkuReview $review
      * @param string    $reason
      */
-    protected function designReject(SkuReview $review, $reason)
+    protected function designReject($review, $reason)
     {
         $review->status = SkuReview::DESIGN_REFUSE;
         $review->design_reject_reason = $reason;
@@ -342,7 +336,7 @@ abstract class ReviewAbstract
     /**
      * @param SkuReview $review
      */
-    protected function designPass(SkuReview $review)
+    protected function designPass($review)
     {
         $review->status = SkuReview::DESIGN_AGREE;
         $review->save();
@@ -354,19 +348,17 @@ abstract class ReviewAbstract
      * @param SkuReview $review
      * @param object    $record
      */
-    protected function devdReview(SkuReview $review, $record)
+    protected function devdReview($review, $record)
     {
-        if (SkuReview::DEVD_RUNNING != $review->status) {
-            return;
-        }
+        if (SkuReview::DEVD_RUNNING == $review->status) {
+            $review->devd_review_time = date('Y-m-d H:i:s', strtotime($record['date']));
+            $review->save();
 
-        $review->devd_review_time = date('Y-m-d H:i:s', strtotime($record['date']));
-        $review->save();
-
-        if (self::agreed($record['operation_result'])) {
-            $this->devdPass($review);
-        } elseif (self::refused($record['operation_result'])) {
-            $this->devdReject($review, $record['remark'] ?? '');
+            if (self::agreed($record['operation_result'])) {
+                $this->devdPass($review);
+            } elseif (self::refused($record['operation_result'])) {
+                $this->devdReject($review, $record['remark'] ?? '');
+            }
         }
     }
 
@@ -374,7 +366,7 @@ abstract class ReviewAbstract
      * @param SkuReview $review
      * @param string    $reason
      */
-    protected function devdReject(SkuReview $review, $reason)
+    protected function devdReject($review, $reason)
     {
         $review->status = SkuReview::DEVD_REFUSE;
         $review->devd_reject_reason = $reason;
@@ -386,7 +378,7 @@ abstract class ReviewAbstract
     /**
      * @param SkuReview $review
      */
-    protected function devdPass(SkuReview $review)
+    protected function devdPass($review)
     {
         $review->status = SkuReview::DEVD_AGREE;
         $review->save();
@@ -398,19 +390,17 @@ abstract class ReviewAbstract
      * @param SkuReview $review
      * @param object    $record
      */
-    protected function oplReview(SkuReview $review, $record)
+    protected function oplReview($review, $record)
     {
-        if (SkuReview::DEVD_AGREE != $review->status) {
-            return;
-        }
+        if (SkuReview::DEVD_AGREE == $review->status) {
+            $review->opl_review_time = date('Y-m-d H:i:s', strtotime($record['date']));
+            $review->save();
 
-        $review->opl_review_time = date('Y-m-d H:i:s', strtotime($record['date']));
-        $review->save();
-
-        if (self::agreed($record['operation_result'])) {
-            $this->oplPass($review);
-        } elseif (self::refused($record['operation_result'])) {
-            $this->oplReject($review, $record['remark'] ?? '');
+            if (self::agreed($record['operation_result'])) {
+                $this->oplPass($review);
+            } elseif (self::refused($record['operation_result'])) {
+                $this->oplReject($review, $record['remark'] ?? '');
+            }
         }
     }
 
@@ -418,7 +408,7 @@ abstract class ReviewAbstract
      * @param SkuReview $review
      * @param string    $reason
      */
-    protected function oplReject(SkuReview $review, $reason)
+    protected function oplReject($review, $reason)
     {
         $review->status = SkuReview::OPL_REFUSE;
         $review->opl_reject_reason = $reason;
@@ -430,7 +420,7 @@ abstract class ReviewAbstract
     /**
      * @param SkuReview $review
      */
-    protected function oplPass(SkuReview $review)
+    protected function oplPass($review)
     {
         $review->status = SkuReview::OPL_AGREE;
         $review->save();
@@ -442,19 +432,17 @@ abstract class ReviewAbstract
      * @param SkuReview $review
      * @param object    $record
      */
-    protected function opdReview(SkuReview $review, $record)
+    protected function opdReview($review, $record)
     {
-        if (SkuReview::OPL_AGREE != $review->status) {
-            return;
-        }
+        if (SkuReview::OPL_AGREE == $review->status) {
+            $review->opd_review_time = date('Y-m-d H:i:s', strtotime($record['date']));
+            $review->save();
 
-        $review->opd_review_time = date('Y-m-d H:i:s', strtotime($record['date']));
-        $review->save();
-
-        if (self::agreed($record['operation_result'])) {
-            $this->opdPass($review);
-        } elseif (self::refused($record['operation_result'])) {
-            $this->opdReject($review, $record['remark'] ?? '');
+            if (self::agreed($record['operation_result'])) {
+                $this->opdPass($review);
+            } elseif (self::refused($record['operation_result'])) {
+                $this->opdReject($review, $record['remark'] ?? '');
+            }
         }
     }
 
@@ -462,7 +450,7 @@ abstract class ReviewAbstract
      * @param SkuReview $review
      * @param string    $reason
      */
-    protected function opdReject(SkuReview $review, $reason)
+    protected function opdReject($review, $reason)
     {
         $review->status = SkuReview::OPD_REFUSE;
         $review->opd_reject_reason = $reason;
@@ -474,7 +462,7 @@ abstract class ReviewAbstract
     /**
      * @param SkuReview $review
      */
-    protected function opdPass(SkuReview $review)
+    protected function opdPass($review)
     {
         $review->status = SkuReview::OPD_AGREE;
         $review->save();
@@ -486,28 +474,26 @@ abstract class ReviewAbstract
      * @param SkuReview $review
      * @param array     $operationRecords
      */
-    protected function reviewLog(SkuReview $review, $operationRecords)
+    protected function reviewLog($review, $operationRecords)
     {
-        if (empty($operationRecords)) {
-            return;
-        }
-
-        $records = [];
-        foreach ($operationRecords as $item) {
-            if (self::executeTaskNormal($item['operation_type'])) {
-                $records[] = $item;
+        if (!empty($operationRecords)) {
+            $records = [];
+            foreach ($operationRecords as $item) {
+                if (self::executeTaskNormal($item['operation_type'])) {
+                    $records[] = $item;
+                }
             }
-        }
 
-        if (isset($records[0])) {
-            $this->devReview($review, $records[0]);
+            if (isset($records[0])) {
+                $this->devReview($review, $records[0]);
+            }
         }
     }
 
     /**
      * @param SkuReview $review
      */
-    protected function pushAgreedMessage(SkuReview $review)
+    protected function pushAgreedMessage($review)
     {
         $message = sprintf('提交人你好，你在 %s 提交的sku信息修改审核已通过，请登录系统查看。', $review->create_time);
         (new DingTalk())->push('sku信息修改审核已通过', $message, $review->submitter_id);
@@ -516,7 +502,7 @@ abstract class ReviewAbstract
     /**
      * @param SkuReview $review
      */
-    protected function pushRefusedMessage(SkuReview $review)
+    protected function pushRefusedMessage($review)
     {
         $message = sprintf('提交人你好，你在 %s 提交的sku信息修改审核被驳回。', $review->create_time);
         (new DingTalk())->push('sku信息修改审核被驳回', $message, $review->submitter_id);

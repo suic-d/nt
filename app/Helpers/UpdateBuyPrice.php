@@ -14,34 +14,32 @@ class UpdateBuyPrice extends ReviewAbstract
      *
      * @throws \Throwable
      */
-    public function handle(SkuReview $review)
+    public function handle($review)
     {
         $instance = new DingApproval();
-        if (!$instance->getProcessInstance($review->process_instance_id)) {
-            return;
-        }
+        if ($instance->getProcessInstance($review->process_instance_id)) {
+            DB::beginTransaction();
 
-        DB::beginTransaction();
+            try {
+                $review->process_status = $instance->getProcessStatus();
+                $review->save();
 
-        try {
-            $review->process_status = $instance->getProcessStatus();
-            $review->save();
+                $this->reviewLog($review, $instance->getOperationRecords());
 
-            $this->reviewLog($review, $instance->getOperationRecords());
+                if ($instance->isAgree()) {
+                    $this->updateBuyPrice($review);
+                }
 
-            if ($instance->isAgree()) {
-                $this->updateBuyPrice($review);
+                DB::commit();
+            } catch (Exception $exception) {
+                DB::rollBack();
             }
 
-            DB::commit();
-        } catch (Exception $exception) {
-            DB::rollBack();
-        }
-
-        if ($instance->isAgree()) {
-            $this->pushAgreedMessage($review);
-        } elseif ($instance->isRefuse()) {
-            $this->pushRefusedMessage($review);
+            if ($instance->isAgree()) {
+                $this->pushAgreedMessage($review);
+            } elseif ($instance->isRefuse()) {
+                $this->pushRefusedMessage($review);
+            }
         }
     }
 
@@ -49,34 +47,32 @@ class UpdateBuyPrice extends ReviewAbstract
      * @param SkuReview $review
      * @param array     $operationRecords
      */
-    protected function reviewLog(SkuReview $review, $operationRecords)
+    protected function reviewLog($review, $operationRecords)
     {
-        if (empty($operationRecords)) {
-            return;
-        }
-
-        $records = [];
-        foreach ($operationRecords as $item) {
-            if (self::executeTaskNormal($item['operation_type'])) {
-                $records[] = $item;
+        if (!empty($operationRecords)) {
+            $records = [];
+            foreach ($operationRecords as $item) {
+                if (self::executeTaskNormal($item['operation_type'])) {
+                    $records[] = $item;
+                }
             }
-        }
 
-        if (isset($records[0])) {
-            $this->devdReview($review, $records[0]);
-        }
-        if (isset($records[1])) {
-            $this->oplReview($review, $records[1]);
-        }
-        if (isset($records[2])) {
-            $this->opdReview($review, $records[2]);
+            if (isset($records[0])) {
+                $this->devdReview($review, $records[0]);
+            }
+            if (isset($records[1])) {
+                $this->oplReview($review, $records[1]);
+            }
+            if (isset($records[2])) {
+                $this->opdReview($review, $records[2]);
+            }
         }
     }
 
     /**
      * @param SkuReview $review
      */
-    protected function pushAgreedMessage(SkuReview $review)
+    protected function pushAgreedMessage($review)
     {
         $message = sprintf(
             '%s 你好，你在 %s 提交的修改采购价申请已审核通过，请查收。',
@@ -89,7 +85,7 @@ class UpdateBuyPrice extends ReviewAbstract
     /**
      * @param SkuReview $review
      */
-    protected function pushRefusedMessage(SkuReview $review)
+    protected function pushRefusedMessage($review)
     {
         $message = sprintf('%s 你好，你在 %s 提交的修改采购价申请被驳回。', $review->submitter_name, $review->create_time);
         (new DingTalk())->push('修改采购价申请被驳回', $message, $review->submitter_id);
@@ -98,7 +94,7 @@ class UpdateBuyPrice extends ReviewAbstract
     /**
      * @param SkuReview $review
      */
-    private function updateBuyPrice(SkuReview $review)
+    private function updateBuyPrice($review)
     {
         $changes = json_decode($review->changes, true);
         if (isset($changes['buy_price'])) {
