@@ -58,7 +58,7 @@ class UpdateCompanyInfo extends Command
      */
     public function updateCompanyStatus($companyId = null)
     {
-        $requests = function () use ($companyId) {
+        $requests = function ($companyId) {
             if (is_null($companyId)) {
                 $companyIds = Company::get(['id'])->pluck('id');
             } else {
@@ -68,7 +68,7 @@ class UpdateCompanyInfo extends Command
                 yield $value => new Request('GET', 'listing/test/set_company_status?id='.$value);
             }
         };
-        $pool = new Pool($this->client, $requests(), [
+        $pool = new Pool($this->client, $requests($companyId), [
             'concurrency' => 5,
             'fulfilled' => function ($response) {
                 dump($response->getBody()->getContents());
