@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Assess\AssessFollowerDetail;
 use App\Models\Assess\AssessUserDetail;
 use App\Models\Assess\DeptList;
+use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
@@ -70,20 +71,24 @@ class AssessHelper extends Command
             $this->getLastChildren($item->dept_id, $cache);
         }
 
-        DeptList::whereIn('dept_id', $cache)->select()->each(function (DeptList $item) use ($userId) {
-            $assessUserDetail = AssessUserDetail::where('user_id', $userId)
-                ->where('dept_id', $item->dept_id)
-                ->first()
-            ;
-            if (!is_null($assessUserDetail)) {
-                return;
+        $depts = DeptList::whereIn('dept_id', $cache)->get();
+        if ($depts->isEmpty()) {
+            return;
+        }
+
+        $assessUserMap = AssessUserDetail::where('user_id', $userId)->get()->keyBy(function ($item) {
+            return $item->dept_id;
+        });
+        foreach ($depts as $d) {
+            if (isset($assessUserMap[$d->dept_id])) {
+                continue;
             }
 
             $assessUserDetail = new AssessUserDetail();
             $assessUserDetail->user_id = $userId;
-            $assessUserDetail->dept_id = $item->dept_id;
+            $assessUserDetail->dept_id = $d->dept_id;
             $assessUserDetail->save();
-        });
+        }
     }
 
     /**
@@ -91,29 +96,28 @@ class AssessHelper extends Command
      */
     public function assessAuth($userId)
     {
-        DB::connection('assess')
+        $followers = DB::connection('assess')
             ->table('assess_demand')
             ->distinct()
             ->get(['follower_id'])
-            ->each(function ($item) use ($userId) {
-                if (empty($item->follower_id)) {
-                    return;
-                }
-
-                $assessFollowerDetail = AssessFollowerDetail::where('user_id', $userId)
-                    ->where('staff_id', $item->follower_id)
-                    ->first()
-                ;
-                if (!is_null($assessFollowerDetail)) {
-                    return;
-                }
-
-                $assessFollowerDetail = new AssessFollowerDetail();
-                $assessFollowerDetail->user_id = $userId;
-                $assessFollowerDetail->staff_id = $item->follower_id;
-                $assessFollowerDetail->save();
-            })
         ;
+        if ($followers->isEmpty()) {
+            return;
+        }
+
+        $followerMap = AssessFollowerDetail::where('user_id', $userId)->get()->keyBy(function ($item) {
+            return $item->staff_id;
+        });
+        foreach ($followers as $f) {
+            if (isset($followerMap[$f->follower_id])) {
+                continue;
+            }
+
+            $assessFollowerDetail = new AssessFollowerDetail();
+            $assessFollowerDetail->user_id = $userId;
+            $assessFollowerDetail->staff_id = $f->follower_id;
+            $assessFollowerDetail->save();
+        }
     }
 
     /**
@@ -134,7 +138,7 @@ class AssessHelper extends Command
             $json = json_decode($response->getBody()->getContents(), true);
 
             return $json['data']['token'] ?? '';
-        } catch (GuzzleException $exception) {
+        } catch (Exception | GuzzleException $exception) {
             dump($exception->getMessage());
         }
 
