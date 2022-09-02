@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\LevelConfig;
+use App\Models\Product\SkuStepPrice;
 use App\Models\Sku;
 use App\Models\SkuLevel;
 use App\Models\SpuInfo;
@@ -42,17 +43,11 @@ class LevelReportController extends Controller
                 throw new Exception('记录为空');
             }
 
-            $stepPriceGroup = DB::table('nt_sku_step_price')
-                ->whereIn('sku', $skuArr = $productPools->pluck('sku'))
-                ->get()
-                ->reduce(function ($carry, $item) {
-                    if (!isset($carry[$item->sku])) {
-                        $carry[$item->sku] = [];
-                    }
-                    $carry[$item->sku][] = $item;
-
-                    return $carry;
-                }, [])
+            $stepPriceGroup = SkuStepPrice::whereIn('sku', $skuArr = $productPools->pluck('sku'))
+                ->get(['id', 'sku'])
+                ->groupBy(function ($item) {
+                    return $item->sku;
+                })
             ;
             $levelMap = SkuLevel::whereIn('sku', $skuArr)->get()->keyBy(function ($item) {
                 return $item->sku;
@@ -93,18 +88,18 @@ class LevelReportController extends Controller
             ->groupBy(['psc.storeId', 'psc.supplierName'])
             ->get(['s.name', 'psc.supplierName', 'psc.period', DB::raw('if(count(*),count(*),0) as batch')])
         ;
-        if ($arrivalList->isNotEmpty()) {
-            $periodSum = [];
-            $batchSum = [];
-            foreach ($arrivalList as $value) {
-                $periodSum[] = $value->period * $value->batch;
-                $batchSum[] = $value->batch;
-            }
-
-            return round(array_sum($periodSum) / array_sum($batchSum), 1);
+        if ($arrivalList->isEmpty()) {
+            return 0.0;
         }
 
-        return 0.0;
+        $periodSum = 0;
+        $batchSum = 0;
+        foreach ($arrivalList as $value) {
+            $periodSum = bcadd($periodSum, bcmul($value->period, $value->batch, 2), 2);
+            $batchSum = bcadd($batchSum, $value->batch, 2);
+        }
+
+        return round(bcdiv($periodSum, $batchSum, 2), 1);
     }
 
     /**
