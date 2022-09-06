@@ -36,7 +36,7 @@ class Kernel extends ConsoleKernel
         /** 资产信息管理 */
         // 更新公司天眼查数据信息，每周二、周五执行
         $schedule->command('crontab:update_company_info')
-            ->days([Schedule::TUESDAY, Schedule::FRIDAY])
+            ->days([Schedule::TUESDAY])
             ->dailyAt('10:00')
             ->withoutOverlapping()
         ;
