@@ -18,29 +18,31 @@ class AddDrawingScore extends ReviewAbstract
     public function handle($review)
     {
         $instance = new DingApproval();
-        if ($instance->getProcessInstance($review->process_instance_id)) {
-            DB::beginTransaction();
+        if (!$instance->getProcessInstance($review->process_instance_id)) {
+            return;
+        }
 
-            try {
-                $review->process_status = $instance->getProcessStatus();
-                $review->save();
+        DB::beginTransaction();
 
-                $this->reviewLog($review, $instance->getOperationRecords());
+        try {
+            $review->process_status = $instance->getProcessStatus();   
+            $review->save();
 
-                if ($instance->isAgree()) {
-                    $this->updateDrawingScore($review);
-                }
-
-                DB::commit();
-            } catch (Exception $exception) {
-                DB::rollBack();
-            }
+            $this->reviewLog($review, $instance->getOperationRecords());
 
             if ($instance->isAgree()) {
-                $this->pushAgreedMessage($review);
-            } elseif ($instance->isRefuse()) {
-                $this->pushRefusedMessage($review);
+                $this->updateDrawingScore($review);
             }
+
+            DB::commit();
+        } catch (Exception $exception) {
+            DB::rollBack();
+        }
+
+        if ($instance->isAgree()) {
+            $this->pushAgreedMessage($review);
+        } elseif ($instance->isRefuse()) {
+            $this->pushRefusedMessage($review);
         }
     }
 
@@ -61,23 +63,25 @@ class AddDrawingScore extends ReviewAbstract
      */
     protected function reviewLog($review, $operationRecords)
     {
-        if (!empty($operationRecords)) {
-            $records = [];
-            foreach ($operationRecords as $item) {
-                if (self::executeTaskNormal($item['operation_type'])) {
-                    $records[] = $item;
-                }
-            }
+        if (empty($operationRecords)) {
+            return;
+        }
 
-            if (isset($records[0])) {
-                $this->opReview($review, $records[0]);
+        $records = [];
+        foreach ($operationRecords as $item) {
+            if (self::executeTaskNormal($item['operation_type'])) {
+                $records[] = $item;
             }
-            if (isset($records[1])) {
-                $this->devReview($review, $records[1]);
-            }
-            if (isset($records[2])) {
-                $this->designReview($review, $records[2]);
-            }
+        }
+
+        if (isset($records[0])) {
+            $this->opReview($review, $records[0]);
+        }
+        if (isset($records[1])) {
+            $this->devReview($review, $records[1]);
+        }
+        if (isset($records[2])) {
+            $this->designReview($review, $records[2]);
         }
     }
 
