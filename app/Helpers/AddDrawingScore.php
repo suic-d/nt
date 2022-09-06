@@ -113,12 +113,13 @@ class AddDrawingScore extends ReviewAbstract
     private function updateDrawingScore($review)
     {
         $sku = Sku::find($review->sku);
-        if (!is_null($sku)) {
-            $sku->drawing_score += $review->score;
-            $sku->save();
-
-            $this->skuLog($review);
+        if (is_null($sku)) {
+            return;
         }
+
+        $sku->drawing_score += $review->score;
+        $sku->save();
+        $this->skuLog($review);
     }
 
     /**
