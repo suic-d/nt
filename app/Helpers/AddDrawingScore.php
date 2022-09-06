@@ -25,7 +25,7 @@ class AddDrawingScore extends ReviewAbstract
         DB::beginTransaction();
 
         try {
-            $review->process_status = $instance->getProcessStatus();   
+            $review->process_status = $instance->getProcessStatus();
             $review->save();
 
             $this->reviewLog($review, $instance->getOperationRecords());
