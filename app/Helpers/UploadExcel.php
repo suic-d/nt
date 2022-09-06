@@ -1167,6 +1167,8 @@ class UploadExcel
                     ['buy_price', '非含税RMB'],
                 ],
                 'tables' => [
+                    'sku' => ['buy_price'],
+                    'product_pool' => ['buy_price'],
                 ],
                 'is_sync' => true,
             ];
