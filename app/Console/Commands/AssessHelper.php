@@ -129,7 +129,7 @@ class AssessHelper extends Command
      */
     public function getToken($username, $password)
     {
-        $client = new Client(['base_uri' => Env::get('BASE_URL_DBRSV'), 'verify' => false]);
+        $client = new Client(['base_uri' => env('BASE_URL_DBRSV'), 'verify' => false]);
 
         try {
             $response = $client->request('GET', 'rest/auth/user/login', [RequestOptions::QUERY => [
@@ -151,7 +151,7 @@ class AssessHelper extends Command
      */
     public function deleteToken($token)
     {
-        $client = new Client(['base_uri' => Env::get('BASE_URL_ASSESS'), 'verify' => false]);
+        $client = new Client(['base_uri' => env('BASE_URL_ASSESS'), 'verify' => false]);
 
         try {
             $client->request('GET', 'index.php/assess/test/deleteToken', [

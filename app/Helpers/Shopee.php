@@ -15,6 +15,6 @@ class Shopee extends PublishAbstract
 
     public function __construct()
     {
-        $this->url = Env::get('SHOPEE_NOTIFY');
+        $this->url = env('SHOPEE_NOTIFY');
     }
 }

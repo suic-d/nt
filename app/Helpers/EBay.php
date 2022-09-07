@@ -15,6 +15,6 @@ class EBay extends PublishAbstract
 
     public function __construct()
     {
-        $this->url = Env::get('EBAY_NOTIFY');
+        $this->url = env('EBAY_NOTIFY');
     }
 }

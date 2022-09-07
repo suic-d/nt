@@ -43,7 +43,7 @@ class AssessOA extends Command
     public function __construct()
     {
         parent::__construct();
-        $this->url = Env::get('BASE_URL_ASSESS');
+        $this->url = env('BASE_URL_ASSESS');
         $this->client = new Client(['base_uri' => $this->url, 'verify' => false]);
     }
 
@@ -165,7 +165,7 @@ class AssessOA extends Command
 
     public function v2()
     {
-        $client = new Client(['base_uri' => Env::get('BASE_URL_ASSESS_V2'), 'verify' => false]);
+        $client = new Client(['base_uri' => env('BASE_URL_ASSESS_V2'), 'verify' => false]);
 
         // 获取部门列表
         try {

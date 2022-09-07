@@ -41,7 +41,7 @@ class UpdateCompanyInfo extends Command
     public function __construct()
     {
         parent::__construct();
-        $this->url = Env::get('BASE_URL_ASSET');
+        $this->url = env('BASE_URL_ASSET');
         $this->client = new Client(['base_uri' => $this->url, 'verify' => false]);
     }
 

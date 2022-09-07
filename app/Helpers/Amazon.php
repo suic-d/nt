@@ -15,6 +15,6 @@ class Amazon extends PublishAbstract
 
     public function __construct()
     {
-        $this->url = Env::get('AMAZON_NOTIFY');
+        $this->url = env('AMAZON_NOTIFY');
     }
 }

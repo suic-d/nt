@@ -15,6 +15,6 @@ class AliExpress extends PublishAbstract
 
     public function __construct()
     {
-        $this->url = Env::get('ALIEXPRESS_NOTIFY');
+        $this->url = env('ALIEXPRESS_NOTIFY');
     }
 }

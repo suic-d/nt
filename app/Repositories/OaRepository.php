@@ -64,7 +64,7 @@ class OaRepository
 
     public function __construct()
     {
-        $this->oaUrl = Env::get('BASE_URL_DBRSV');
+        $this->oaUrl = env('BASE_URL_DBRSV');
         $this->client = new Client(['base_uri' => $this->oaUrl, 'verify' => false]);
     }
 

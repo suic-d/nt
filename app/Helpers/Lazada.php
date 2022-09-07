@@ -15,6 +15,6 @@ class Lazada extends PublishAbstract
 
     public function __construct()
     {
-        $this->url = Env::get('LAZADA_NOTIFY');
+        $this->url = env('LAZADA_NOTIFY');
     }
 }

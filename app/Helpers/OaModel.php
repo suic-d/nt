@@ -19,7 +19,7 @@ class OaModel
      */
     public static function getAuth()
     {
-        $client = new Client(['base_uri' => Env::get('BASE_URL_DBRSV'), 'verify' => false]);
+        $client = new Client(['base_uri' => env('BASE_URL_DBRSV'), 'verify' => false]);
 
         try {
             $response = $client->request('GET', 'rest/authorization/authorize', [

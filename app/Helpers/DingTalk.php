@@ -26,7 +26,7 @@ class DingTalk
     public function __construct()
     {
         $this->client = new Client();
-        $this->url = Env::get('BASE_URL_GOSVC');
+        $this->url = env('BASE_URL_GOSVC');
         $this->client = new Client(['base_uri' => $this->url, 'verify' => false]);
     }
 

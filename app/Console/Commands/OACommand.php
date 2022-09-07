@@ -46,7 +46,7 @@ class OACommand extends Command
     public function __construct()
     {
         parent::__construct();
-        $this->url = Env::get('BASE_URL');
+        $this->url = env('BASE_URL');
         $this->client = new Client(['base_uri' => $this->url, 'verify' => false]);
     }
 

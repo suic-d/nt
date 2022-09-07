@@ -57,7 +57,7 @@ class LevelReport extends Command
     {
         parent::__construct();
 
-        $this->baseUri = Env::get('BASE_URL');
+        $this->baseUri = env('BASE_URL');
         $this->client = new Client(['base_uri' => $this->baseUri, 'verify' => false]);
     }
 
