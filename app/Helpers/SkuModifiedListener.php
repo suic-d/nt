@@ -154,12 +154,9 @@ class SkuModifiedListener
         }
 
         $staffMap = StaffList::whereIn('staff_id', $spuPublishedModels->pluck('shop_user'))
-            ->get()
-            ->keyBy(function ($item) {
-                return $item->staff_id;
-            })
+            ->get(['staff_id', 'staff_name'])
+            ->pluck('staff_name', 'staff_id')
         ;
-
         $skuModel = Sku::find($sku);
 
         $spuPublishedGroup = $spuPublishedModels->reduce(function ($carry, $item) {
@@ -246,7 +243,7 @@ class SkuModifiedListener
                 if (!empty($titles) && !empty($contents)) {
                     $message = sprintf(
                         '尊敬的：%s\n\n亲，您在 %s 上架至 %s 的SKU：%s\n\n品名：%s\n\n%s\n\n更新时间：%s\n\n修改人：%s\n\n请知悉！',
-                        $staffMap[$user]->staff_name ?? '',
+                        $staffMap[$user] ?? '',
                         $item->publish_time,
                         $shop,
                         $item->sku,
