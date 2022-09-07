@@ -7,6 +7,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
 use Illuminate\Console\Command;
+use Illuminate\Support\Env;
 
 class UpdateCompanyInfo extends Command
 {
@@ -27,9 +28,7 @@ class UpdateCompanyInfo extends Command
     /**
      * @var string
      */
-    protected $url = 'http://assetinfo.api.nantang-tech.com';
-
-//    protected $url = 'http://test.assetinfo.api.nantang-tech.com';
+    protected $url;
 
     /**
      * @var Client
@@ -42,6 +41,7 @@ class UpdateCompanyInfo extends Command
     public function __construct()
     {
         parent::__construct();
+        $this->url = Env::get('BASE_URL_ASSET');
         $this->client = new Client(['base_uri' => $this->url, 'verify' => false]);
     }
 

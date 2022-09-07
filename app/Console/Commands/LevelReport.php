@@ -16,6 +16,7 @@ use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\RequestOptions;
 use Illuminate\Console\Command;
+use Illuminate\Support\Env;
 use Illuminate\Support\Facades\DB;
 
 class LevelReport extends Command
@@ -37,7 +38,7 @@ class LevelReport extends Command
     /**
      * @var string
      */
-    protected $baseUri = 'http://v2.product.nantang-tech.com';
+    protected $baseUri;
 
     /**
      * @var \Illuminate\Database\Eloquent\Collection|LevelConfig[]
@@ -56,6 +57,7 @@ class LevelReport extends Command
     {
         parent::__construct();
 
+        $this->baseUri = Env::get('BASE_URL');
         $this->client = new Client(['base_uri' => $this->baseUri, 'verify' => false]);
     }
 

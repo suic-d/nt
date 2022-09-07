@@ -9,6 +9,7 @@ use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\RequestOptions;
 use Illuminate\Console\Command;
+use Illuminate\Support\Env;
 
 class GetProcessInstance extends Command
 {
@@ -29,7 +30,7 @@ class GetProcessInstance extends Command
     /**
      * @var string
      */
-    private $baseUri = 'http://v2.product.nantang-tech.com';
+    private $baseUri;
 
     /**
      * @var Client
@@ -48,6 +49,7 @@ class GetProcessInstance extends Command
     {
         parent::__construct();
 
+        $this->baseUri = Env::get('BASE_URL');
         $this->client = new Client(['base_uri' => $this->baseUri, 'verify' => false]);
         $this->logFile = '/www/logs/laravel-'.date('Y-m-d').'.log';
     }
