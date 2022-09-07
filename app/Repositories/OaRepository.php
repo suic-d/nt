@@ -9,6 +9,7 @@ use App\Models\StaffList;
 use App\Models\StaffMainDept;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
+use Illuminate\Support\Env;
 use Throwable;
 
 class OaRepository
@@ -16,7 +17,7 @@ class OaRepository
     /**
      * @var string
      */
-    private $oaUrl = 'https://dbsrv.nterp.nantang-tech.com';
+    private $oaUrl;
 
     /**
      * @var string
@@ -63,6 +64,7 @@ class OaRepository
 
     public function __construct()
     {
+        $this->oaUrl = Env::get('BASE_URL_DBRSV');
         $this->client = new Client(['base_uri' => $this->oaUrl, 'verify' => false]);
     }
 

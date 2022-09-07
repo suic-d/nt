@@ -12,6 +12,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
 use Illuminate\Console\Command;
+use Illuminate\Support\Env;
 
 class OACommand extends Command
 {
@@ -32,7 +33,7 @@ class OACommand extends Command
     /**
      * @var string
      */
-    protected $url = 'http://v2.product.nantang-tech.com';
+    protected $url;
 
     /**
      * @var Client
@@ -45,6 +46,7 @@ class OACommand extends Command
     public function __construct()
     {
         parent::__construct();
+        $this->url = Env::get('BASE_URL');
         $this->client = new Client(['base_uri' => $this->url, 'verify' => false]);
     }
 

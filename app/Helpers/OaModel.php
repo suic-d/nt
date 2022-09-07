@@ -6,11 +6,10 @@ use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
+use Illuminate\Support\Env;
 
 class OaModel
 {
-    const URL = 'https://dbsrv.nterp.nantang-tech.com';
-
     const APP_KEY = 'gYw5ogbgqU91Mub8xA0H';
 
     const APP_SECRET = '72e80fef340b576bac6af717nterp_oa';
@@ -20,7 +19,7 @@ class OaModel
      */
     public static function getAuth()
     {
-        $client = new Client(['base_uri' => self::URL, 'verify' => false]);
+        $client = new Client(['base_uri' => Env::get('BASE_URL_DBRSV'), 'verify' => false]);
 
         try {
             $response = $client->request('GET', 'rest/authorization/authorize', [

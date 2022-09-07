@@ -2,6 +2,8 @@
 
 namespace App\Helpers;
 
+use Illuminate\Support\Env;
+
 class Amazon extends PublishAbstract
 {
     /**
@@ -11,8 +13,8 @@ class Amazon extends PublishAbstract
      */
     protected $platform = 'amazon';
 
-    /**
-     * @var string
-     */
-    protected $url = 'http://amazon.back.nantang-tech.com/listing/sku/modify/notification';
+    public function __construct()
+    {
+        $this->url = Env::get('AMAZON_NOTIFY');
+    }
 }

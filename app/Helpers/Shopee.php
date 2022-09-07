@@ -2,6 +2,8 @@
 
 namespace App\Helpers;
 
+use Illuminate\Support\Env;
+
 class Shopee extends PublishAbstract
 {
     /**
@@ -11,8 +13,8 @@ class Shopee extends PublishAbstract
      */
     protected $platform = 'shopee';
 
-    /**
-     * @var string
-     */
-    protected $url = 'http://shopee.api.nantang-tech.com/listing/sold_out_sku/notify';
+    public function __construct()
+    {
+        $this->url = Env::get('SHOPEE_NOTIFY');
+    }
 }

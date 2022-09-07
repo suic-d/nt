@@ -2,6 +2,8 @@
 
 namespace App\Helpers;
 
+use Illuminate\Support\Env;
+
 class EBay extends PublishAbstract
 {
     /**
@@ -11,8 +13,8 @@ class EBay extends PublishAbstract
      */
     protected $platform = 'ebay';
 
-    /**
-     * @var string
-     */
-    protected $url = 'http://ebay.back.nantang-tech.com/index.php/listing/sku/modify/notification';
+    public function __construct()
+    {
+        $this->url = Env::get('EBAY_NOTIFY');
+    }
 }

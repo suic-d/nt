@@ -2,6 +2,8 @@
 
 namespace App\Helpers;
 
+use Illuminate\Support\Env;
+
 class Lazada extends PublishAbstract
 {
     /**
@@ -11,8 +13,8 @@ class Lazada extends PublishAbstract
      */
     protected $platform = 'lazada';
 
-    /**
-     * @var string
-     */
-    protected $url = 'http://lazada.back.nantang-tech.com/listing/sku/modify/notification';
+    public function __construct()
+    {
+        $this->url = Env::get('LAZADA_NOTIFY');
+    }
 }

@@ -10,6 +10,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use Illuminate\Console\Command;
+use Illuminate\Support\Env;
 use Illuminate\Support\Facades\DB;
 
 class AssessHelper extends Command
@@ -128,7 +129,7 @@ class AssessHelper extends Command
      */
     public function getToken($username, $password)
     {
-        $client = new Client(['base_uri' => 'https://dbsrv.nterp.nantang-tech.com/', 'verify' => false]);
+        $client = new Client(['base_uri' => Env::get('BASE_URL_DBRSV'), 'verify' => false]);
 
         try {
             $response = $client->request('GET', 'rest/auth/user/login', [RequestOptions::QUERY => [
@@ -150,7 +151,7 @@ class AssessHelper extends Command
      */
     public function deleteToken($token)
     {
-        $client = new Client(['base_uri' => 'http://assess.php.nantang-tech.com', 'verify' => false]);
+        $client = new Client(['base_uri' => Env::get('BASE_URL_ASSESS'), 'verify' => false]);
 
         try {
             $client->request('GET', 'index.php/assess/test/deleteToken', [

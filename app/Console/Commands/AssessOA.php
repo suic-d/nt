@@ -165,7 +165,7 @@ class AssessOA extends Command
 
     public function v2()
     {
-        $client = new Client(['base_uri' => 'http://v2.assess.php.nantang-tech.com', 'verify' => false]);
+        $client = new Client(['base_uri' => Env::get('BASE_URL_ASSESS_V2'), 'verify' => false]);
 
         // 获取部门列表
         try {

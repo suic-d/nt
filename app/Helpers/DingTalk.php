@@ -6,13 +6,14 @@ use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
+use Illuminate\Support\Env;
 
 class DingTalk
 {
     /**
      * @var string
      */
-    protected $url = 'https://gosvc.nterp.nantang-tech.com/gopush/dingtalk/asyncPush';
+    protected $url;
 
     /**
      * @var ClientInterface
@@ -25,6 +26,8 @@ class DingTalk
     public function __construct()
     {
         $this->client = new Client();
+        $this->url = Env::get('BASE_URL_GOSVC');
+        $this->client = new Client(['base_uri' => $this->url, 'verify' => false]);
     }
 
     /**
@@ -41,7 +44,9 @@ class DingTalk
         $params = ['title' => $title, 'text' => $text, 'userId' => $userId];
 
         try {
-            $response = $this->client->request('POST', $this->url, [RequestOptions::FORM_PARAMS => $params]);
+            $response = $this->client->request('POST', 'gopush/dingtalk/asyncPush', [
+                RequestOptions::FORM_PARAMS => $params,
+            ]);
             if (200 == $response->getStatusCode()) {
                 $json = json_decode($response->getBody()->getContents(), true);
                 if (isset($json['code']) && '0' == $json['code']) {

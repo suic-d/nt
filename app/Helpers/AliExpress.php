@@ -2,6 +2,8 @@
 
 namespace App\Helpers;
 
+use Illuminate\Support\Env;
+
 class AliExpress extends PublishAbstract
 {
     /**
@@ -11,8 +13,8 @@ class AliExpress extends PublishAbstract
      */
     protected $platform = 'aliexpress';
 
-    /**
-     * @var string
-     */
-    protected $url = 'http://aliexpress.php.nantang-tech.com/listing/sku/modify/notification';
+    public function __construct()
+    {
+        $this->url = Env::get('ALIEXPRESS_NOTIFY');
+    }
 }
