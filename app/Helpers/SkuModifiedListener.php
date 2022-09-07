@@ -54,48 +54,49 @@ class SkuModifiedListener
         if ($cache) {
             // 推送ebay
             (new EBay())->push($sku, $changes, $createId, $cache);
-        } else {
-            $pushEbay = false;
-            $pushAmazon = false;
-            $pushAliExpress = false;
-            $pushLazada = false;
-            $pushShopee = false;
-            $eBay = new EBay();
-            $amazon = new Amazon();
-            $aliExpress = new AliExpress();
-            $lazada = new Lazada();
-            $shopee = new Shopee();
 
-            $changesAmazon = $changes;
-            if (isset($changes['sale_state']['old_str'], $changes['sale_state']['new_str'])) {
-                if ('在售' != $changes['sale_state']['old_str']
-                    || '停售' != $changes['sale_state']['new_str']
-                    || 0 != (new StockRepository())->getDirectHairWarehouseStock($sku)) {
-                    unset($changesAmazon['sale_state']);
-                }
+            return;
+        }
+
+        $changesAmazon = $changes;
+        if (isset($changes['sale_state']['old_str'], $changes['sale_state']['new_str'])) {
+            if ('在售' != $changes['sale_state']['old_str']
+                || '停售' != $changes['sale_state']['new_str']
+                || 0 != (new StockRepository())->getDirectHairWarehouseStock($sku)) {
+                unset($changesAmazon['sale_state']);
             }
+        }
 
-            for ($i = 0; $i < 5; ++$i) {
-                // 推送ebay
-                if (!$pushEbay) {
-                    $pushEbay = $eBay->push($sku, $changes, $createId);
-                }
-                // 推送amazon
-                if (!$pushAmazon) {
-                    $pushAmazon = $amazon->push($sku, $changesAmazon, $createId);
-                }
-                // 推送aliexpress
-                if (!$pushAliExpress) {
-                    $pushAliExpress = $aliExpress->push($sku, $changes, $createId);
-                }
-                // 推送lazada
-                if (!$pushLazada) {
-                    $pushLazada = $lazada->push($sku, $changes, $createId);
-                }
-                // 推送shopee
-                if (!$pushShopee) {
-                    $pushShopee = $shopee->push($sku, $changes, $createId);
-                }
+        $pushEbay = false;
+        $pushAmazon = false;
+        $pushAliExpress = false;
+        $pushLazada = false;
+        $pushShopee = false;
+        $eBay = new EBay();
+        $amazon = new Amazon();
+        $aliExpress = new AliExpress();
+        $lazada = new Lazada();
+        $shopee = new Shopee();
+        for ($i = 0; $i < 5; ++$i) {
+            // 推送ebay
+            if (!$pushEbay) {
+                $pushEbay = $eBay->push($sku, $changes, $createId);
+            }
+            // 推送amazon
+            if (!$pushAmazon) {
+                $pushAmazon = $amazon->push($sku, $changesAmazon, $createId);
+            }
+            // 推送aliexpress
+            if (!$pushAliExpress) {
+                $pushAliExpress = $aliExpress->push($sku, $changes, $createId);
+            }
+            // 推送lazada
+            if (!$pushLazada) {
+                $pushLazada = $lazada->push($sku, $changes, $createId);
+            }
+            // 推送shopee
+            if (!$pushShopee) {
+                $pushShopee = $shopee->push($sku, $changes, $createId);
             }
         }
     }
