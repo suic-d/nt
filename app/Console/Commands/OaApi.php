@@ -45,7 +45,6 @@ class OaApi extends Command
 
     public function handle()
     {
-        $this->getDeptUser(412715518);
     }
 
     /**
