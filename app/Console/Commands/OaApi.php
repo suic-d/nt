@@ -96,7 +96,7 @@ class OaApi extends Command
                     }
                 }
             }
-        } catch (GuzzleException $exception) {
+        } catch (GuzzleException | Exception $exception) {
         }
     }
 
