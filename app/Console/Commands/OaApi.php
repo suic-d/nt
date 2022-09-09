@@ -77,22 +77,14 @@ class OaApi extends Command
                     $staff->save();
 
                     StaffDept::where('staff_id', $staff->staff_id)->delete();
-                    if (empty($u['deptIds'])) {
+                    $deptIds = empty($u['deptIds']) ? [$deptId] : explode(',', $u['deptIds']);
+                    foreach ($deptIds as $v) {
                         $staffDept = new StaffDept();
                         $staffDept->staff_id = $staff->staff_id;
-                        $staffDept->department = $deptId;
+                        $staffDept->department = $v;
                         $staffDept->order = $u['order'];
                         $staffDept->modify_time = date('Y-m-d H:i:s');
                         $staffDept->save();
-                    } else {
-                        foreach (explode(',', $u['deptIds']) as $v) {
-                            $staffDept = new StaffDept();
-                            $staffDept->staff_id = $staff->staff_id;
-                            $staffDept->department = $v;
-                            $staffDept->order = $u['order'];
-                            $staffDept->modify_time = date('Y-m-d H:i:s');
-                            $staffDept->save();
-                        }
                     }
                 }
             }
