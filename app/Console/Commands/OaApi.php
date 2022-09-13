@@ -71,19 +71,19 @@ class OaApi extends Command
             $staff->position = $u['position'];
             $staff->employee_type = empty($u['employeeType']) ? 0 : $u['employeeType'];
             $staff->employee_status = empty($u['employeeStatus']) ? -1 : $u['employeeStatus'];
-
-            $userDetail = $this->getUserDetail($staff->staff_id);
-            $staff->union_id = $userDetail['unionId'];
-            $staff->mobile = $userDetail['mobile'];
-            $staff->work_place = $userDetail['workPlace'];
-            $staff->avatar = $userDetail['avatar'];
-            $staff->is_admin = ('true' === $userDetail['isAdmin']) ? 1 : 0;
-            $staff->is_boss = ('true' === $userDetail['isBoss']) ? 1 : 0;
-            $staff->is_hide = ('true' === $userDetail['isHide']) ? 1 : 0;
-            $staff->active = ('true' === $userDetail['active']) ? 1 : 0;
-            $staff->hired_date = empty($userDetail['hiredDate']) ? '0000-00-00' : $userDetail['hiredDate'];
-            $staff->email = $userDetail['email'];
-            $staff->remark = $userDetail['remark'];
+            if (!empty($userDetail = $this->getUserDetail($staff->staff_id))) {
+                $staff->union_id = $userDetail['unionId'];
+                $staff->mobile = $userDetail['mobile'];
+                $staff->work_place = $userDetail['workPlace'];
+                $staff->avatar = $userDetail['avatar'];
+                $staff->is_admin = ('true' === $userDetail['isAdmin']) ? 1 : 0;
+                $staff->is_boss = ('true' === $userDetail['isBoss']) ? 1 : 0;
+                $staff->is_hide = ('true' === $userDetail['isHide']) ? 1 : 0;
+                $staff->active = ('true' === $userDetail['active']) ? 1 : 0;
+                $staff->hired_date = empty($userDetail['hiredDate']) ? '0000-00-00' : $userDetail['hiredDate'];
+                $staff->email = $userDetail['email'];
+                $staff->remark = $userDetail['remark'];
+            }
             $staff->modify_time = date('Y-m-d H:i:s');
             $staff->save();
 
