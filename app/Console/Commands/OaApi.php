@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Assess\DeptList;
 use App\Models\StaffDept;
 use App\Models\StaffList;
 use App\Models\StaffMainDept;
@@ -46,6 +47,9 @@ class OaApi extends Command
 
     public function handle()
     {
+        DeptList::get(['dept_id'])->each(function ($item) {
+            $this->saveDeptUser($item->dept_id);
+        });
     }
 
     /**
@@ -67,19 +71,6 @@ class OaApi extends Command
             $staff->position = $u['position'];
             $staff->employee_type = empty($u['employeeType']) ? 0 : $u['employeeType'];
             $staff->employee_status = empty($u['employeeStatus']) ? -1 : $u['employeeStatus'];
-            $staff->modify_time = date('Y-m-d H:i:s');
-            $staff->save();
-
-            StaffDept::where('staff_id', $staff->staff_id)->delete();
-            $deptIds = empty($u['deptIds']) ? [$deptId] : explode(',', $u['deptIds']);
-            foreach ($deptIds as $v) {
-                $staffDept = new StaffDept();
-                $staffDept->staff_id = $staff->staff_id;
-                $staff->department = $v;
-                $staff->order = $u['order'];
-                $staffDept->modify_time = date('Y-m-d H:i:s');
-                $staffDept->save();
-            }
 
             $userDetail = $this->getUserDetail($staff->staff_id);
             $staff->union_id = $userDetail['unionId'];
@@ -96,11 +87,21 @@ class OaApi extends Command
             $staff->modify_time = date('Y-m-d H:i:s');
             $staff->save();
 
-            $mainDeptId = empty($userDetail['mainDeptId']) ? $deptId : $userDetail['mainDeptId'];
+            StaffDept::where('staff_id', $staff->staff_id)->delete();
+            $deptIds = empty($u['deptIds']) ? [$deptId] : explode(',', $u['deptIds']);
+            foreach ($deptIds as $v) {
+                $staffDept = new StaffDept();
+                $staffDept->staff_id = $staff->staff_id;
+                $staff->department = $v;
+                $staff->order = $u['order'];
+                $staffDept->modify_time = date('Y-m-d H:i:s');
+                $staffDept->save();
+            }
+
             StaffMainDept::where('staff_id', $staff->staff_id)->delete();
             $staffMainDept = new StaffMainDept();
             $staffMainDept->staff_id = $staff->staff_id;
-            $staffMainDept->department = $mainDeptId;
+            $staffMainDept->department = empty($userDetail['mainDeptId']) ? $deptId : $userDetail['mainDeptId'];
             $staffMainDept->modify_time = date('Y-m-d H:i:s');
             $staffMainDept->save();
         }
