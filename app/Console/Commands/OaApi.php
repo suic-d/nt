@@ -87,23 +87,43 @@ class OaApi extends Command
             $staff->modify_time = date('Y-m-d H:i:s');
             $staff->save();
 
-            StaffDept::where('staff_id', $staff->staff_id)->delete();
             $deptIds = empty($u['deptIds']) ? [$deptId] : explode(',', $u['deptIds']);
-            foreach ($deptIds as $v) {
-                $staffDept = new StaffDept();
-                $staffDept->staff_id = $staff->staff_id;
-                $staff->department = $v;
-                $staff->order = $u['order'];
-                $staffDept->modify_time = date('Y-m-d H:i:s');
-                $staffDept->save();
-            }
+            $this->saveStaffDept($staff->staff_id, $deptIds, $u['order']);
 
-            StaffMainDept::where('staff_id', $staff->staff_id)->delete();
-            $staffMainDept = new StaffMainDept();
-            $staffMainDept->staff_id = $staff->staff_id;
-            $staffMainDept->department = empty($userDetail['mainDeptId']) ? $deptId : $userDetail['mainDeptId'];
-            $staffMainDept->modify_time = date('Y-m-d H:i:s');
-            $staffMainDept->save();
+            $mainDeptId = empty($userDetail['mainDeptId']) ? $deptId : $userDetail['mainDeptId'];
+            $this->saveStaffMainDept($staff->staff_id, $mainDeptId);
+        }
+    }
+
+    /**
+     * @param string $staffId
+     * @param string $deptId
+     */
+    public function saveStaffMainDept($staffId, $deptId)
+    {
+        StaffMainDept::where('staff_id', $staffId)->delete();
+        $staffMainDept = new StaffMainDept();
+        $staffMainDept->staff_id = $staffId;
+        $staffMainDept->department = $deptId;
+        $staffMainDept->modify_time = date('Y-m-d H:i:s');
+        $staffMainDept->save();
+    }
+
+    /**
+     * @param string $staffId
+     * @param array  $deptIds
+     * @param string $order
+     */
+    public function saveStaffDept($staffId, $deptIds, $order)
+    {
+        StaffDept::where('staff_id', $staffId)->delete();
+        foreach ($deptIds as $v) {
+            $staffDept = new StaffDept();
+            $staffDept->staff_id = $staffId;
+            $staffDept->department = $v;
+            $staffDept->order = $order;
+            $staffDept->modify_time = date('Y-m-d H:i:s');
+            $staffDept->save();
         }
     }
 
@@ -153,7 +173,7 @@ class OaApi extends Command
     /**
      * @return string
      */
-    private function getAuthorization()
+    public function getAuthorization()
     {
         if (is_null($this->authorization)) {
             $this->generateAuthorization();
