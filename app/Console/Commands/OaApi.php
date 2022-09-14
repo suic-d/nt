@@ -156,16 +156,21 @@ class OaApi extends Command
     private function getAuthorization()
     {
         if (is_null($this->authorization)) {
-            try {
-                $response = $this->client->request('GET', 'rest/authorization/authorize', [
-                    RequestOptions::QUERY => ['appKey' => env('OA_APP_KEY'), 'appSecret' => env('OA_APP_SECRET')],
-                ]);
-                $json = json_decode($response->getBody()->getContents(), true);
-                $this->authorization = $json['data']['authorization'] ?? '';
-            } catch (GuzzleException | Exception $exception) {
-            }
+            $this->generateAuthorization();
         }
 
         return $this->authorization;
+    }
+
+    private function generateAuthorization()
+    {
+        try {
+            $response = $this->client->request('GET', 'rest/authorization/authorize', [
+                RequestOptions::QUERY => ['appKey' => env('OA_APP_KEY'), 'appSecret' => env('OA_APP_SECRET')],
+            ]);
+            $json = json_decode($response->getBody()->getContents(), true);
+            $this->authorization = $json['data']['authorization'] ?? '';
+        } catch (GuzzleException | Exception $exception) {
+        }
     }
 }
