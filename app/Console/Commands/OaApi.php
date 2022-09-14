@@ -71,6 +71,8 @@ class OaApi extends Command
             $staff->position = $u['position'];
             $staff->employee_type = empty($u['employeeType']) ? 0 : $u['employeeType'];
             $staff->employee_status = empty($u['employeeStatus']) ? -1 : $u['employeeStatus'];
+            $staff->modify_time = date('Y-m-d H:i:s');
+            $staff->save();
             if (!empty($userDetail = $this->getUserDetail($staff->staff_id))) {
                 $staff->union_id = $userDetail['unionId'];
                 $staff->mobile = $userDetail['mobile'];
@@ -83,15 +85,14 @@ class OaApi extends Command
                 $staff->hired_date = empty($userDetail['hiredDate']) ? '0000-00-00' : $userDetail['hiredDate'];
                 $staff->email = $userDetail['email'];
                 $staff->remark = $userDetail['remark'];
+                $staff->save();
+
+                $mainDeptId = empty($userDetail['mainDeptId']) ? $deptId : $userDetail['mainDeptId'];
+                $this->saveStaffMainDept($staff->staff_id, $mainDeptId);
             }
-            $staff->modify_time = date('Y-m-d H:i:s');
-            $staff->save();
 
             $deptIds = empty($u['deptIds']) ? [$deptId] : explode(',', $u['deptIds']);
             $this->saveStaffDept($staff->staff_id, $deptIds, $u['order']);
-
-            $mainDeptId = empty($userDetail['mainDeptId']) ? $deptId : $userDetail['mainDeptId'];
-            $this->saveStaffMainDept($staff->staff_id, $mainDeptId);
         }
     }
 
@@ -191,6 +192,7 @@ class OaApi extends Command
             $json = json_decode($response->getBody()->getContents(), true);
             $this->authorization = $json['data']['authorization'] ?? '';
         } catch (GuzzleException | Exception $exception) {
+            dump($exception->getMessage());
         }
     }
 }

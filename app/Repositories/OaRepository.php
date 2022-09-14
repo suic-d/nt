@@ -7,9 +7,10 @@ use App\Models\ProductUser;
 use App\Models\StaffDept;
 use App\Models\StaffList;
 use App\Models\StaffMainDept;
+use Exception;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
-use Illuminate\Support\Env;
 use Throwable;
 
 class OaRepository
@@ -22,12 +23,12 @@ class OaRepository
     /**
      * @var string
      */
-    private $oaAppKey = 'gYw5ogbgqU91Mub8xA0H';
+    private $oaAppKey;
 
     /**
      * @var string
      */
-    private $oaAppSecret = '72e80fef340b576bac6af717nterp_oa';
+    private $oaAppSecret;
 
     /**
      * @var int[]
@@ -65,6 +66,8 @@ class OaRepository
     public function __construct()
     {
         $this->oaUrl = env('BASE_URL_DBRSV');
+        $this->oaAppKey = env('OA_APP_KEY');
+        $this->oaAppSecret = env('OA_APP_SECRET');
         $this->client = new Client(['base_uri' => $this->oaUrl, 'verify' => false]);
     }
 
@@ -74,17 +77,7 @@ class OaRepository
     public function getAuthorization()
     {
         if (empty($this->authorization)) {
-            try {
-                $response = $this->client->request('GET', 'rest/authorization/authorize', [
-                    RequestOptions::QUERY => [
-                        'appKey' => $this->oaAppKey,
-                        'appSecret' => $this->oaAppSecret,
-                    ],
-                ]);
-                $json = json_decode($response->getBody()->getContents(), true);
-                $this->authorization = $json['data']['authorization'] ?? '';
-            } catch (Throwable $exception) {
-            }
+            $this->generateAuthorization();
         }
 
         return $this->authorization;
@@ -149,7 +142,7 @@ class OaRepository
         return [];
     }
 
-    public function syncDeptList()
+    public function saveDeptList()
     {
         if (empty($deptList = $this->getDeptList())) {
             return;
@@ -169,121 +162,117 @@ class OaRepository
             $dept->modify_time = date('Y-m-d H:i:s');
             $dept->save();
 
-            echo __FUNCTION__, ' : ', $dept->dept_id, PHP_EOL;
+            $this->saveDeptUser($dept->dept_id);
         }
     }
 
-    public function syncDeptUser()
+    /**
+     * @param int $deptId
+     */
+    public function saveDeptUser($deptId)
     {
-        $depts = DeptList::get();
-        if ($depts->isEmpty()) {
-            return;
-        }
-
-        foreach ($depts as $dept) {
-            if (empty($users = $this->getDeptUser($dept->dept_id))) {
-                continue;
+        foreach ($this->getDeptUser($deptId) as $u) {
+            $staff = StaffList::where('staff_id', $u['id'])->first();
+            if (is_null($staff)) {
+                $staff = new StaffList();
             }
-
-            foreach ($users as $user) {
-                $staff = StaffList::where('staff_id', $user['id'])->first();
-                if (is_null($staff)) {
-                    $staff = new StaffList();
-                }
-                $staff->staff_id = $user['id'];
-                $staff->staff_name = $user['name'];
-                $staff->is_dimission = (4 == $user['employeeStatus']) ? 2 : 1;
-                $staff->is_leader = ('true' == $user['isLeader']) ? 1 : 0;
-                $staff->department = $user['deptIds'];
-                $staff->job_number = $user['jobnumber'];
-                $staff->position = $user['position'];
-                $staff->employee_type = $user['employeeType'];
-                $staff->employee_status = $user['employeeStatus'];
-                $staff->modify_time = date('Y-m-d H:i:s');
-                $staff->save();
-
-                StaffDept::where('staff_id', $staff->staff_id)->get()->each(function (StaffDept $item) {
-                    $item->delete();
-                });
-                if (!empty($user['deptIds'])) {
-                    foreach (explode(',', $user['deptIds']) as $deptId) {
-                        $staffDept = new StaffDept();
-                        $staffDept->staff_id = $staff->staff_id;
-                        $staffDept->department = $deptId;
-                        $staffDept->order = $user['order'];
-                        $staffDept->modify_time = date('Y-m-d H:i:s');
-                        $staffDept->save();
-                    }
-                }
-            }
-
-            echo __FUNCTION__, ' : ', $dept->dept_id, PHP_EOL;
-        }
-    }
-
-    public function syncStaffDetail()
-    {
-        $staffs = StaffList::get();
-        if ($staffs->isEmpty()) {
-            return;
-        }
-
-        foreach ($staffs as $staff) {
-            if (empty($user = $this->getStaffDetail($staff->staff_id))) {
-                continue;
-            }
-
-            $staff->union_id = $user['unionId'];
-            $staff->mobile = $user['mobile'];
-            $staff->work_place = $user['workPlace'];
-            $staff->avatar = $user['avatar'];
-            $staff->is_admin = ('true' == $user['isAdmin']) ? 1 : 0;
-            $staff->is_boss = ('true' == $user['isBoss']) ? 1 : 0;
-            $staff->is_hide = ('true' == $user['isHide']) ? 1 : 0;
-            $staff->active = ('true' == $user['active']) ? 1 : 0;
-            $staff->hired_date = empty($user['hiredDate']) ? '0000-00-00' : $user['hiredDate'];
-            $staff->email = $user['email'];
-            $staff->remark = $user['remark'];
+            $staff->staff_id = $u['id'];
+            $staff->staff_name = $u['name'];
+            $staff->is_dimission = (4 == $u['employeeStatus']) ? 2 : 1;
+            $staff->is_leader = ('true' == $u['isLeader']) ? 1 : 0;
+            $staff->department = $u['deptIds'];
+            $staff->job_number = $u['jobnumber'];
+            $staff->position = $u['position'];
+            $staff->employee_type = $u['employeeType'];
+            $staff->employee_status = $u['employeeStatus'];
             $staff->modify_time = date('Y-m-d H:i:s');
             $staff->save();
+            if (!empty($user = $this->getStaffDetail($staff->staff_id))) {
+                $staff->union_id = $user['unionId'];
+                $staff->mobile = $user['mobile'];
+                $staff->work_place = $user['workPlace'];
+                $staff->avatar = $user['avatar'];
+                $staff->is_admin = ('true' === $user['isAdmin']) ? 1 : 0;
+                $staff->is_boss = ('true' === $user['isBoss']) ? 1 : 0;
+                $staff->is_hide = ('true' === $user['isHide']) ? 1 : 0;
+                $staff->active = ('true' === $user['active']) ? 1 : 0;
+                $staff->hired_date = empty($user['hiredDate']) ? '0000-00-00' : $user['hiredDate'];
+                $staff->email = $user['email'];
+                $staff->remark = $user['remark'];
+                $staff->save();
 
-            StaffMainDept::where('staff_id', $staff->staff_id)->get()->each(function (StaffMainDept $item) {
-                $item->delete();
-            });
-            $staffMainDept = new StaffMainDept();
-            $staffMainDept->staff_id = $staff->staff_id;
-            $staffMainDept->department = $user['mainDeptId'];
-            $staffMainDept->modify_time = date('Y-m-d H:i:s');
-            $staffMainDept->save();
-
-            $productUser = ProductUser::where('staff_id', $staff->staff_id)->first();
-            if (is_null($productUser)) {
-                $productUser = new ProductUser();
-            }
-            $productUser->staff_id = $staff->staff_id;
-            $productUser->staff_name = $staff->staff_name;
-            $productUser->mobile = $staff->mobile;
-            $productUser->job_number = $staff->job_number;
-            $productUser->is_dimission = $staff->is_dimission;
-            $productUser->position = $staff->position;
-            $productUser->employee_type = $staff->employee_type;
-            if ($this->isDevDept($staffMainDept->department)) {
-                // 开发
-                $productUser->user_depart = 1;
-            } elseif ($this->isDesignDept($staffMainDept->department)) {
-                // 设计
-                $productUser->user_depart = 2;
-            } elseif ($this->isPurchaseDept($staffMainDept->department)) {
-                // 采购
-                $productUser->user_depart = 4;
+                $mainDeptId = empty($user['mainDeptId']) ? $deptId : $user['mainDeptId'];
+                $this->saveProductUser($staff, $mainDeptId);
+                $this->saveStaffMainDept($staff->staff_id, $mainDeptId);
             }
 
-            $productUser->department = $staffMainDept->department;
-            $productUser->hired_date = $staff->hired_date;
-            $productUser->modify_time = date('Y-m-d H:i:s');
-            $productUser->save();
+            $deptIds = empty($u['deptIds']) ? [$deptId] : explode(',', $u['deptIds']);
+            $this->saveStaffDept($staff->staff_id, $deptIds, $u['order']);
+        }
+    }
 
-            echo __FUNCTION__, ' : ', $staff->staff_id, PHP_EOL;
+    /**
+     * @param StaffList $staff
+     * @param string    $mainDeptId
+     */
+    public function saveProductUser($staff, $mainDeptId)
+    {
+        $productUser = ProductUser::where('staff_id', $staff->staff_id)->first();
+        if (is_null($productUser)) {
+            $productUser = new ProductUser();
+        }
+        $productUser->staff_id = $staff->staff_id;
+        $productUser->staff_name = $staff->staff_name;
+        $productUser->mobile = $staff->mobile;
+        $productUser->job_number = $staff->job_number;
+        $productUser->is_dimission = $staff->is_dimission;
+        $productUser->position = $staff->position;
+        $productUser->employee_type = $staff->employee_type;
+        if ($this->isDevDept($mainDeptId)) {
+            // 开发
+            $productUser->user_depart = 1;
+        } elseif ($this->isDesignDept($mainDeptId)) {
+            // 设计
+            $productUser->user_depart = 2;
+        } elseif ($this->isPurchaseDept($mainDeptId)) {
+            // 采购
+            $productUser->user_depart = 4;
+        }
+        $productUser->department = $mainDeptId;
+        $productUser->hired_date = $staff->hired_date;
+        $productUser->modify_time = date('Y-m-d H:i:s');
+        $productUser->save();
+    }
+
+    /**
+     * @param string $staffId
+     * @param string $deptId
+     */
+    public function saveStaffMainDept($staffId, $deptId)
+    {
+        StaffMainDept::where('staff_id', $staffId)->delete();
+        $staffMainDept = new StaffMainDept();
+        $staffMainDept->staff_id = $staffId;
+        $staffMainDept->department = $deptId;
+        $staffMainDept->modify_time = date('Y-m-d H:i:s');
+        $staffMainDept->save();
+    }
+
+    /**
+     * @param string $staffId
+     * @param array  $deptIds
+     * @param string $order
+     */
+    public function saveStaffDept($staffId, $deptIds, $order)
+    {
+        StaffDept::where('staff_id', $staffId)->delete();
+        foreach ($deptIds as $v) {
+            $staffDept = new StaffDept();
+            $staffDept->staff_id = $staffId;
+            $staffDept->department = $v;
+            $staffDept->order = $order;
+            $staffDept->modify_time = date('Y-m-d H:i:s');
+            $staffDept->save();
         }
     }
 
@@ -342,5 +331,18 @@ class OaRepository
         }
 
         return $this->isPurchaseDept($dept->parent_id);
+    }
+
+    private function generateAuthorization()
+    {
+        try {
+            $response = $this->client->request('GET', 'rest/authorization/authorize', [
+                RequestOptions::QUERY => ['appKey' => $this->oaAppKey, 'appSecret' => $this->oaAppSecret],
+            ]);
+            $json = json_decode($response->getBody()->getContents(), true);
+            $this->authorization = $json['data']['authorization'] ?? '';
+        } catch (GuzzleException | Exception $exception) {
+            dump($exception->getMessage());
+        }
     }
 }
