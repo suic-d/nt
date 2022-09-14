@@ -73,6 +73,10 @@ class OaApi extends Command
             $staff->employee_status = empty($u['employeeStatus']) ? -1 : $u['employeeStatus'];
             $staff->modify_time = date('Y-m-d H:i:s');
             $staff->save();
+
+            $deptIds = empty($u['deptIds']) ? [$deptId] : explode(',', $u['deptIds']);
+            $this->saveStaffDept($staff->staff_id, $deptIds, $u['order']);
+
             if (!empty($userDetail = $this->getUserDetail($staff->staff_id))) {
                 $staff->union_id = $userDetail['unionId'];
                 $staff->mobile = $userDetail['mobile'];
@@ -90,9 +94,6 @@ class OaApi extends Command
                 $mainDeptId = empty($userDetail['mainDeptId']) ? $deptId : $userDetail['mainDeptId'];
                 $this->saveStaffMainDept($staff->staff_id, $mainDeptId);
             }
-
-            $deptIds = empty($u['deptIds']) ? [$deptId] : explode(',', $u['deptIds']);
-            $this->saveStaffDept($staff->staff_id, $deptIds, $u['order']);
         }
     }
 
