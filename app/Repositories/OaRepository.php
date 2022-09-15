@@ -106,7 +106,7 @@ class OaRepository
      *
      * @return array
      */
-    public function getDeptUser($deptId)
+    public function getDeptUsers($deptId)
     {
         try {
             $response = $this->client->request('GET', 'rest/ding/user/indept', [
@@ -171,7 +171,7 @@ class OaRepository
      */
     public function saveDeptUser($deptId)
     {
-        foreach ($this->getDeptUser($deptId) as $u) {
+        foreach ($this->getDeptUsers($deptId) as $u) {
             $staff = StaffList::where('staff_id', $u['id'])->first();
             if (is_null($staff)) {
                 $staff = new StaffList();
