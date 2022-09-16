@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\Assess;
 
 use App\Models\Assess\AssessFollowerDetail;
 use App\Models\Assess\AssessUserDetail;
@@ -10,17 +10,16 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use Illuminate\Console\Command;
-use Illuminate\Support\Env;
 use Illuminate\Support\Facades\DB;
 
-class AssessHelper extends Command
+class Helper extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'assess-helper';
+    protected $signature = 'assess:helper';
 
     /**
      * The console command description.
