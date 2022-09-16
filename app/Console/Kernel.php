@@ -42,10 +42,6 @@ class Kernel extends ConsoleKernel
             ->dailyAt('10:00')
             ->withoutOverlapping()
         ;
-
-        /** 测评系统 */
-        // 同步OA
-//        $schedule->command('crontab:assess-oa')->dailyAt('12:30')->withoutOverlapping();
     }
 
     /**
