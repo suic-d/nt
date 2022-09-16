@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\Product;
 
 use App\Models\LevelConfig;
 use App\Models\Product\Dictionary;
@@ -16,7 +16,6 @@ use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\RequestOptions;
 use Illuminate\Console\Command;
-use Illuminate\Support\Env;
 use Illuminate\Support\Facades\DB;
 
 class LevelReport extends Command
@@ -26,7 +25,7 @@ class LevelReport extends Command
      *
      * @var string
      */
-    protected $signature = 'crontab:level_report';
+    protected $signature = 'product:levelReport';
 
     /**
      * The console command description.
@@ -35,35 +34,19 @@ class LevelReport extends Command
      */
     protected $description = 'sku等级报表';
 
-    /**
-     * @var string
-     */
-    protected $baseUri;
+    protected $client;
 
     /**
      * @var \Illuminate\Database\Eloquent\Collection|LevelConfig[]
      */
     private static $levelConfigs;
 
-    /**
-     * @var Client
-     */
-    private $client;
-
-    /**
-     * Create a new command instance.
-     */
     public function __construct()
     {
         parent::__construct();
-
-        $this->baseUri = env('BASE_URL');
-        $this->client = new Client(['base_uri' => $this->baseUri, 'verify' => false]);
+        $this->client = new Client(['base_uri' => env('BASE_URL'), 'verify' => false]);
     }
 
-    /**
-     * Execute the console command.
-     */
     public function handle()
     {
         $this->rl();
@@ -105,7 +88,7 @@ class LevelReport extends Command
             ->join('nt_spu_info as si', 'si.spu', '=', 'pp.spu')
             ->leftJoin('nt_supplier as su', 'su.id', '=', 'sk.supplier_id')
             ->leftJoin('nt_dictionary as di', 'di.id', '=', 'su.shipping_province')
-            ->orderBy('pp.done_at', 'desc')
+            ->orderByDesc('pp.done_at')
             ->paginate($perPage, ['pp.sku'], 'page', 1)
             ->lastPage()
         ;
@@ -147,6 +130,7 @@ class LevelReport extends Command
             }
 
             unset($products);
+            dump($page++);
         }
     }
 
@@ -180,7 +164,6 @@ class LevelReport extends Command
             $supplier = Supplier::find($skuModel->supplier_id);
             if (!is_null($supplier)) {
                 $skuLevel->arrival_time = self::getArrivalTime($supplier->supplier_name);
-
                 $dictionary = Dictionary::find($supplier->shipping_province);
                 if (!is_null($dictionary)) {
                     $skuLevel->delivery_place = $dictionary->name;
@@ -209,7 +192,7 @@ class LevelReport extends Command
                                 continue;
                             }
                         } else {
-                            if (bccomp($skuLevel->arrival_time, $config->arrival_time_max, 1) > 0) {
+                            if (bccomp($skuLevel->arrival_time, $config->arrival_time_max, 1) >= 0) {
                                 continue;
                             }
                         }
@@ -246,6 +229,18 @@ class LevelReport extends Command
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Collection|LevelConfig[]
+     */
+    public static function getLevelConfigs()
+    {
+        if (is_null(self::$levelConfigs)) {
+            self::$levelConfigs = LevelConfig::get();
+        }
+
+        return self::$levelConfigs;
+    }
+
+    /**
      * @param string $supplierName
      *
      * @return float
@@ -254,10 +249,10 @@ class LevelReport extends Command
     {
         $arrivalList = DB::connection('mysql_data')
             ->table('purchase_stat_current', 'psc')
-            ->leftJoin('store AS s', 's.storeId', '=', 'psc.storeId')
+            ->leftJoin('store as s', 's.storeId', '=', 'psc.storeId')
             ->where('psc.supplierName', $supplierName)
             ->groupBy(['psc.storeId', 'psc.supplierName'])
-            ->get(['s.name', 'psc.supplierName', 'psc.period', DB::raw('IF(COUNT(*), COUNT(*), 0) AS batch')])
+            ->get(['s.name', 'psc.supplierName', 'psc.period', DB::raw('IF(COUNT(*), COUNT(*), 0) as batch')])
         ;
         if ($arrivalList->isEmpty()) {
             return 0.0;
@@ -271,17 +266,5 @@ class LevelReport extends Command
         }
 
         return round($periodSum / $batchSum, 1);
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Collection|LevelConfig[]
-     */
-    public static function getLevelConfigs()
-    {
-        if (is_null(self::$levelConfigs)) {
-            self::$levelConfigs = LevelConfig::get();
-        }
-
-        return self::$levelConfigs;
     }
 }
