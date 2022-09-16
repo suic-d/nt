@@ -29,15 +29,13 @@ class GetProcessInstance extends Command
     protected $description = '钉钉审核';
 
     /**
-     * @var string
-     */
-    private $baseUri;
-
-    /**
      * @var Client
      */
     private $client;
 
+    /**
+     * @var Logger
+     */
     private $logger;
 
     /**
@@ -47,8 +45,7 @@ class GetProcessInstance extends Command
     {
         parent::__construct();
 
-        $this->baseUri = env('BASE_URL');
-        $this->client = new Client(['base_uri' => $this->baseUri, 'verify' => false]);
+        $this->client = new Client(['base_uri' => env('BASE_URL'), 'verify' => false]);
         $this->logger = new Logger('getProcessInstance');
         $this->logger->pushHandler(new StreamHandler(storage_path('logs/getProcessInstance.log'), Logger::INFO));
     }
