@@ -34,6 +34,9 @@ class LevelReport extends Command
      */
     protected $description = 'sku等级报表';
 
+    /**
+     * @var Client
+     */
     protected $client;
 
     /**
