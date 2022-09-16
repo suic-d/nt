@@ -9,7 +9,8 @@ use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\RequestOptions;
 use Illuminate\Console\Command;
-use Illuminate\Support\Env;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 
 class GetProcessInstance extends Command
 {
@@ -37,10 +38,7 @@ class GetProcessInstance extends Command
      */
     private $client;
 
-    /**
-     * @var string
-     */
-    private $logFile;
+    private $logger;
 
     /**
      * Create a new command instance.
@@ -51,7 +49,8 @@ class GetProcessInstance extends Command
 
         $this->baseUri = env('BASE_URL');
         $this->client = new Client(['base_uri' => $this->baseUri, 'verify' => false]);
-        $this->logFile = '/www/logs/laravel-'.date('Y-m-d').'.log';
+        $this->logger = new Logger('getProcessInstance');
+        $this->logger->pushHandler(new StreamHandler(storage_path('logs/getProcessInstance.log'), Logger::INFO));
     }
 
     /**
@@ -60,16 +59,6 @@ class GetProcessInstance extends Command
     public function handle()
     {
         $this->pool();
-        $this->log(__METHOD__);
-    }
-
-    /**
-     * @param string $log
-     */
-    public function log($log)
-    {
-        $message = sprintf('[%s] %s'.PHP_EOL, date('Y-m-d H:i:s'), $log);
-        error_log($message, 3, $this->logFile);
     }
 
     public function request()
@@ -88,11 +77,9 @@ class GetProcessInstance extends Command
                 $response = $this->client->request('GET', 'index.php/api/v1/ExternalAPI/getProcessInstance', [
                     RequestOptions::QUERY => ['review_id' => $v->id],
                 ]);
-                $this->log($contents = $response->getBody()->getContents());
-                dump($contents);
+                $this->logger->info($response->getBody()->getContents());
             } catch (GuzzleException $exception) {
-                $this->log($msg = $exception->getMessage());
-                dump($msg);
+                $this->logger->info($exception->getMessage());
             }
         }
     }
@@ -112,12 +99,10 @@ class GetProcessInstance extends Command
         $pool = new Pool($this->client, $requests(), [
             'concurrency' => 5,
             'fulfilled' => function ($response) {
-                $this->log($contents = $response->getBody()->getContents());
-                dump($contents);
+                $this->logger->info($response->getBody()->getContents());
             },
             'rejected' => function ($reason) {
-                $this->log($msg = $reason->getMessage());
-                dump($msg);
+                $this->logger->info($reason->getMessage());
             },
         ]);
         $pool->promise()->wait();
