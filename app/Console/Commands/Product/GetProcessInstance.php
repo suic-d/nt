@@ -1,13 +1,11 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\Product;
 
 use App\Models\SkuReview;
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\RequestOptions;
 use Illuminate\Console\Command;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -19,7 +17,7 @@ class GetProcessInstance extends Command
      *
      * @var string
      */
-    protected $signature = 'get-process-instance';
+    protected $signature = 'product:getProcessInstance';
 
     /**
      * The console command description.
@@ -31,57 +29,22 @@ class GetProcessInstance extends Command
     /**
      * @var Client
      */
-    private $client;
+    protected $client;
 
     /**
      * @var Logger
      */
-    private $logger;
+    protected $logger;
 
-    /**
-     * Create a new command instance.
-     */
     public function __construct()
     {
         parent::__construct();
-
         $this->client = new Client(['base_uri' => env('BASE_URL'), 'verify' => false]);
         $this->logger = new Logger('getProcessInstance');
         $this->logger->pushHandler(new StreamHandler(storage_path('logs/getProcessInstance.log'), Logger::INFO));
     }
 
-    /**
-     * Execute the console command.
-     */
     public function handle()
-    {
-        $this->pool();
-    }
-
-    public function request()
-    {
-        $reviews = SkuReview::whereIn('process_status', ['NEW', 'RUNNING'])
-            ->orderBy('id')
-            ->forPage(1, 200)
-            ->get(['id'])
-        ;
-        if ($reviews->isEmpty()) {
-            return;
-        }
-
-        foreach ($reviews as $v) {
-            try {
-                $response = $this->client->request('GET', 'index.php/api/v1/ExternalAPI/getProcessInstance', [
-                    RequestOptions::QUERY => ['review_id' => $v->id],
-                ]);
-                $this->logger->info($response->getBody()->getContents());
-            } catch (GuzzleException $exception) {
-                $this->logger->info($exception->getMessage());
-            }
-        }
-    }
-
-    public function pool()
     {
         $requests = function () {
             $reviews = SkuReview::whereIn('process_status', ['NEW', 'RUNNING'])
@@ -99,7 +62,7 @@ class GetProcessInstance extends Command
                 $this->logger->info($response->getBody()->getContents());
             },
             'rejected' => function ($reason) {
-                $this->logger->info($reason->getMessage());
+                $this->logger->error($reason->getMessage());
             },
         ]);
         $pool->promise()->wait();

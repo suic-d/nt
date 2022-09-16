@@ -33,7 +33,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('product:syncStaffDetail')->dailyAt('12:10')->withoutOverlapping();
         $schedule->command('product:syncProductUser')->dailyAt('12:15')->withoutOverlapping();
         // 钉钉审核
-        $schedule->command('get-process-instance')->everyFiveMinutes();
+        $schedule->command('product:getProcessInstance')->everyFiveMinutes();
 
         /** 资产信息管理 */
         // 更新公司天眼查数据信息，每周二执行
