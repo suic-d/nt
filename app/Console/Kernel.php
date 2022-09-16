@@ -28,7 +28,6 @@ class Kernel extends ConsoleKernel
         // 更新各平台刊登信息
         $schedule->command('crontab:spu_published_list')->dailyAt('10:15')->withoutOverlapping();
         // 同步OA
-//        $schedule->command('crontab:oa')->dailyAt('12:30')->withoutOverlapping();
         $schedule->command('product:syncDeptList')->dailyAt('12:00')->withoutOverlapping();
         $schedule->command('product:syncDeptUser')->dailyAt('12:05')->withoutOverlapping();
         $schedule->command('product:syncStaffDetail')->dailyAt('12:10')->withoutOverlapping();
@@ -38,7 +37,7 @@ class Kernel extends ConsoleKernel
 
         /** 资产信息管理 */
         // 更新公司天眼查数据信息，每周二执行
-        $schedule->command('crontab:update_company_info')
+        $schedule->command('asset:updateCompanyInfo')
             ->days([Schedule::TUESDAY])
             ->dailyAt('10:00')
             ->withoutOverlapping()
