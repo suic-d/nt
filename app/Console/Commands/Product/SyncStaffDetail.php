@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands\Product;
 
-use App\Models\DeptList;
+use App\Models\StaffList;
 use GuzzleHttp\Client;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
@@ -10,21 +10,21 @@ use Illuminate\Console\Command;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 
-class SyncDeptUser extends Command
+class SyncStaffDetail extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'product:syncDeptUser';
+    protected $signature = 'product:syncStaffDetail';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = '获取部门下用户';
+    protected $description = '获取员工详情';
 
     /**
      * @var Client
@@ -40,16 +40,16 @@ class SyncDeptUser extends Command
     {
         parent::__construct();
         $this->client = new Client(['base_uri' => env('BASE_URL'), 'verify' => false]);
-        $this->logger = new Logger('syncDeptUser');
-        $this->logger->pushHandler(new StreamHandler(storage_path('logs/syncDeptUser.log'), Logger::INFO));
+        $this->logger = new Logger('syncStaffDetail');
+        $this->logger->pushHandler(new StreamHandler(storage_path('logs/syncStaffDetail.log'), Logger::INFO));
     }
 
     public function handle()
     {
         $requests = function () {
-            $deptIdArr = DeptList::get(['dept_id'])->pluck('dept_id');
-            foreach ($deptIdArr as $value) {
-                yield $value => new Request('GET', 'index.php/oaapi/oaapi/deptUser?id='.$value);
+            $staffIdArr = StaffList::where('is_dimission', 1)->get(['staff_id'])->pluck('staff_id');
+            foreach ($staffIdArr as $value) {
+                yield $value => new Request('GET', 'index.php/oaapi/oaapi/staffDetail?id='.$value);
             }
         };
         $pool = new Pool($this->client, $requests(), [
