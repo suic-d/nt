@@ -5,6 +5,7 @@ namespace App\Console\Commands\Product;
 use App\Models\Sku;
 use App\Models\SpuPublished;
 use App\Models\SpuPublishedList;
+use Exception;
 use Illuminate\Console\Command;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -45,56 +46,61 @@ class PublishedList extends Command
         ini_set('memory_limit', '512M');
         $this->logger->info(__METHOD__.' processing');
 
-        $skuArr = SpuPublished::whereRaw('DATE(add_time) >= ?', [date('Y-m-d', strtotime('-10 days'))])
-            ->distinct()
-            ->get(['sku'])
-            ->pluck('sku')
-            ->toArray()
-        ;
-        foreach ($skuArr as $sku) {
-            $model = SpuPublishedList::where('sku', $sku)->first();
-            if (is_null($model)) {
-                $model = new SpuPublishedList();
-                $model->sku = $sku;
-                $publishedModel = SpuPublished::where('sku', $sku)
-                    ->where('spu', '!=', '')
-                    ->whereNotNull('spu')
-                    ->first()
-                ;
-                if (is_null($publishedModel)) {
-                    $skuModel = Sku::find($sku);
-                    if (!is_null($skuModel)) {
-                        $model->spu = $skuModel->spu;
+        try {
+            $skuArr = SpuPublished::whereRaw('DATE(add_time) >= ?', [date('Y-m-d', strtotime('-10 days'))])
+                ->distinct()
+                ->get(['sku'])
+                ->pluck('sku')
+                ->toArray()
+            ;
+            foreach ($skuArr as $sku) {
+                $model = SpuPublishedList::where('sku', $sku)->first();
+                if (is_null($model)) {
+                    $model = new SpuPublishedList();
+                    $model->sku = $sku;
+                    $publishedModel = SpuPublished::where('sku', $sku)
+                        ->where('spu', '!=', '')
+                        ->whereNotNull('spu')
+                        ->first()
+                    ;
+                    if (is_null($publishedModel)) {
+                        $skuModel = Sku::find($sku);
+                        if (!is_null($skuModel)) {
+                            $model->spu = $skuModel->spu;
+                        }
+                    } else {
+                        $model->spu = $publishedModel->spu;
                     }
-                } else {
-                    $model->spu = $publishedModel->spu;
+                    $model->add_time = date('Y-m-d H:i:s');
                 }
-                $model->add_time = date('Y-m-d H:i:s');
-            }
 
-            $publishedModels = SpuPublished::where('sku', $sku)->get(['id', 'platform']);
-            $publishedGroup = $publishedModels->reduce(function ($carry, $item) {
-                $platform = strtolower($item->platform);
-                if (!isset($carry[$platform])) {
-                    $carry[$platform] = [];
+                $publishedModels = SpuPublished::where('sku', $sku)->get(['id', 'platform']);
+                $publishedGroup = $publishedModels->reduce(function ($carry, $item) {
+                    $platform = strtolower($item->platform);
+                    if (!isset($carry[$platform])) {
+                        $carry[$platform] = [];
+                    }
+                    $carry[$platform][] = $item->id;
+
+                    return $carry;
+                }, []);
+                $model->link_count = $publishedModels->count();
+                $model->pl_count = count($publishedGroup);
+                $model->amazon_count = isset($publishedGroup['amazon']) ? count($publishedGroup['amazon']) : 0;
+                $model->ebay_count = isset($publishedGroup['ebay']) ? count($publishedGroup['ebay']) : 0;
+                $model->lazada_count = isset($publishedGroup['lazada']) ? count($publishedGroup['lazada']) : 0;
+                $model->aliexpress_count = isset($publishedGroup['aliexpress'])
+                    ? count($publishedGroup['aliexpress']) : 0;
+                $model->shopee_count = isset($publishedGroup['shopee']) ? count($publishedGroup['shopee']) : 0;
+                if ($model->isDirty()) {
+                    $model->update_time = date('Y-m-d H:i:s');
+                    $model->save();
                 }
-                $carry[$platform][] = $item->id;
 
-                return $carry;
-            }, []);
-            $model->link_count = $publishedModels->count();
-            $model->pl_count = count($publishedGroup);
-            $model->amazon_count = isset($publishedGroup['amazon']) ? count($publishedGroup['amazon']) : 0;
-            $model->ebay_count = isset($publishedGroup['ebay']) ? count($publishedGroup['ebay']) : 0;
-            $model->lazada_count = isset($publishedGroup['lazada']) ? count($publishedGroup['lazada']) : 0;
-            $model->aliexpress_count = isset($publishedGroup['aliexpress']) ? count($publishedGroup['aliexpress']) : 0;
-            $model->shopee_count = isset($publishedGroup['shopee']) ? count($publishedGroup['shopee']) : 0;
-            if ($model->isDirty()) {
-                $model->update_time = date('Y-m-d H:i:s');
-                $model->save();
+                unset($publishedModels, $publishedGroup);
             }
-
-            unset($publishedModels, $publishedGroup);
+        } catch (Exception $exception) {
+            $this->logger->error($exception->getMessage());
         }
 
         $this->logger->info(__METHOD__.' processed');
