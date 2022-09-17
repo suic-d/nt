@@ -1,20 +1,20 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\Product;
 
 use App\Models\Sku;
 use App\Models\SpuPublished;
 use App\Models\SpuPublishedList;
 use Illuminate\Console\Command;
 
-class SpuPublishedListCommand extends Command
+class PublishedList extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'crontab:spu_published_list';
+    protected $signature = 'product:publishedList';
 
     /**
      * The console command description.
@@ -23,9 +23,6 @@ class SpuPublishedListCommand extends Command
      */
     protected $description = '刊登报表';
 
-    /**
-     * Create a new command instance.
-     */
     public function __construct()
     {
         parent::__construct();

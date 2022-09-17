@@ -26,7 +26,7 @@ class Kernel extends ConsoleKernel
         // 禁上报表
         $schedule->command('crontab:publish_forbidden')->dailyAt('10:00')->withoutOverlapping();
         // 更新各平台刊登信息
-        $schedule->command('crontab:spu_published_list')->dailyAt('10:15')->withoutOverlapping();
+        $schedule->command('product:publishedList')->dailyAt('10:15')->withoutOverlapping();
         // 同步OA
         $schedule->command('product:syncDeptList')->dailyAt('12:00')->withoutOverlapping();
         $schedule->command('product:syncDeptUser')->dailyAt('12:05')->withoutOverlapping();
