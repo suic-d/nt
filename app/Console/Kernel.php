@@ -24,7 +24,7 @@ class Kernel extends ConsoleKernel
     {
         /** 商品中心 */
         // 禁上报表
-        $schedule->command('crontab:publish_forbidden')->dailyAt('10:00')->withoutOverlapping();
+        $schedule->command('product:publishForbidden')->dailyAt('10:00')->withoutOverlapping();
         // 更新各平台刊登信息
         $schedule->command('product:publishedList')->dailyAt('10:15')->withoutOverlapping();
         // 同步OA

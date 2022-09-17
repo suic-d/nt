@@ -1,22 +1,21 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\Product;
 
 use App\Models\AliExpressListingProhibit;
 use App\Models\AmazonForbidPublishReason;
 use App\Models\EbayBanOn;
 use App\Models\LazadaBanOn;
-use App\Models\PublishForbidden;
 use Illuminate\Console\Command;
 
-class PublishForbiddenCommand extends Command
+class PublishForbidden extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'crontab:publish_forbidden';
+    protected $signature = 'product:publishForbidden';
 
     /**
      * The console command description.
