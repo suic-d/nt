@@ -93,6 +93,8 @@ class PublishedList extends Command
                 $model->update_time = date('Y-m-d H:i:s');
                 $model->save();
             }
+
+            unset($publishedModels, $publishedGroup);
         }
 
         $this->logger->info(__METHOD__.' processed');
