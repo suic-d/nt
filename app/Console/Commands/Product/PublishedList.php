@@ -6,6 +6,8 @@ use App\Models\Sku;
 use App\Models\SpuPublished;
 use App\Models\SpuPublishedList;
 use Illuminate\Console\Command;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 
 class PublishedList extends Command
 {
@@ -23,9 +25,16 @@ class PublishedList extends Command
      */
     protected $description = '刊登报表';
 
+    /**
+     * @var Logger
+     */
+    protected $logger;
+
     public function __construct()
     {
         parent::__construct();
+        $this->logger = new Logger('publishedList');
+        $this->logger->pushHandler(new StreamHandler(storage_path('logs/publishedList.log'), Logger::INFO));
     }
 
     /**
@@ -33,6 +42,8 @@ class PublishedList extends Command
      */
     public function handle()
     {
+        $this->logger->info(__METHOD__.' processing');
+
         SpuPublished::distinct()
             ->whereRaw('DATE(add_time) >= ?', [date('Y-m-d', strtotime('-10 day'))])
             ->get(['sku'])
@@ -58,13 +69,13 @@ class PublishedList extends Command
                     $model->add_time = date('Y-m-d H:i:s');
                 }
 
-                $spuPublishedModels = SpuPublished::where('sku', $item->sku)->get();
-                $spuPublishedGroup = $spuPublishedModels->reduce(function ($carry, SpuPublished $item) {
+                $spuPublishedModels = SpuPublished::where('sku', $item->sku)->get(['id', 'platform']);
+                $spuPublishedGroup = $spuPublishedModels->reduce(function ($carry, $item) {
                     $platform = strtolower($item->platform);
                     if (!isset($carry[$platform])) {
                         $carry[$platform] = [];
                     }
-                    $carry[$platform][] = $item;
+                    $carry[$platform][] = $item->id;
 
                     return $carry;
                 }, []);
@@ -83,5 +94,7 @@ class PublishedList extends Command
                 }
             })
         ;
+
+        $this->logger->info(__METHOD__.' processed');
     }
 }
