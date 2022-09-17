@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\Fba;
 
 use App\Helpers\Europe;
 use App\Helpers\FarEast;
@@ -10,14 +10,14 @@ use Illuminate\Console\Command;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Symfony\Component\Console\Input\InputArgument;
 
-class ShopGrantAuthorization extends Command
+class ShopAuth extends Command
 {
     /**
      * The console command name.
      *
      * @var string
      */
-    protected $name = 'shop-grant-auth';
+    protected $name = 'fba:shopAuth';
 
     /**
      * The console command description.
