@@ -6,6 +6,9 @@ use App\Models\Sku;
 use App\Models\SpuPublished;
 use App\Models\SpuPublishedList;
 use Exception;
+use GuzzleHttp\Client;
+use GuzzleHttp\Pool;
+use GuzzleHttp\Psr7\Request;
 use Illuminate\Console\Command;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -31,11 +34,17 @@ class PublishedList extends Command
      */
     protected $logger;
 
+    /**
+     * @var Client
+     */
+    protected $client;
+
     public function __construct()
     {
         parent::__construct();
         $this->logger = new Logger('publishedList');
         $this->logger->pushHandler(new StreamHandler(storage_path('logs/publishedList.log'), Logger::INFO));
+        $this->client = new Client(['base_uri' => env('BASE_URL'), 'verify' => false]);
     }
 
     /**
@@ -45,7 +54,37 @@ class PublishedList extends Command
     {
         ini_set('memory_limit', '512M');
         $this->logger->info(__METHOD__.' processing');
+        $this->request();
+        $this->logger->info(__METHOD__.' processed');
+    }
 
+    public function request()
+    {
+        $requests = function () {
+            $skuArr = SpuPublished::whereRaw('DATE(add_time) >= ?', [date('Y-m-d', strtotime('-10 days'))])
+                ->distinct()
+                ->get(['sku'])
+                ->pluck('sku')
+                ->toArray()
+            ;
+            foreach ($skuArr as $sku) {
+                yield $sku => new Request('GET', 'index.php/crontab/TransAttr/updatePublishedList?sku='.$sku);
+            }
+        };
+        $pool = new Pool($this->client, $requests(), [
+            'concurrency' => 5,
+            'fulfilled' => function ($response, $idx) {
+                $this->logger->info($idx.' '.$response->getBody()->getContents());
+            },
+            'rejected' => function ($reason, $idx) {
+                $this->logger->error($idx.' '.$reason->getMessage());
+            },
+        ]);
+        $pool->promise()->wait();
+    }
+
+    public function db()
+    {
         try {
             $skuArr = SpuPublished::whereRaw('DATE(add_time) >= ?', [date('Y-m-d', strtotime('-10 days'))])
                 ->distinct()
@@ -102,7 +141,5 @@ class PublishedList extends Command
         } catch (Exception $exception) {
             $this->logger->error($exception->getMessage());
         }
-
-        $this->logger->info(__METHOD__.' processed');
     }
 }
