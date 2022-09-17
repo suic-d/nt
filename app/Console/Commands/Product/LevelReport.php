@@ -17,6 +17,8 @@ use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\RequestOptions;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 
 class LevelReport extends Command
 {
@@ -40,6 +42,11 @@ class LevelReport extends Command
     protected $client;
 
     /**
+     * @var Logger
+     */
+    protected $logger;
+
+    /**
      * @var \Illuminate\Database\Eloquent\Collection|LevelConfig[]
      */
     private static $levelConfigs;
@@ -48,11 +55,15 @@ class LevelReport extends Command
     {
         parent::__construct();
         $this->client = new Client(['base_uri' => env('BASE_URL'), 'verify' => false]);
+        $this->logger = new Logger('levelReport');
+        $this->logger->pushHandler(new StreamHandler(storage_path('logs/levelReport.log'), Logger::INFO));
     }
 
     public function handle()
     {
+        $this->logger->info(__METHOD__.' processing');
         $this->rl();
+        $this->logger->info(__METHOD__.' processed');
     }
 
     public function rl()
