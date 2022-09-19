@@ -55,11 +55,11 @@ class SyncDeptUser extends Command
         $pool = new Pool($this->client, $requests(), [
             'concurrency' => 5,
             'fulfilled' => function ($response, $idx) {
-                $this->logger->info($idx.' '.$response->getBody()->getContents());
+                $this->logger->info('dept_id = '.$idx.' '.$response->getBody()->getContents());
                 $this->logger->close();
             },
             'rejected' => function ($reason, $idx) {
-                $this->logger->error($idx.' '.$reason->getMessage());
+                $this->logger->error('dept_id = '.$idx.' '.$reason->getMessage());
                 $this->logger->close();
             },
         ]);

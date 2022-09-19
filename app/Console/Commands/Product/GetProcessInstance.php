@@ -59,11 +59,11 @@ class GetProcessInstance extends Command
         $pool = new Pool($this->client, $requests(), [
             'concurrency' => 5,
             'fulfilled' => function ($response, $idx) {
-                $this->logger->info($idx.' '.$response->getBody()->getContents());
+                $this->logger->info('review_id = '.$idx.' '.$response->getBody()->getContents());
                 $this->logger->close();
             },
             'rejected' => function ($reason, $idx) {
-                $this->logger->error($idx.' '.$reason->getMessage());
+                $this->logger->error('review_id = '.$idx.' '.$reason->getMessage());
                 $this->logger->close();
             },
         ]);
