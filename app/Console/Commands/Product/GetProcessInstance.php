@@ -60,9 +60,11 @@ class GetProcessInstance extends Command
             'concurrency' => 5,
             'fulfilled' => function ($response, $idx) {
                 $this->logger->info($idx.' '.$response->getBody()->getContents());
+                $this->logger->close();
             },
             'rejected' => function ($reason, $idx) {
                 $this->logger->error($idx.' '.$reason->getMessage());
+                $this->logger->close();
             },
         ]);
         $pool->promise()->wait();
