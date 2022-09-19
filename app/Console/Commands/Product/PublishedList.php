@@ -104,21 +104,13 @@ class PublishedList extends Command
                         ->whereNotNull('spu')
                         ->first()
                     ;
-                    if (is_null($publishedModel)) {
-                        $skuModel = Sku::find($sku);
-                        if (!is_null($skuModel)) {
-                            $model->spu = $skuModel->spu;
-                        }
-                    } else {
-                        $model->spu = $publishedModel->spu;
-                    }
+                    $model->spu = $publishedModel->spu ?? (Sku::find($sku)->spu ?? '');
                     $model->add_time = date('Y-m-d H:i:s');
                 }
 
                 $publishedModels = SpuPublished::where('sku', $sku)->get(['id', 'platform']);
                 $publishedGroup = $publishedModels->reduce(function ($carry, $item) {
-                    $platform = strtolower($item->platform);
-                    if (!isset($carry[$platform])) {
+                    if (!isset($carry[$platform = strtolower($item->platform)])) {
                         $carry[$platform] = [];
                     }
                     $carry[$platform][] = $item->id;
@@ -127,12 +119,11 @@ class PublishedList extends Command
                 }, []);
                 $model->link_count = $publishedModels->count();
                 $model->pl_count = count($publishedGroup);
-                $model->amazon_count = isset($publishedGroup['amazon']) ? count($publishedGroup['amazon']) : 0;
-                $model->ebay_count = isset($publishedGroup['ebay']) ? count($publishedGroup['ebay']) : 0;
-                $model->lazada_count = isset($publishedGroup['lazada']) ? count($publishedGroup['lazada']) : 0;
-                $model->aliexpress_count = isset($publishedGroup['aliexpress'])
-                    ? count($publishedGroup['aliexpress']) : 0;
-                $model->shopee_count = isset($publishedGroup['shopee']) ? count($publishedGroup['shopee']) : 0;
+                $model->amazon_count = count($publishedGroup['amazon'] ?? []);
+                $model->ebay_count = count($publishedGroup['ebay'] ?? []);
+                $model->lazada_count = count($publishedGroup['lazada'] ?? []);
+                $model->aliexpress_count = count($publishedGroup['aliexpress'] ?? []);
+                $model->shopee_count = count($publishedGroup['shopee'] ?? []);
                 if ($model->isDirty()) {
                     $model->update_time = date('Y-m-d H:i:s');
                     $model->save();
