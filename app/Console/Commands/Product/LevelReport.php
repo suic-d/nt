@@ -84,9 +84,9 @@ class LevelReport extends Command
                 $response = $this->client->request('POST', 'index.php/crontab/TransAttr/rl', [
                     RequestOptions::JSON => ['skus' => $products->pluck('sku')],
                 ]);
-                dump($response->getBody()->getContents());
+                $this->logger->info('page='.$page.'&limit='.$limit.' '.$response->getBody()->getContents());
             } catch (GuzzleException $exception) {
-                dump($exception->getMessage());
+                $this->logger->error('page='.$page.'&limit='.$limit.' '.$exception->getMessage());
             }
 
             unset($products);
@@ -108,16 +108,16 @@ class LevelReport extends Command
         ;
         $requests = function () use ($perPage, $lastPage) {
             for ($page = 1; $page <= $lastPage; ++$page) {
-                yield new Request('GET', 'index.php/crontab/TransAttr/lr?page='.$page.'&limit='.$perPage);
+                yield $page => new Request('GET', 'index.php/crontab/TransAttr/lr?page='.$page.'&limit='.$perPage);
             }
         };
         $pool = new Pool($this->client, $requests(), [
             'concurrency' => 5,
-            'fulfilled' => function ($response) {
-                dump($response->getBody()->getContents());
+            'fulfilled' => function ($response, $idx) {
+                $this->logger->info('page='.$idx.' '.$response->getBody()->getContents());
             },
-            'rejected' => function ($reason) {
-                dump($reason->getMessage());
+            'rejected' => function ($reason, $idx) {
+                $this->logger->error('page='.$idx.' '.$reason->getMessage());
             },
         ]);
         $pool->promise()->wait();
