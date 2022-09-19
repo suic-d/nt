@@ -60,13 +60,13 @@ class PublishForbidden extends Command
             }
 
             $amazonForbidPublishReasons->each(function ($item) {
-                $publishForbidden = PublishForbidden::with('publishForbiddenReasons')
+                $publishForbidden = \App\Models\PublishForbidden::with('publishForbiddenReasons')
                     ->where('spu', $item->spu)
                     ->where('platform', 'amazon')
                     ->first()
                 ;
                 if (is_null($publishForbidden)) {
-                    $publishForbidden = new PublishForbidden();
+                    $publishForbidden = new \App\Models\PublishForbidden();
                     $publishForbidden->spu = $item->spu;
                     $publishForbidden->platform = 'amazon';
                 } else {
@@ -108,13 +108,13 @@ class PublishForbidden extends Command
             }
 
             $ebayBanOnModels->each(function ($item) {
-                $publishForbidden = PublishForbidden::with('publishForbiddenReasons')
+                $publishForbidden = \App\Models\PublishForbidden::with('publishForbiddenReasons')
                     ->where('spu', $item->spu)
                     ->where('platform', 'ebay')
                     ->first()
                 ;
                 if (is_null($publishForbidden)) {
-                    $publishForbidden = new PublishForbidden();
+                    $publishForbidden = new \App\Models\PublishForbidden();
                     $publishForbidden->spu = $item->spu;
                     $publishForbidden->platform = 'ebay';
                 } else {
@@ -171,13 +171,13 @@ class PublishForbidden extends Command
             }
 
             $lazadaBanOnModels->each(function ($item) {
-                $publishForbidden = PublishForbidden::with('publishForbiddenReasons')
+                $publishForbidden = \App\Models\PublishForbidden::with('publishForbiddenReasons')
                     ->where('spu', $item->spu)
                     ->where('platform', 'lazada')
                     ->first()
                 ;
                 if (is_null($publishForbidden)) {
-                    $publishForbidden = new PublishForbidden();
+                    $publishForbidden = new \App\Models\PublishForbidden();
                     $publishForbidden->spu = $item->spu;
                     $publishForbidden->platform = 'lazada';
                 } else {
@@ -231,13 +231,13 @@ class PublishForbidden extends Command
             }
 
             $aliexpressListingProhibits->each(function ($item) {
-                $publishForbidden = PublishForbidden::with('publishForbiddenReasons')
+                $publishForbidden = \App\Models\PublishForbidden::with('publishForbiddenReasons')
                     ->where('spu', $item->spu)
                     ->where('platform', 'aliexpress')
                     ->first()
                 ;
                 if (is_null($publishForbidden)) {
-                    $publishForbidden = new PublishForbidden();
+                    $publishForbidden = new \App\Models\PublishForbidden();
                     $publishForbidden->spu = $item->spu;
                     $publishForbidden->platform = 'aliexpress';
                 } else {
