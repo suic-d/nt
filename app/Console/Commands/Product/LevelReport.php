@@ -84,9 +84,9 @@ class LevelReport extends Command
                 $response = $this->client->request('POST', 'index.php/crontab/TransAttr/rl', [
                     RequestOptions::JSON => ['skus' => $products->pluck('sku')],
                 ]);
-                $this->logger->info('page='.$page.'&limit='.$limit.' '.$response->getBody()->getContents());
+                $this->logger->info('page='.$page.' '.$response->getBody()->getContents());
             } catch (GuzzleException $exception) {
-                $this->logger->error('page='.$page.'&limit='.$limit.' '.$exception->getMessage());
+                $this->logger->error('page='.$page.' '.$exception->getMessage());
             }
 
             unset($products);
