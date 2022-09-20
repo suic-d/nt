@@ -41,7 +41,10 @@ class GetProcessInstance extends Command
         parent::__construct();
         $this->client = new Client(['base_uri' => env('BASE_URL'), 'verify' => false]);
         $this->logger = new Logger('getProcessInstance');
-        $this->logger->pushHandler(new StreamHandler(storage_path('logs/getProcessInstance.log'), Logger::INFO));
+        $this->logger->pushHandler(new StreamHandler(
+            storage_path('logs/'.date('Ymd').'/getProcessInstance.log'),
+            Logger::INFO
+        ));
     }
 
     public function handle()
