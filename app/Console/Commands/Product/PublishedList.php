@@ -99,7 +99,7 @@ class PublishedList extends Command
             for ($offset = 0; $offset < $size; $offset += $length) {
                 yield $offset => new Request(
                     'POST',
-                    'index.php/crontab/TransAttr/batchPublishedList',
+                    'index.php/crontab/TransAttr/updatePublishedList',
                     ['Content-Type' => 'application/json'],
                     json_encode(['sku' => array_slice($skuArr, $offset, $length)])
                 );
