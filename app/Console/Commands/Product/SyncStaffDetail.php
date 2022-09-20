@@ -41,7 +41,10 @@ class SyncStaffDetail extends Command
         parent::__construct();
         $this->client = new Client(['base_uri' => env('BASE_URL'), 'verify' => false]);
         $this->logger = new Logger('syncStaffDetail');
-        $this->logger->pushHandler(new StreamHandler(storage_path('logs/syncStaffDetail.log'), Logger::INFO));
+        $this->logger->pushHandler(new StreamHandler(
+            storage_path('logs/'.date('Ymd').'/syncStaffDetail.log'),
+            Logger::INFO
+        ));
     }
 
     public function handle()

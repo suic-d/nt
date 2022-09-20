@@ -41,7 +41,10 @@ class SyncDeptUser extends Command
         parent::__construct();
         $this->client = new Client(['base_uri' => env('BASE_URL'), 'verify' => false]);
         $this->logger = new Logger('syncDeptUser');
-        $this->logger->pushHandler(new StreamHandler(storage_path('logs/syncDeptUser.log'), Logger::INFO));
+        $this->logger->pushHandler(new StreamHandler(
+            storage_path('logs/'.date('Ymd').'/syncDeptUser.log'),
+            Logger::INFO
+        ));
     }
 
     public function handle()
