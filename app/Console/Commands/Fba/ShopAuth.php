@@ -64,7 +64,8 @@ class ShopAuth extends Command
     public function refreshToken()
     {
         $file = '/www/20220426.xlsx';
-        $worksheet = IOFactory::load($file)->getActiveSheet();
+        $spreadsheet = IOFactory::load($file);
+        $worksheet = $spreadsheet->getActiveSheet();
         $highestRow = $worksheet->getHighestDataRow();
         for ($row = $this->argument('offset'); $row <= $highestRow; ++$row) {
             $account = trim($worksheet->getCell('A'.$row)->getValue());
@@ -92,12 +93,16 @@ class ShopAuth extends Command
                     break;
             }
         }
+
+        $spreadsheet->disconnectWorksheets();
+        unset($spreadsheet);
     }
 
     public function auth()
     {
         $file = '/www/20210820.xlsx';
-        $worksheet = IOFactory::load($file)->getActiveSheet();
+        $spreadsheet = IOFactory::load($file);
+        $worksheet = $spreadsheet->getActiveSheet();
         $highestRow = $worksheet->getHighestDataRow();
         for ($row = $this->argument('offset'); $row <= $highestRow; ++$row) {
             $account = trim($worksheet->getCell('A'.$row)->getValue());
@@ -132,6 +137,9 @@ class ShopAuth extends Command
                     break;
             }
         }
+
+        $spreadsheet->disconnectWorksheets();
+        unset($spreadsheet);
     }
 
     public function getArguments()
