@@ -9,7 +9,6 @@ use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\RequestOptions;
 use Illuminate\Console\Command;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -88,31 +87,36 @@ class PublishedList extends Command
 
     public function batch()
     {
-        $skuArr = SpuPublished::whereRaw('DATE(add_time) >= ?', [date('Y-m-d', strtotime('-10 days'))])
-            ->distinct()
-            ->get(['sku'])
-            ->pluck('sku')
-            ->toArray()
-        ;
-        $offset = 0;
-        $length = 100;
-        while (true) {
-            if (empty($sub = array_slice($skuArr, $offset, $length))) {
-                break;
+        $requests = function () {
+            $skuArr = SpuPublished::whereRaw('DATE(add_time) >= ?', [date('Y-m-d', strtotime('-10 days'))])
+                ->distinct()
+                ->get(['sku'])
+                ->pluck('sku')
+                ->toArray()
+            ;
+            $size = count($skuArr);
+            $length = 100;
+            for ($offset = 0; $offset < $size; $offset += $length) {
+                yield $offset => new Request(
+                    'POST',
+                    'index.php/crontab/TransAttr/batchPublishedList',
+                    ['Content-Type' => 'application/json'],
+                    json_encode(['sku' => array_slice($skuArr, $offset, $length)])
+                );
             }
-
-            try {
-                $response = $this->client->request('POST', 'index.php/crontab/TransAttr/batchPublishedList', [
-                    RequestOptions::JSON => ['sku' => $sub],
-                ]);
-                $this->logger->info('offset = '.$offset.' length = '.$length.' '.$response->getBody()->getContents());
-            } catch (Exception $exception) {
-                $this->logger->error($exception->getMessage());
-            }
-
-            unset($sub);
-            $offset += $length;
-        }
+        };
+        $pool = new Pool($this->client, $requests(), [
+            'concurrency' => 5,
+            'fulfilled' => function ($response, $idx) {
+                $this->logger->info('offset = '.$idx.' '.$response->getBody()->getContents());
+                $this->logger->close();
+            },
+            'rejected' => function ($reason, $idx) {
+                $this->logger->info('offset = '.$idx.' '.$reason->getMessage());
+                $this->logger->close();
+            },
+        ]);
+        $pool->promise()->wait();
     }
 
     public function db()
