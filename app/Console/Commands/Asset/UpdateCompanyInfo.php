@@ -41,7 +41,10 @@ class UpdateCompanyInfo extends Command
         parent::__construct();
         $this->client = new Client(['base_uri' => env('BASE_URL_ASSET'), 'verify' => false]);
         $this->logger = new Logger('updateCompanyInfo');
-        $this->logger->pushHandler(new StreamHandler(storage_path('logs/updateCompanyInfo.log'), Logger::INFO));
+        $this->logger->pushHandler(new StreamHandler(
+            storage_path('logs/'.date('Ymd').'/updateCompanyInfo.log'),
+            Logger::INFO
+        ));
     }
 
     public function handle()
