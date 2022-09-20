@@ -9,6 +9,7 @@ use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\RequestOptions;
 use Illuminate\Console\Command;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -83,6 +84,35 @@ class PublishedList extends Command
             },
         ]);
         $pool->promise()->wait();
+    }
+
+    public function batch()
+    {
+        $skuArr = SpuPublished::whereRaw('DATE(add_time) >= ?', [date('Y-m-d', strtotime('-10 days'))])
+            ->distinct()
+            ->get(['sku'])
+            ->pluck('sku')
+            ->toArray()
+        ;
+        $offset = 0;
+        $length = 100;
+        while (true) {
+            if (empty($sub = array_slice($skuArr, $offset, $length))) {
+                break;
+            }
+
+            try {
+                $response = $this->client->request('POST', 'index.php/crontab/TransAttr/batchPublishedList', [
+                    RequestOptions::JSON => ['sku' => $sub],
+                ]);
+                $this->logger->info('offset = '.$offset.' length = '.$length.' '.$response->getBody()->getContents());
+            } catch (Exception $exception) {
+                $this->logger->error($exception->getMessage());
+            }
+
+            unset($sub);
+            $offset += $length;
+        }
     }
 
     public function db()
