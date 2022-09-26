@@ -39,7 +39,10 @@ class SyncProductUser extends Command
         parent::__construct();
         $this->client = new Client(['base_uri' => env('BASE_URL'), 'verify' => false]);
         $this->logger = new Logger('syncProductUser');
-        $this->logger->pushHandler(new StreamHandler(storage_path('logs/syncProductUser.log'), Logger::INFO));
+        $this->logger->pushHandler(new StreamHandler(
+            storage_path('logs/'.date('Ymd').'/syncProductUser.log'),
+            Logger::INFO
+        ));
     }
 
     public function handle()
