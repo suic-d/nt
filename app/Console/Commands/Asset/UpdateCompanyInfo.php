@@ -58,7 +58,10 @@ class UpdateCompanyInfo extends Command
         $pool = new Pool($this->client, $requests(), [
             'concurrency' => 5,
             'fulfilled' => function ($response, $idx) {
-                $this->logger->info('company_id = '.$idx.' '.$response->getBody()->getContents());
+                $this->logger->info('company_id = '.$idx.' '.json_encode(
+                    json_decode($response->getBody()->getContents(), true),
+                    JSON_UNESCAPED_UNICODE
+                ));
                 $this->logger->close();
             },
             'rejected' => function ($reason, $idx) {
