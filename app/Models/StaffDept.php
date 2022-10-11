@@ -22,4 +22,12 @@ class StaffDept extends Model
      * @var string
      */
     protected $table = 'nt_staff_dept';
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function deptList()
+    {
+        return $this->hasOne(DeptList::class, 'dept_id', 'department');
+    }
 }
