@@ -8,6 +8,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Cache;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 
@@ -232,6 +233,11 @@ class ZhanGe extends Command
      */
     public function getUserInfo()
     {
+        $key = 'framework'.DIRECTORY_SEPARATOR.'cache-'.sha1(__METHOD__);
+        if (Cache::has($key)) {
+            return Cache::get($key);
+        }
+
         if (empty($this->userInfo)) {
             try {
                 $response = $this->client->request('GET', 'miniGame/getUserInfo', [
@@ -242,6 +248,11 @@ class ZhanGe extends Command
             } catch (GuzzleException $exception) {
                 $this->logger->error($exception->getMessage());
             }
+        }
+
+        if (!empty($this->userInfo)) {
+            // 缓存5分钟
+            Cache::set($key, $this->userInfo, 300);
         }
 
         return $this->userInfo;
