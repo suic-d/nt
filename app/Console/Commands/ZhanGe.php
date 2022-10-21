@@ -176,6 +176,7 @@ class ZhanGe extends Command
                     $raid->boss_id = $boss['bossId'];
                     $raid->boss_name = $boss['bossName'];
                     $raid->boss_level = $boss['bossLevel'];
+                    $raid->buff = $boss['buff'] ?? 0;
                     $raid->gold = $boss['goldDrop'];
                     $raid->gong_zheng = $boss['paiziDrop'] ?? 0;
                     $raid->han_bing = $boss['paizi80Drop'] ?? 0;
