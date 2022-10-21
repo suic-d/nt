@@ -42,6 +42,9 @@ class Kernel extends ConsoleKernel
             ->dailyAt('10:00')
             ->withoutOverlapping()
         ;
+
+        // 战歌峡谷
+        $schedule->command('zg:doRaid')->everyMinute();
     }
 
     /**
