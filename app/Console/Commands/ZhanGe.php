@@ -172,11 +172,18 @@ class ZhanGe extends Command
                     $raid->game_type = $gameType;
                     $raid->raid_id = $item['raidId'];
                     $raid->raid_name = $item['raidName'];
+                    $raid->raid_time = $item['raidTime'];
                     $raid->boss_id = $boss['bossId'];
                     $raid->boss_name = $boss['bossName'];
                     $raid->boss_level = $boss['bossLevel'];
+                    $raid->gold = $boss['goldDrop'];
+                    $raid->gong_zheng = $boss['paiziDrop'] ?? 0;
+                    $raid->han_bing = $boss['paizi80Drop'] ?? 0;
                     $raid->zb_id = $zb['id'];
                     $raid->zb_name = $zb['name'];
+                    $raid->zb_level = $zb['level'];
+                    $raid->zb_color = $zb['color'];
+                    $raid->drop_rate = join(',', $zb['gailv']);
                     $raid->save();
                 }
             }
