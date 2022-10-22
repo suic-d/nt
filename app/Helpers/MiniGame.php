@@ -50,7 +50,7 @@ class MiniGame
      */
     public function __construct($currentVersion = '')
     {
-        if (!empty($this->currentVersion)) {
+        if (!empty($currentVersion)) {
             $this->currentVersion = $currentVersion;
         }
 
@@ -272,5 +272,81 @@ class MiniGame
         }
 
         return $this->raidList;
+    }
+
+    /**
+     * @param int $level
+     *
+     * @return bool
+     */
+    public function buyFuMo($level)
+    {
+        $detail = $this->getFuMoDetail($level);
+        if (empty($detail)) {
+            return false;
+        }
+
+        return $this->buyZhuangBei($this->getFuMoDetail(30), 'fm');
+    }
+
+    /**
+     * @param int $level
+     *
+     * @return string
+     */
+    public function getFuMoDetail($level)
+    {
+        $map = array_column($this->getBuffList(json_encode([299])), null, 'level');
+        if (isset($map[$level])) {
+            return json_encode($map[$level], JSON_UNESCAPED_UNICODE);
+        }
+
+        return '';
+    }
+
+    /**
+     * @param string $buffId
+     *
+     * @return array
+     */
+    public function getBuffList($buffId)
+    {
+        try {
+            $response = $this->client->request('GET', 'miniGame/getBuffList', [
+                RequestOptions::QUERY => ['buffId' => $buffId],
+            ]);
+
+            return json_decode($response->getBody()->getContents(), true)['data'] ?? [];
+        } catch (GuzzleException $exception) {
+            $this->logger->error($exception->getMessage());
+        }
+
+        return [];
+    }
+
+    /**
+     * @param string $detail
+     * @param string $shopType
+     *
+     * @return bool
+     */
+    public function buyZhuangBei($detail, $shopType)
+    {
+        try {
+            $response = $this->client->request('GET', 'miniGame/buyZhuangbei', [RequestOptions::QUERY => [
+                'openid' => self::OPEN_ID,
+                'detail' => $detail,
+                'shopType' => $shopType,
+            ]]);
+            $this->logger->info($content = $response->getBody()->getContents());
+            $json = json_decode($content, true);
+            if (isset($json['code']) && 3 == $json['code']) {
+                return true;
+            }
+        } catch (GuzzleException | Exception $exception) {
+            $this->logger->error($exception->getMessage());
+        }
+
+        return false;
     }
 }
