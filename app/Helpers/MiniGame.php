@@ -379,4 +379,22 @@ class MiniGame
 
         return false;
     }
+
+    /**
+     * @return array
+     */
+    public function getShoppingList()
+    {
+        try {
+            $response = $this->client->request('GET', 'miniGame/getShoppingList', [
+                RequestOptions::QUERY => ['gameType' => $this->currentVersion],
+            ]);
+
+            return json_decode($response->getBody()->getContents(), true)['data'] ?? [];
+        } catch (GuzzleException $exception) {
+            $this->logger->error($exception->getMessage());
+        }
+
+        return [];
+    }
 }
