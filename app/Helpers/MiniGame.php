@@ -73,9 +73,9 @@ class MiniGame
         $this->clearBag();
 
         $raid = Raid::where('game_type', $this->currentVersion)
+            ->where('prioryty', '!=', 0)
             ->where('zb_got', 0)
-            ->where('prioryty', 1)
-            ->orderBy('boss_level')
+            ->orderByDesc('prioryty')
             ->first()
         ;
         if (is_null($raid)) {
