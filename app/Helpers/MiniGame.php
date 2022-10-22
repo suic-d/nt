@@ -46,12 +46,26 @@ class MiniGame
     protected $currentVersion = '80';
 
     /**
-     * @param string $currentVersion
+     * @var array
      */
-    public function __construct($currentVersion = '')
+    protected $config = [
+        'prioryty' => [
+            ['raid_id' => '', 'boss_id' => ''],
+        ],
+        'game_type' => '80',
+    ];
+
+    /**
+     * @param array $config
+     */
+    public function __construct($config = [])
     {
-        if (!empty($currentVersion)) {
-            $this->currentVersion = $currentVersion;
+        if (!empty($config)) {
+            $this->config = array_merge($this->config, $config);
+        }
+
+        if (!empty($this->config['game_type'])) {
+            $this->currentVersion = $this->config['game_type'];
         }
 
         $this->client = new Client(['base_uri' => $this->url, 'verify' => false, 'timeout' => 5]);
@@ -85,33 +99,41 @@ class MiniGame
     public function getRaid()
     {
         $userInfo = $this->getUserInfo();
-        if (isset($userInfo['baodi']) && $userInfo['baodi'] > 20) {
-            // 有专注光环，跳过免疫专注光环的boss
+
+        foreach ($this->config['prioryty'] as $v) {
+            if (empty($v['raid_id']) || empty($v['boss_id'])) {
+                continue;
+            }
+
+            if (isset($userInfo['baodi']) && $userInfo['baodi'] > 20 && in_array($v['boss_id'], ['98', '99'])) {
+                continue;
+            }
+
             $raid = Raid::where('game_type', $this->currentVersion)
-                ->where('prioryty', '!=', 0)
+                ->where('raid_id', $v['raid_id'])
+                ->where('boss_id', $v['boss_id'])
                 ->where('zb_got', 0)
-                ->whereNotIn('boss_id', ['98', '99'])
-                ->orderByDesc('prioryty')
                 ->first()
             ;
-        } else {
-            $raid = Raid::where('game_type', $this->currentVersion)
-                ->where('prioryty', '!=', 0)
-                ->where('zb_got', 0)
-                ->orderByDesc('prioryty')
-                ->first()
-            ;
+            if (!is_null($raid)) {
+                return $raid;
+            }
         }
 
-        if (is_null($raid)) {
-            $raid = Raid::where('game_type', $this->currentVersion)
+        if (isset($userInfo['baodi']) && $userInfo['baodi'] > 20) {
+            return Raid::where('game_type', $this->currentVersion)
                 ->where('zb_got', 0)
+                ->whereNotIn('boss_id', ['98', '99'])
                 ->orderBy('boss_level')
                 ->first()
             ;
         }
 
-        return $raid;
+        return Raid::where('game_type', $this->currentVersion)
+            ->where('zb_got', 0)
+            ->orderBy('boss_level')
+            ->first()
+            ;
     }
 
     /**
