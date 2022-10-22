@@ -151,7 +151,6 @@ class MiniGame
                 $raid = Raid::where('zb_id', $zb['id'])->first();
                 if (!is_null($raid)) {
                     $raid->zb_got = 1;
-                    $raid->prioryty = 0;
                     $raid->save();
                 }
             } catch (GuzzleException | Exception $exception) {
@@ -185,7 +184,6 @@ class MiniGame
             $raid = Raid::where('zb_id', $v)->first();
             if (!is_null($raid)) {
                 $raid->zb_got = 1;
-                $raid->prioryty = 0;
                 $raid->save();
             }
         }
@@ -195,7 +193,6 @@ class MiniGame
             $raid = Raid::where('zb_id', $zb['id'])->first();
             if (!is_null($raid)) {
                 $raid->zb_got = 1;
-                $raid->prioryty = 0;
                 $raid->save();
             }
         }
