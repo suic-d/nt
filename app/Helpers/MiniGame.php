@@ -121,12 +121,15 @@ class MiniGame
         }
 
         if (isset($userInfo['baodi']) && $userInfo['baodi'] > 20) {
-            return Raid::where('game_type', $this->currentVersion)
+            $raid = Raid::where('game_type', $this->currentVersion)
                 ->where('zb_got', 0)
                 ->whereNotIn('boss_id', ['98', '99'])
                 ->orderBy('boss_level')
                 ->first()
             ;
+            if (!is_null($raid)) {
+                return $raid;
+            }
         }
 
         return Raid::where('game_type', $this->currentVersion)
