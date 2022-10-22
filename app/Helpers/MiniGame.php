@@ -74,9 +74,18 @@ class MiniGame
 
         $raid = Raid::where('game_type', $this->currentVersion)
             ->where('zb_got', 0)
+            ->where('prioryty', 1)
             ->orderBy('boss_level')
             ->first()
         ;
+        if (is_null($raid)) {
+            $raid = Raid::where('game_type', $this->currentVersion)
+                ->where('zb_got', 0)
+                ->orderBy('boss_level')
+                ->first()
+            ;
+        }
+
         if (!is_null($raid)) {
             $this->doRaid($raid->raid_id, $raid->boss_id);
         }
@@ -225,10 +234,10 @@ class MiniGame
      */
     public function getUserInfo()
     {
-        $key = 'framework'.DIRECTORY_SEPARATOR.'cache-'.sha1(__METHOD__);
-        if (Cache::has($key)) {
-            return Cache::get($key);
-        }
+//        $key = 'framework'.DIRECTORY_SEPARATOR.'cache-'.sha1(__METHOD__);
+//        if (Cache::has($key)) {
+//            return Cache::get($key);
+//        }
 
         if (empty($this->userInfo)) {
             try {
@@ -242,10 +251,10 @@ class MiniGame
             }
         }
 
-        if (!empty($this->userInfo)) {
-            // 缓存5分钟
-            Cache::set($key, $this->userInfo, 300);
-        }
+//        if (!empty($this->userInfo)) {
+//            // 缓存5分钟
+//            Cache::set($key, $this->userInfo, 300);
+//        }
 
         return $this->userInfo;
     }
