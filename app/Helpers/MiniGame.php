@@ -72,12 +72,37 @@ class MiniGame
         $this->levelCount();
         $this->clearBag();
 
-        $raid = Raid::where('game_type', $this->currentVersion)
-            ->where('prioryty', '!=', 0)
-            ->where('zb_got', 0)
-            ->orderByDesc('prioryty')
-            ->first()
-        ;
+        if (!is_null($raid = $this->getRaid())) {
+            $this->doRaid($raid->raid_id, $raid->boss_id);
+        }
+    }
+
+    /**
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     *
+     * @return null|Raid
+     */
+    public function getRaid()
+    {
+        $userInfo = $this->getUserInfo();
+        if (isset($userInfo['baodi']) && $userInfo['baodi'] > 20) {
+            // 有专注光环，跳过免疫专注光环的boss
+            $raid = Raid::where('game_type', $this->currentVersion)
+                ->where('prioryty', '!=', 0)
+                ->where('zb_got', 0)
+                ->whereNotIn('boss_id', ['98', '99'])
+                ->orderByDesc('prioryty')
+                ->first()
+            ;
+        } else {
+            $raid = Raid::where('game_type', $this->currentVersion)
+                ->where('prioryty', '!=', 0)
+                ->where('zb_got', 0)
+                ->orderByDesc('prioryty')
+                ->first()
+            ;
+        }
+
         if (is_null($raid)) {
             $raid = Raid::where('game_type', $this->currentVersion)
                 ->where('zb_got', 0)
@@ -86,9 +111,7 @@ class MiniGame
             ;
         }
 
-        if (!is_null($raid)) {
-            $this->doRaid($raid->raid_id, $raid->boss_id);
-        }
+        return $raid;
     }
 
     /**
