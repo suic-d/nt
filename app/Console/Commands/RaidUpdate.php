@@ -31,6 +31,6 @@ class RaidUpdate extends Command
 
     public function handle()
     {
-        (new MiniGame())->updateRaidList('80');
+        (new MiniGame('80'))->updateRaidList();
     }
 }

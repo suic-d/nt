@@ -178,12 +178,10 @@ class MiniGame
 
     /**
      * 更新副本装备列表.
-     *
-     * @param string $gameType
      */
-    public function updateRaidList($gameType)
+    public function updateRaidList()
     {
-        $list = $this->getRaidList($gameType);
+        $list = $this->getRaidList($this->currentVersion);
         foreach ($list as $item) {
             foreach ($item['bossList'] as $boss) {
                 foreach ($boss['zbList'] as $zb) {
@@ -192,7 +190,7 @@ class MiniGame
                         $raid = new Raid();
                     }
 
-                    $raid->game_type = $gameType;
+                    $raid->game_type = $this->currentVersion;
                     $raid->raid_id = $item['raidId'];
                     $raid->raid_name = $item['raidName'];
                     $raid->raid_time = $item['raidTime'];
