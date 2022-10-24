@@ -107,22 +107,37 @@ class MiniGame
         $userInfo = $this->getUserInfo();
 
         foreach ($this->config['prioryty'] as $v) {
-            if (empty($v['raid_id']) || empty($v['boss_id'])) {
+            if (empty($v['raid_id'])) {
                 continue;
             }
 
-            if (isset($userInfo['baodi']) && $userInfo['baodi'] > 20 && in_array($v['boss_id'], ['98', '99'])) {
-                continue;
+            if (!empty($v['boss_id'])) {
+                $bossIds = is_array($v['boss_id']) ? $v['boss_id'] : [$v['boss_id']];
+            } else {
+                $bossIds = Raid::where('game_type', $this->currentVersion)
+                    ->where('raid_id', $v['raid_id'])
+                    ->where('zb_got', 0)
+                    ->distinct()
+                    ->get(['boss_id'])
+                    ->pluck('boss_id')
+                    ->toArray()
+                ;
             }
 
-            $raid = Raid::where('game_type', $this->currentVersion)
-                ->where('raid_id', $v['raid_id'])
-                ->where('boss_id', $v['boss_id'])
-                ->where('zb_got', 0)
-                ->first()
-            ;
-            if (!is_null($raid)) {
-                return $raid;
+            foreach ($bossIds as $bossId) {
+                if (isset($userInfo['baodi']) && $userInfo['baodi'] > 20 && in_array($bossId, ['98', '99'])) {
+                    continue;
+                }
+
+                $raid = Raid::where('game_type', $this->currentVersion)
+                    ->where('raid_id', $v['raid_id'])
+                    ->where('boss_id', $bossId)
+                    ->where('zb_got', 0)
+                    ->first()
+                ;
+                if (!is_null($raid)) {
+                    return $raid;
+                }
             }
         }
 
