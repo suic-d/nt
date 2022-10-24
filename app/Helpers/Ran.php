@@ -24,7 +24,7 @@ class Ran
      * @param string $gameType
      * @param string $openId
      */
-    public function __construct($url, $gameType, $openId)
+    public function __construct(string $url, string $gameType, string $openId)
     {
         $this->url = $url;
         $this->gameType = $gameType;
@@ -84,7 +84,7 @@ class Ran
      *
      * @param string $gameType
      */
-    public function updateRaidList($gameType)
+    public function updateRaidList(string $gameType)
     {
         foreach ($this->getRaidList($gameType) as $item) {
             foreach ($item['bossList'] as $boss) {
@@ -135,11 +135,9 @@ class Ran
     }
 
     /**
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     *
      * @return null|Raid
      */
-    public function getRaid()
+    public function getRaid(): ?Raid
     {
         $userInfo = $this->getUserInfo();
 
