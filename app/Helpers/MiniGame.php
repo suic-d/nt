@@ -107,11 +107,11 @@ class MiniGame
         $userInfo = $this->getUserInfo();
 
         foreach ($this->config['prioryty'] as $v) {
-            if (empty($v['raid_id'])) {
+            if (!isset($v['raid_id']) || empty($v['raid_id'])) {
                 continue;
             }
 
-            if (!empty($v['boss_id'])) {
+            if (isset($v['boss_id']) && !empty($v['boss_id'])) {
                 $bossIds = is_array($v['boss_id']) ? $v['boss_id'] : [$v['boss_id']];
             } else {
                 $bossIds = Raid::where('game_type', $this->currentVersion)
