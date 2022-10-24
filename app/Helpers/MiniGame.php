@@ -7,7 +7,6 @@ use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
-use Illuminate\Support\Facades\Cache;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 
@@ -39,6 +38,11 @@ class MiniGame
      * @var array
      */
     protected $raidList;
+
+    /**
+     * @var array
+     */
+    protected $buffList;
 
     /**
      * @var string
@@ -87,6 +91,8 @@ class MiniGame
         $this->clearBag();
 
         if (!is_null($raid = $this->getRaid())) {
+            $this->fm($raid->boss_level);
+            sleep(5);
             $this->doRaid($raid->raid_id, $raid->boss_id);
         }
     }
@@ -366,17 +372,19 @@ class MiniGame
      */
     public function getBuffList($buffId)
     {
-        try {
-            $response = $this->client->request('GET', 'miniGame/getBuffList', [
-                RequestOptions::QUERY => ['buffId' => $buffId],
-            ]);
+        if (empty($this->buffList)) {
+            try {
+                $response = $this->client->request('GET', 'miniGame/getBuffList', [
+                    RequestOptions::QUERY => ['buffId' => $buffId],
+                ]);
 
-            return json_decode($response->getBody()->getContents(), true)['data'] ?? [];
-        } catch (GuzzleException $exception) {
-            $this->logger->error($exception->getMessage());
+                $this->buffList = json_decode($response->getBody()->getContents(), true)['data'] ?? [];
+            } catch (GuzzleException $exception) {
+                $this->logger->error($exception->getMessage());
+            }
         }
 
-        return [];
+        return $this->buffList;
     }
 
     /**
@@ -421,5 +429,142 @@ class MiniGame
         }
 
         return [];
+    }
+
+    public function fm($bossLevel)
+    {
+        $userInfo = $this->getUserInfo();
+        $level = $userInfo['level'] + $userInfo['buff'];
+        // 高于25，无需fm
+        if ($level - $bossLevel > 25) {
+            return;
+        }
+
+        $diff = $bossLevel + 25 - $level;
+        // 无需fm
+        if ($diff <= 0 || $diff > 250) {
+            return;
+        }
+        if ($diff <= 20) {
+            $this->buyFuMo(20);
+        } elseif ($diff <= 30) {
+            $this->buyFuMo(30);
+        } elseif ($diff <= 40) {
+            $this->buyFuMo(40);
+        } elseif ($diff <= 50) {
+            $this->buyFuMo(20);
+            sleep(3);
+            $this->buyFuMo(30);
+        } elseif ($diff <= 60) {
+            $this->buyFuMo(20);
+            sleep(3);
+            $this->buyFuMo(40);
+        } elseif ($diff <= 70) {
+            $this->buyFuMo(30);
+            sleep(3);
+            $this->buyFuMo(40);
+        } elseif ($diff <= 80) {
+            $this->buyFuMo(20);
+            sleep(3);
+            $this->buyFuMo(60);
+        } elseif ($diff <= 90) {
+            $this->buyFuMo(20);
+            sleep(3);
+            $this->buyFuMo(30);
+            sleep(3);
+            $this->buyFuMo(40);
+        } elseif ($diff <= 100) {
+            $this->buyFuMo(100);
+        } elseif ($diff <= 110) {
+            $this->buyFuMo(20);
+            sleep(3);
+            $this->buyFuMo(30);
+            sleep(3);
+            $this->buyFuMo(60);
+        } elseif ($diff <= 120) {
+            $this->buyFuMo(20);
+            sleep(3);
+            $this->buyFuMo(100);
+        } elseif ($diff <= 130) {
+            $this->buyFuMo(30);
+            sleep(3);
+            $this->buyFuMo(100);
+        } elseif ($diff <= 140) {
+            $this->buyFuMo(40);
+            sleep(3);
+            $this->buyFuMo(100);
+        } elseif ($diff <= 150) {
+            $this->buyFuMo(20);
+            sleep(3);
+            $this->buyFuMo(30);
+            sleep(3);
+            $this->buyFuMo(100);
+        } elseif ($diff <= 160) {
+            $this->buyFuMo(20);
+            sleep(3);
+            $this->buyFuMo(40);
+            sleep(3);
+            $this->buyFuMo(100);
+        } elseif ($diff <= 170) {
+            $this->buyFuMo(30);
+            sleep(3);
+            $this->buyFuMo(40);
+            sleep(3);
+            $this->buyFuMo(100);
+        } elseif ($diff <= 180) {
+            $this->buyFuMo(20);
+            sleep(3);
+            $this->buyFuMo(60);
+            sleep(3);
+            $this->buyFuMo(100);
+        } elseif ($diff <= 190) {
+            $this->buyFuMo(20);
+            sleep(3);
+            $this->buyFuMo(30);
+            sleep(3);
+            $this->buyFuMo(40);
+            sleep(3);
+            $this->buyFuMo(100);
+        } elseif ($diff <= 200) {
+            $this->buyFuMo(40);
+            sleep(3);
+            $this->buyFuMo(60);
+            sleep(3);
+            $this->buyFuMo(100);
+        } elseif ($diff <= 210) {
+            $this->buyFuMo(20);
+            sleep(3);
+            $this->buyFuMo(30);
+            sleep(3);
+            $this->buyFuMo(60);
+            sleep(3);
+            $this->buyFuMo(100);
+        } elseif ($diff <= 220) {
+            $this->buyFuMo(20);
+            sleep(3);
+            $this->buyFuMo(40);
+            sleep(3);
+            $this->buyFuMo(60);
+            sleep(3);
+            $this->buyFuMo(100);
+        } elseif ($diff <= 230) {
+            $this->buyFuMo(30);
+            sleep(3);
+            $this->buyFuMo(40);
+            sleep(3);
+            $this->buyFuMo(60);
+            sleep(3);
+            $this->buyFuMo(100);
+        } elseif ($diff <= 250) {
+            $this->buyFuMo(20);
+            sleep(3);
+            $this->buyFuMo(30);
+            sleep(3);
+            $this->buyFuMo(40);
+            sleep(3);
+            $this->buyFuMo(60);
+            sleep(3);
+            $this->buyFuMo(100);
+        }
     }
 }
