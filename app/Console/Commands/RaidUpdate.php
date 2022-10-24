@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Helpers\MiniGame;
+use App\Helpers\Ran;
 use Illuminate\Console\Command;
 
 class RaidUpdate extends Command
@@ -31,8 +31,6 @@ class RaidUpdate extends Command
 
     public function handle()
     {
-        (new MiniGame(['game_type' => '60']))->updateRaidList();
-        (new MiniGame(['game_type' => '70']))->updateRaidList();
-        (new MiniGame(['game_type' => '80']))->updateRaidList();
+        (new Ran(ZhanGe::URL, ZhanGe::GAME_TYPE, ZhanGe::OPEN_ID))->updateRaidList('80');
     }
 }
