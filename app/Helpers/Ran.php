@@ -53,6 +53,10 @@ class Ran
             $this->fm($raid->boss_level);
             sleep(3);
             $this->doRaid($raid->raid_id, $raid->boss_id);
+            sleep(30);
+            $this->addMoney();
+            sleep(30);
+            $this->addMoney();
         }
     }
 

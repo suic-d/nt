@@ -369,4 +369,19 @@ trait MiniGame
             $this->buyFM(100);
         }
     }
+
+    /**
+     * 看广告.
+     */
+    public function addMoney()
+    {
+        try {
+            $response = $this->client->request('GET', 'miniGame/addMoney', [
+                RequestOptions::QUERY => ['openid' => $this->openId],
+            ]);
+            $this->logger->info(__METHOD__.' '.$response->getBody()->getContents());
+        } catch (GuzzleException $exception) {
+            $this->logger->error(__METHOD__.' '.$exception->getMessage());
+        }
+    }
 }
