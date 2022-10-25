@@ -43,7 +43,7 @@ class Ran
      */
     public function handle()
     {
-        if (Cache::has($this->getMutexName()) || $this->curRaid()) {
+        if ($this->hasMutex() || $this->curRaid()) {
             return;
         }
 
@@ -58,27 +58,52 @@ class Ran
             $this->doRaid($raid->raid_id, $raid->boss_id);
             sleep(3);
 
-            // 广告1
-            $adv1 = new AdvertQueue();
-            $adv1->open_id = $this->openId;
-            $adv1->expire_at = time() + 30;
-            $adv1->save();
+            $this->createAdvert();
+            $this->setMutex();
+        }
+    }
 
-            // 广告2
-            $adv2 = new AdvertQueue();
-            $adv2->open_id = $this->openId;
-            $adv2->expire_at = time() + 60;
-            $adv2->save();
+    /**
+     * 创建广告队列.
+     */
+    public function createAdvert()
+    {
+        // 广告1
+        $adv1 = new AdvertQueue();
+        $adv1->open_id = $this->openId;
+        $adv1->expire_at = time() + 30;
+        $adv1->save();
 
-            $userInfo = $this->getUserInfo(true);
-            if (isset($userInfo['curRaidOverTime'], $userInfo['nowTime'])) {
-                $nowTime = (int) ceil($userInfo['nowTime'] / 1000);
-                $curRaidOverTime = (int) ceil($userInfo['curRaidOverTime'] / 1000);
-                // 加锁
-                $ttl = $curRaidOverTime - 600 - $nowTime;
-                if ($ttl > 0) {
-                    Cache::set($this->getMutexName(), true, $ttl);
-                }
+        // 广告2
+        $adv2 = new AdvertQueue();
+        $adv2->open_id = $this->openId;
+        $adv2->expire_at = time() + 60;
+        $adv2->save();
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasMutex(): bool
+    {
+        return Cache::has($this->getMutexName());
+    }
+
+    /**
+     * 加锁.
+     *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function setMutex()
+    {
+        $userInfo = $this->getUserInfo(true);
+        if (isset($userInfo['curRaidOverTime'], $userInfo['nowTime'])) {
+            $nowTime = (int) ceil($userInfo['nowTime'] / 1000);
+            $curRaidOverTime = (int) ceil($userInfo['curRaidOverTime'] / 1000);
+            // 加锁
+            $ttl = $curRaidOverTime - 600 - $nowTime;
+            if ($ttl > 0) {
+                Cache::set($this->getMutexName(), true, $ttl);
             }
         }
     }
