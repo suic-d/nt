@@ -69,11 +69,10 @@ class Ran
 
             $userInfo = $this->getUserInfo(true);
             if (isset($userInfo['curRaidOverTime'])) {
+                $nowTime = (int) ceil($userInfo['curRaidOverTime'] / 1000);
                 $curRaidOverTime = (int) ceil($userInfo['curRaidOverTime'] / 1000);
-                // 减去广告时间10分钟
-                $curRaidOverTime -= 600;
                 // 加锁
-                $ttl = $curRaidOverTime - time();
+                $ttl = $curRaidOverTime - 600 - $nowTime;
                 if ($ttl > 0) {
                     Cache::set($this->getMutexName(), true, $ttl);
                 }
