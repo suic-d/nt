@@ -38,6 +38,9 @@ class Ran
         ));
     }
 
+    /**
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
     public function handle()
     {
         if (Cache::has($this->getMutexName()) || $this->curRaid()) {
@@ -68,8 +71,8 @@ class Ran
             $adv2->save();
 
             $userInfo = $this->getUserInfo(true);
-            if (isset($userInfo['curRaidOverTime'])) {
-                $nowTime = (int) ceil($userInfo['curRaidOverTime'] / 1000);
+            if (isset($userInfo['curRaidOverTime'], $userInfo['nowTime'])) {
+                $nowTime = (int) ceil($userInfo['nowTime'] / 1000);
                 $curRaidOverTime = (int) ceil($userInfo['curRaidOverTime'] / 1000);
                 // 加锁
                 $ttl = $curRaidOverTime - 600 - $nowTime;
