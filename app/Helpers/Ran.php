@@ -6,6 +6,7 @@ use App\Models\Local\AdvertQueue;
 use App\Models\Local\Raid;
 use App\Traits\MiniGame;
 use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Cache;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 
@@ -39,7 +40,7 @@ class Ran
 
     public function handle()
     {
-        if ($this->curRaid()) {
+        if (Cache::has($this->getMutexName()) || $this->curRaid()) {
             return;
         }
 
@@ -52,6 +53,8 @@ class Ran
             $this->fm($raid->boss_level);
             sleep(3);
             $this->doRaid($raid->raid_id, $raid->boss_id);
+            sleep(3);
+
             // 广告1
             $adv1 = new AdvertQueue();
             $adv1->open_id = $this->openId;
@@ -63,7 +66,27 @@ class Ran
             $adv2->open_id = $this->openId;
             $adv2->expire_at = time() + 60;
             $adv2->save();
+
+            $userInfo = $this->getUserInfo(true);
+            if (isset($userInfo['curRaidOverTime'])) {
+                $curRaidOverTime = (int) ceil($userInfo['curRaidOverTime'] / 1000);
+                // 减去广告时间10分钟
+                $curRaidOverTime -= 600;
+                // 加锁
+                $ttl = $curRaidOverTime - time();
+                if ($ttl > 0) {
+                    Cache::set($this->getMutexName(), true, $ttl);
+                }
+            }
         }
+    }
+
+    /**
+     * @return string
+     */
+    public function getMutexName(): string
+    {
+        return 'framework'.DIRECTORY_SEPARATOR.'cache-'.sha1(__METHOD__.$this->openId);
     }
 
     /**
