@@ -46,19 +46,25 @@ trait MiniGame
     protected $gameType;
 
     /**
+     * @param bool $refresh
+     *
      * @return array
      */
-    public function getUserInfo(): array
+    public function getUserInfo(bool $refresh = false): array
     {
-        if (empty($this->userInfo)) {
-            try {
-                $response = $this->client->request('GET', 'miniGame/getUserInfo', [
-                    RequestOptions::QUERY => ['openid' => $this->openId],
-                ]);
-                $this->userInfo = json_decode($response->getBody()->getContents(), true)['data'] ?? [];
-            } catch (GuzzleException $exception) {
-                $this->logger->error(__METHOD__.' '.$exception->getMessage());
+        if (!$refresh) {
+            if (!empty($this->userInfo)) {
+                return $this->userInfo;
             }
+        }
+
+        try {
+            $response = $this->client->request('GET', 'miniGame/getUserInfo', [
+                RequestOptions::QUERY => ['openid' => $this->openId],
+            ]);
+            $this->userInfo = json_decode($response->getBody()->getContents(), true)['data'] ?? [];
+        } catch (GuzzleException $exception) {
+            $this->logger->error(__METHOD__.' '.$exception->getMessage());
         }
 
         return $this->userInfo;

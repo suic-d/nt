@@ -1,0 +1,47 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\Helpers\Ran;
+use App\Models\Local\AdvertQueue;
+use Illuminate\Console\Command;
+
+class AdvertVisit extends Command
+{
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'ad:visit';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = '观看视频，领取奖励';
+
+    /**
+     * Create a new command instance.
+     */
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
+    public function handle()
+    {
+        $adv = AdvertQueue::where('status', 0)
+            ->where('expire_at', '<=', time())
+            ->oldest()
+            ->first()
+        ;
+        if (!is_null($adv)) {
+            (new Ran(env('MG_GAME_TYPE')))->addMoney();
+
+            $adv->status = 1;
+            $adv->save();
+        }
+    }
+}

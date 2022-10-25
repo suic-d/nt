@@ -19,7 +19,7 @@ class RaidUpdate extends Command
      *
      * @var string
      */
-    protected $description = '巫妖王之怒';
+    protected $description = 'WLK';
 
     /**
      * Create a new command instance.
@@ -31,6 +31,6 @@ class RaidUpdate extends Command
 
     public function handle()
     {
-        (new Ran(ZhanGe::URL, ZhanGe::GAME_TYPE, ZhanGe::OPEN_ID))->updateRaidList('80');
+        (new Ran(env('MG_GAME_TYPE')))->updateRaidList('80');
     }
 }

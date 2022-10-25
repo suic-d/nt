@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Models\Local\AdvertQueue;
 use App\Models\Local\Raid;
 use App\Traits\MiniGame;
 use GuzzleHttp\Client;
@@ -20,15 +21,13 @@ class Ran
     /**
      * Create a new command instance.
      *
-     * @param string $url
      * @param string $gameType
-     * @param string $openId
      */
-    public function __construct(string $url, string $gameType, string $openId)
+    public function __construct(string $gameType)
     {
-        $this->url = $url;
+        $this->url = env('MG_BASE_URL');
         $this->gameType = $gameType;
-        $this->openId = $openId;
+        $this->openId = env('MG_OPEN_ID');
 
         $this->client = new Client(['base_uri' => $this->url, 'verify' => false, 'timeout' => 5]);
         $this->logger = new Logger('MiniGame');
@@ -53,10 +52,17 @@ class Ran
             $this->fm($raid->boss_level);
             sleep(3);
             $this->doRaid($raid->raid_id, $raid->boss_id);
-            sleep(30);
-            $this->addMoney();
-            sleep(30);
-            $this->addMoney();
+            // 广告1
+            $adv1 = new AdvertQueue();
+            $adv1->open_id = $this->openId;
+            $adv1->expire_at = time() + 30;
+            $adv1->save();
+
+            // 广告2
+            $adv2 = new AdvertQueue();
+            $adv2->open_id = $this->openId;
+            $adv2->expire_at = time() + 60;
+            $adv2->save();
         }
     }
 
