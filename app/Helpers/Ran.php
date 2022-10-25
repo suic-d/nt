@@ -55,7 +55,11 @@ class Ran
         if (!is_null($raid = $this->getRaid())) {
             $this->fm($raid->boss_level);
             sleep(3);
-            $this->doRaid($raid->raid_id, $raid->boss_id);
+            for ($i = 0; $i < self::$maxTries; ++$i) {
+                if ($this->doRaid($raid->raid_id, $raid->boss_id)) {
+                    break;
+                }
+            }
             sleep(3);
 
             $this->createAdvert();

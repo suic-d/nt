@@ -105,8 +105,10 @@ trait MiniGame
      *
      * @param string $raidId
      * @param string $bossId
+     *
+     * @return bool
      */
-    public function doRaid(string $raidId, string $bossId)
+    public function doRaid(string $raidId, string $bossId): bool
     {
         try {
             $response = $this->client->request('GET', 'miniGame/doRaid', [RequestOptions::QUERY => [
@@ -115,9 +117,13 @@ trait MiniGame
                 'bossId' => $bossId,
             ]]);
             $this->logger->info(__METHOD__.' '.$response->getBody()->getContents());
+
+            return true;
         } catch (GuzzleException $exception) {
             $this->logger->error(__METHOD__.' '.$exception->getMessage());
         }
+
+        return false;
     }
 
     /**
