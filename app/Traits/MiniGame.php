@@ -232,7 +232,7 @@ trait MiniGame
                 'detail' => $detail,
                 'shopType' => $shopType,
             ]]);
-            $this->logger->info($response->getBody()->getContents());
+            $this->logger->info($detail.' '.$response->getBody()->getContents());
 
             return true;
         } catch (GuzzleException | Exception $exception) {
