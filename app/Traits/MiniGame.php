@@ -245,21 +245,34 @@ trait MiniGame
     /**
      * @param string $gameType
      *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     *
      * @return array
      */
     public function getShoppingList(string $gameType): array
     {
+        $key = 'framework'.DIRECTORY_SEPARATOR.'cache-'.sha1(__METHOD__.$gameType);
+        if (Cache::has($key)) {
+            return Cache::get($key);
+        }
+
+        $shopList = [];
+
         try {
             $response = $this->client->request('GET', 'miniGame/getShoppingList', [
                 RequestOptions::QUERY => ['gameType' => $gameType],
             ]);
 
-            return json_decode($response->getBody()->getContents(), true)['data'] ?? [];
+            $shopList = json_decode($response->getBody()->getContents(), true)['data'] ?? [];
         } catch (GuzzleException $exception) {
             $this->logger->error(__METHOD__.' '.$exception->getMessage());
         }
 
-        return [];
+        if (!empty($shopList)) {
+            Cache::set($key, $shopList, 86400);
+        }
+
+        return $shopList;
     }
 
     /**
