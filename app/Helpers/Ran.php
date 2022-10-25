@@ -214,8 +214,7 @@ class Ran
                 if (isset($v['boss_id']) && !empty($v['boss_id'])) {
                     $bossIds = is_array($v['boss_id']) ? $v['boss_id'] : [$v['boss_id']];
                 } else {
-                    $bossIds = Raid::where('game_type', $this->gameType)
-                        ->where('raid_id', $v['raid_id'])
+                    $bossIds = Raid::where('raid_id', $v['raid_id'])
                         ->where('zb_got', 0)
                         ->distinct()
                         ->get(['boss_id'])
@@ -229,8 +228,7 @@ class Ran
                         continue;
                     }
 
-                    $raid = Raid::where('game_type', $this->gameType)
-                        ->where('raid_id', $v['raid_id'])
+                    $raid = Raid::where('raid_id', $v['raid_id'])
                         ->where('boss_id', $bossId)
                         ->where('zb_got', 0)
                         ->first()
