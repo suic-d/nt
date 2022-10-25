@@ -163,6 +163,12 @@ trait MiniGame
         $map = array_column($this->getFMList(), null, 'level');
         if (isset($map[$level])) {
             $this->buyZhuangBei(json_encode($map[$level], JSON_UNESCAPED_UNICODE), 'fm');
+
+            $userInfo = $this->getUserInfo(true);
+            if (isset($userInfo['buffList'])) {
+                $this->getBuffList(json_encode($userInfo['buffList']));
+            }
+            $this->buffCount();
         }
     }
 
@@ -241,7 +247,7 @@ trait MiniGame
      */
     public function fm(int $bossLevel)
     {
-        $userInfo = $this->getUserInfo();
+        $userInfo = $this->getUserInfo(true);
         $level = $userInfo['level'] + $userInfo['buff'];
         // 高于25，无需fm
         if ($level - $bossLevel > 25) {
@@ -387,6 +393,21 @@ trait MiniGame
             ]);
             $this->logger->info(__METHOD__.' '.$response->getBody()->getContents());
         } catch (GuzzleException $exception) {
+            $this->logger->error(__METHOD__.' '.$exception->getMessage());
+        }
+    }
+
+    /**
+     * 更新buff.
+     */
+    public function buffCount()
+    {
+        try {
+            $response = $this->client->request('GET', 'miniGame/buffCount', [
+                RequestOptions::QUERY => ['openid' => $this->openId],
+            ]);
+            $this->logger->info(__METHOD__.' '.$response->getBody()->getContents());
+        } catch (GuzzleException | Exception $exception) {
             $this->logger->error(__METHOD__.' '.$exception->getMessage());
         }
     }
