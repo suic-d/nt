@@ -38,10 +38,15 @@ class AdvertVisit extends Command
             ->first()
         ;
         if (!is_null($adv)) {
-            (new Ran(env('MG_GAME_TYPE')))->addMoney();
+            $instance = new Ran(env('MG_GAME_TYPE'));
+            for ($i = 0; $i < 5; ++$i) {
+                if ($instance->addMoney()) {
+                    $adv->status = 1;
+                    $adv->save();
 
-            $adv->status = 1;
-            $adv->save();
+                    break;
+                }
+            }
         }
     }
 }

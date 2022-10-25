@@ -6,6 +6,7 @@ use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
+use Illuminate\Support\Facades\Cache;
 use Monolog\Logger;
 
 trait MiniGame
@@ -34,11 +35,6 @@ trait MiniGame
      * @var array
      */
     protected $userInfo;
-
-    /**
-     * @var array
-     */
-    protected $fmList;
 
     /**
      * @var string
@@ -144,15 +140,23 @@ trait MiniGame
     /**
      * 获取附魔列表.
      *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     *
      * @return array
      */
     public function getFMList(): array
     {
-        if (empty($this->fmList)) {
-            $this->fmList = $this->getBuffList(json_encode([299]));
+        $key = 'framework'.DIRECTORY_SEPARATOR.'cache-'.sha1(__METHOD__);
+        if (Cache::has($key)) {
+            return Cache::get($key);
         }
 
-        return $this->fmList;
+        $fmList = $this->getBuffList(json_encode([299]));
+        if (!empty($fmList)) {
+            Cache::set($key, $fmList, 86400);
+        }
+
+        return $fmList;
     }
 
     /**
@@ -384,17 +388,23 @@ trait MiniGame
 
     /**
      * 看广告.
+     *
+     * @return bool
      */
-    public function addMoney()
+    public function addMoney(): bool
     {
         try {
             $response = $this->client->request('GET', 'miniGame/addMoney', [
                 RequestOptions::QUERY => ['openid' => $this->openId],
             ]);
             $this->logger->info(__METHOD__.' '.$response->getBody()->getContents());
+
+            return true;
         } catch (GuzzleException $exception) {
             $this->logger->error(__METHOD__.' '.$exception->getMessage());
         }
+
+        return false;
     }
 
     /**
