@@ -12,6 +12,11 @@ use Monolog\Logger;
 trait MiniGame
 {
     /**
+     * @var int
+     */
+    public static $maxTries = 5;
+
+    /**
      * @var string
      */
     protected $openId;
@@ -161,18 +166,29 @@ trait MiniGame
 
     /**
      * @param int $level
+     *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function buyFM(int $level)
     {
         $map = array_column($this->getFMList(), null, 'level');
         if (isset($map[$level])) {
-            $this->buyZhuangBei(json_encode($map[$level], JSON_UNESCAPED_UNICODE), 'fm');
+            for ($i = 0; $i < self::$maxTries; ++$i) {
+                if ($this->buyZhuangBei(json_encode($map[$level], JSON_UNESCAPED_UNICODE), 'fm')) {
+                    break;
+                }
+            }
 
             $userInfo = $this->getUserInfo(true);
             if (isset($userInfo['buffList'])) {
                 $this->getBuffList(json_encode($userInfo['buffList']));
             }
-            $this->buffCount();
+
+            for ($i = 0; $i < self::$maxTries; ++$i) {
+                if ($this->buffCount()) {
+                    break;
+                }
+            }
         }
     }
 
@@ -199,8 +215,10 @@ trait MiniGame
     /**
      * @param string $detail
      * @param string $shopType
+     *
+     * @return bool
      */
-    public function buyZhuangBei(string $detail, string $shopType)
+    public function buyZhuangBei(string $detail, string $shopType): bool
     {
         try {
             $response = $this->client->request('GET', 'miniGame/buyZhuangbei', [RequestOptions::QUERY => [
@@ -209,9 +227,13 @@ trait MiniGame
                 'shopType' => $shopType,
             ]]);
             $this->logger->info($response->getBody()->getContents());
+
+            return true;
         } catch (GuzzleException | Exception $exception) {
             $this->logger->error(__METHOD__.' '.$exception->getMessage());
         }
+
+        return false;
     }
 
     /**
@@ -248,6 +270,8 @@ trait MiniGame
      * 附魔.
      *
      * @param int $bossLevel
+     *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function fm(int $bossLevel)
     {
@@ -409,16 +433,22 @@ trait MiniGame
 
     /**
      * 更新buff.
+     *
+     * @return bool
      */
-    public function buffCount()
+    public function buffCount(): bool
     {
         try {
             $response = $this->client->request('GET', 'miniGame/buffCount', [
                 RequestOptions::QUERY => ['openid' => $this->openId],
             ]);
             $this->logger->info(__METHOD__.' '.$response->getBody()->getContents());
+
+            return true;
         } catch (GuzzleException | Exception $exception) {
             $this->logger->error(__METHOD__.' '.$exception->getMessage());
         }
+
+        return false;
     }
 }

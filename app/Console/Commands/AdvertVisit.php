@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Helpers\Ran;
 use App\Models\Local\AdvertQueue;
+use App\Traits\MiniGame;
 use Illuminate\Console\Command;
 
 class AdvertVisit extends Command
@@ -39,7 +40,7 @@ class AdvertVisit extends Command
         ;
         if (!is_null($adv)) {
             $instance = new Ran(env('MG_GAME_TYPE'));
-            for ($i = 0; $i < 5; ++$i) {
+            for ($i = 0; $i < MiniGame::$maxTries; ++$i) {
                 if ($instance->addMoney()) {
                     $adv->status = 1;
                     $adv->save();
