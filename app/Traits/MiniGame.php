@@ -457,4 +457,34 @@ trait MiniGame
 
         return false;
     }
+
+    /**
+     * 任务列表.
+     *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     *
+     * @return array
+     */
+    public function getMissionList(): array
+    {
+        $key = 'framework'.DIRECTORY_SEPARATOR.'cache-'.sha1(__METHOD__);
+        if (Cache::has($key)) {
+            return Cache::get($key);
+        }
+
+        $missionList = [];
+
+        try {
+            $response = $this->client->request('GET', 'miniGame/getRenwuList');
+            $missionList = json_decode($response->getBody()->getContents(), true)['data'] ?? [];
+        } catch (GuzzleException $exception) {
+            $this->logger->error(__METHOD__.' '.$exception->getMessage());
+        }
+
+        if (!empty($missionList)) {
+            Cache::set($key, $missionList, 86400);
+        }
+
+        return $missionList;
+    }
 }
