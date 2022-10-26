@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Jobs\AdvertisementVisit;
 use App\Models\Local\AdvertQueue;
 use App\Models\Local\Raid;
 use App\Traits\MiniGame;
@@ -13,6 +14,8 @@ use Monolog\Logger;
 class Ran
 {
     use MiniGame;
+
+    const QUEUE_AD = 'mini_game_ad';
 
     /**
      * @var array
@@ -77,12 +80,14 @@ class Ran
         $adv1->open_id = $this->openId;
         $adv1->expire_at = time() + 30;
         $adv1->save();
+        AdvertisementVisit::dispatch($adv1)->onQueue(self::QUEUE_AD)->delay(now()->addSeconds(30));
 
         // 广告2
         $adv2 = new AdvertQueue();
         $adv2->open_id = $this->openId;
         $adv2->expire_at = time() + 60;
         $adv2->save();
+        AdvertisementVisit::dispatch($adv2)->onQueue(self::QUEUE_AD)->delay(now()->addSeconds(60));
     }
 
     /**

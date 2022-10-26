@@ -45,7 +45,7 @@ class Kernel extends ConsoleKernel
 
         // 战歌峡谷
         $schedule->command('zg:doRaid')->everyMinute();
-        $schedule->command('ad:visit')->everyMinute();
+//        $schedule->command('ad:visit')->everyMinute();
         $schedule->command('raid:update')->hourly();
     }
 
