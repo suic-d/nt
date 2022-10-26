@@ -2,12 +2,9 @@
 
 namespace App\Helpers;
 
-use App\Jobs\AdvertisementVisit;
-use App\Models\Local\AdvertQueue;
 use App\Models\Local\Raid;
 use App\Traits\MiniGame;
 use GuzzleHttp\Client;
-use Illuminate\Support\Facades\Cache;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 
@@ -68,61 +65,6 @@ class Ran
             $this->createAdvert();
             $this->setMutex();
         }
-    }
-
-    /**
-     * 创建广告队列.
-     */
-    public function createAdvert()
-    {
-        // 广告1
-        $adv1 = new AdvertQueue();
-        $adv1->open_id = $this->openId;
-        $adv1->expire_at = time() + 30;
-        $adv1->save();
-        AdvertisementVisit::dispatch($adv1)->onQueue(self::QUEUE_AD)->delay(now()->addSeconds(30));
-
-        // 广告2
-        $adv2 = new AdvertQueue();
-        $adv2->open_id = $this->openId;
-        $adv2->expire_at = time() + 60;
-        $adv2->save();
-        AdvertisementVisit::dispatch($adv2)->onQueue(self::QUEUE_AD)->delay(now()->addSeconds(60));
-    }
-
-    /**
-     * @return bool
-     */
-    public function hasMutex(): bool
-    {
-        return Cache::has($this->getMutexName());
-    }
-
-    /**
-     * 加锁.
-     *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     */
-    public function setMutex()
-    {
-        $userInfo = $this->getUserInfo(true);
-        if (isset($userInfo['curRaidOverTime'], $userInfo['nowTime'])) {
-            $nowTime = (int) ceil($userInfo['nowTime'] / 1000);
-            $curRaidOverTime = (int) ceil($userInfo['curRaidOverTime'] / 1000);
-            // 加锁
-            $ttl = $curRaidOverTime - 600 - $nowTime;
-            if ($ttl > 0) {
-                Cache::set($this->getMutexName(), true, $ttl);
-            }
-        }
-    }
-
-    /**
-     * @return string
-     */
-    public function getMutexName(): string
-    {
-        return 'framework'.DIRECTORY_SEPARATOR.'cache-'.sha1(__METHOD__.$this->openId);
     }
 
     /**
