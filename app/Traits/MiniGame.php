@@ -66,6 +66,7 @@ trait MiniGame
             $this->userInfo = json_decode($response->getBody()->getContents(), true)['data'] ?? [];
         } catch (GuzzleException $exception) {
             $this->logger->error(__METHOD__.' '.$exception->getMessage());
+            $this->logger->close();
         }
 
         return $this->userInfo;
@@ -85,6 +86,7 @@ trait MiniGame
             ]]);
         } catch (GuzzleException $exception) {
             $this->logger->error(__METHOD__.' '.$exception->getMessage());
+            $this->logger->close();
         }
     }
 
@@ -97,6 +99,7 @@ trait MiniGame
             $this->client->request('GET', 'miniGame/clearBag', [RequestOptions::QUERY => ['openid' => $this->openId]]);
         } catch (GuzzleException $exception) {
             $this->logger->error(__METHOD__.' '.$exception->getMessage());
+            $this->logger->close();
         }
     }
 
@@ -117,10 +120,12 @@ trait MiniGame
                 'bossId' => $bossId,
             ]]);
             $this->logger->info(__METHOD__.' '.$response->getBody()->getContents());
+            $this->logger->close();
 
             return true;
         } catch (GuzzleException $exception) {
             $this->logger->error(__METHOD__.' '.$exception->getMessage());
+            $this->logger->close();
         }
 
         return false;
@@ -143,6 +148,7 @@ trait MiniGame
             return json_decode($response->getBody()->getContents(), true)['data'] ?? [];
         } catch (GuzzleException $exception) {
             $this->logger->error(__METHOD__.' '.$exception->getMessage());
+            $this->logger->close();
         }
 
         return [];
@@ -213,6 +219,7 @@ trait MiniGame
             return json_decode($response->getBody()->getContents(), true)['data'] ?? [];
         } catch (GuzzleException $exception) {
             $this->logger->error(__METHOD__.' '.$exception->getMessage());
+            $this->logger->close();
         }
 
         return [];
@@ -233,11 +240,14 @@ trait MiniGame
                 'shopType' => $shopType,
             ]]);
             $this->logger->info(__METHOD__.' '.$detail);
+            $this->logger->close();
             $this->logger->info(__METHOD__.' '.$response->getBody()->getContents());
+            $this->logger->close();
 
             return true;
         } catch (GuzzleException | Exception $exception) {
             $this->logger->error(__METHOD__.' '.$exception->getMessage());
+            $this->logger->close();
         }
 
         return false;
@@ -267,6 +277,7 @@ trait MiniGame
             $shopList = json_decode($response->getBody()->getContents(), true)['data'] ?? [];
         } catch (GuzzleException $exception) {
             $this->logger->error(__METHOD__.' '.$exception->getMessage());
+            $this->logger->close();
         }
 
         if (!empty($shopList)) {
@@ -442,10 +453,12 @@ trait MiniGame
                 RequestOptions::QUERY => ['openid' => $this->openId],
             ]);
             $this->logger->info(__METHOD__.' '.$response->getBody()->getContents());
+            $this->logger->close();
 
             return true;
         } catch (GuzzleException $exception) {
             $this->logger->error(__METHOD__.' '.$exception->getMessage());
+            $this->logger->close();
         }
 
         return false;
@@ -463,10 +476,12 @@ trait MiniGame
                 RequestOptions::QUERY => ['openid' => $this->openId],
             ]);
             $this->logger->info(__METHOD__.' '.$response->getBody()->getContents());
+            $this->logger->close();
 
             return true;
         } catch (GuzzleException | Exception $exception) {
             $this->logger->error(__METHOD__.' '.$exception->getMessage());
+            $this->logger->close();
         }
 
         return false;
@@ -493,6 +508,7 @@ trait MiniGame
             $missionList = json_decode($response->getBody()->getContents(), true)['data'] ?? [];
         } catch (GuzzleException $exception) {
             $this->logger->error(__METHOD__.' '.$exception->getMessage());
+            $this->logger->close();
         }
 
         if (!empty($missionList)) {
