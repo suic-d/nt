@@ -444,13 +444,15 @@ trait MiniGame
     /**
      * 看广告.
      *
+     * @param string $openId
+     *
      * @return bool
      */
-    public function addMoney(): bool
+    public function addMoney(string $openId): bool
     {
         try {
             $response = $this->client->request('GET', 'miniGame/addMoney', [
-                RequestOptions::QUERY => ['openid' => $this->openId],
+                RequestOptions::QUERY => ['openid' => $openId],
             ]);
             $this->logger->info(__METHOD__.' '.$response->getBody()->getContents());
             $this->logger->close();

@@ -41,7 +41,7 @@ class AdvertVisit extends Command
         if (!is_null($adv)) {
             $instance = new Ran(env('MG_GAME_TYPE'));
             for ($i = 0; $i < MiniGame::$maxTries; ++$i) {
-                if ($instance->addMoney()) {
+                if ($instance->addMoney($adv->open_id)) {
                     $adv->status = 1;
                     $adv->save();
 

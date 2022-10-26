@@ -38,7 +38,7 @@ class AdvertisementVisit implements ShouldQueue
     {
         $instance = new Ran(env('MG_GAME_TYPE'));
         for ($i = 0; $i <= MiniGame::$maxTries; ++$i) {
-            if ($instance->addMoney()) {
+            if ($instance->addMoney($this->advertQueue->open_id)) {
                 $this->advertQueue->status = 1;
                 $this->advertQueue->save();
 
