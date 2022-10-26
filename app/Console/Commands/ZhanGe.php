@@ -32,14 +32,7 @@ class ZhanGe extends Command
     public function handle()
     {
         $instance = new Ran(env('MG_GAME_TYPE'));
-        $instance->setAdvance([
-            //奥妮克希亚的巢穴
-            ['raid_id' => '85'],
-            // 魔枢
-            ['raid_id' => '81'],
-            // 安卡赫特-古代王国
-            ['raid_id' => '82'],
-        ]);
+        $instance->setAdvance(config('raid.high'));
         $instance->handle();
     }
 }
