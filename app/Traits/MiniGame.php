@@ -519,4 +519,20 @@ trait MiniGame
 
         return $missionList;
     }
+
+    /**
+     * @param string $name
+     * @param string $type
+     *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function buyGear($name, $type)
+    {
+        $map = array_column($this->getShoppingList($type), null, 'name');
+        if (!isset($map[$name])) {
+            return;
+        }
+
+        $this->buyZhuangBei(json_encode($map[$name], JSON_UNESCAPED_UNICODE), $type);
+    }
 }
