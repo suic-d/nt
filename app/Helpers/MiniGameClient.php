@@ -430,11 +430,11 @@ class MiniGameClient
     /**
      * @param string $openId
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     *@throws \Psr\SimpleCache\InvalidArgumentException
      *
      * @return bool
      */
-    public function curRaidOver($openId)
+    public function curRaidOver(string $openId): bool
     {
         return time() >= $this->getCurRaidOverTime($openId);
     }

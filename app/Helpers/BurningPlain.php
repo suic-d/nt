@@ -34,9 +34,12 @@ class BurningPlain
         $this->advance = config('raid.rs');
     }
 
+    /**
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
     public function handle()
     {
-        if ($this->miniGame->hasMutex($this->openId) || $this->miniGame->curRaid($this->openId)) {
+        if (!$this->miniGame->curRaidOver($this->openId) || $this->miniGame->curRaid($this->openId)) {
             return;
         }
 
@@ -50,13 +53,13 @@ class BurningPlain
 //            sleep(3);
             for ($i = 0; $i < MiniGameClient::MAX_TRIES; ++$i) {
                 if ($this->miniGame->doRaid($this->openId, $raid->raid_id, $raid->boss_id)) {
+                    sleep(3);
+                    $this->miniGame->refreshCurRaidOverTime($this->openId);
+//                    $this->miniGame->createAdvert($this->openId);
+
                     break;
                 }
             }
-            sleep(3);
-
-            $this->miniGame->setMutex($this->openId);
-            $this->miniGame->createAdvert($this->openId);
         }
     }
 
