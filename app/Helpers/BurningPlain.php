@@ -29,7 +29,7 @@ class BurningPlain
     public function __construct()
     {
         $this->miniGame = MiniGameClient::getInstance();
-        $this->openId = 'oFtFh44QflCoAbo_sISuylskfG04';
+        $this->openId = env('RS_OPEN_ID');
         $this->gameType = '60';
         $this->advance = config('raid.rs');
     }
