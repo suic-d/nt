@@ -53,13 +53,13 @@ class WarSongGulch
             sleep(3);
             for ($i = 0; $i < MiniGameClient::MAX_TRIES; ++$i) {
                 if ($this->miniGame->doRaid($this->openId, $raid->raid_id, $raid->boss_id)) {
+                    sleep(3);
+                    $this->miniGame->refreshCurRaidOverTime($this->openId);
+                    $this->miniGame->createAdvert($this->openId);
+
                     break;
                 }
             }
-            sleep(3);
-
-            $this->miniGame->refreshCurRaidOverTime($this->openId);
-            $this->miniGame->createAdvert($this->openId);
         }
     }
 
