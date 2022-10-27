@@ -55,7 +55,7 @@ class BurningPlain
                 if ($this->miniGame->doRaid($this->openId, $raid->raid_id, $raid->boss_id)) {
                     sleep(3);
                     $this->miniGame->refreshCurRaidOverTime($this->openId);
-//                    $this->miniGame->createAdvert($this->openId);
+                    $this->miniGame->createAdvert($this->openId);
 
                     break;
                 }
@@ -206,13 +206,5 @@ class BurningPlain
             ->orderBy('boss_level')
             ->first()
             ;
-    }
-
-    /**
-     * @param array $advance
-     */
-    public function setAdvance(array $advance)
-    {
-        $this->advance = $advance;
     }
 }
