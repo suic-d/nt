@@ -2,80 +2,96 @@
 
 namespace App\Helpers;
 
-use App\Models\Local\Raid;
-use App\Traits\MiniGame;
-use GuzzleHttp\Client;
-use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
+use App\Models\Local\Gear;
 
-class Ran
+class BurningPlain
 {
-    use MiniGame;
+    /**
+     * @var MiniGameClient
+     */
+    protected $miniGame;
 
-    const QUEUE_AD = 'mini_game_ad';
+    /**
+     * @var string
+     */
+    protected $openId;
+
+    /**
+     * @var string
+     */
+    protected $gameType;
 
     /**
      * @var array
      */
     protected $advance;
 
-    /**
-     * Create a new command instance.
-     *
-     * @param string $gameType
-     */
-    public function __construct(string $gameType)
+    public function __construct()
     {
-        $this->url = env('MG_BASE_URL');
-        $this->gameType = $gameType;
-        $this->openId = env('MG_OPEN_ID');
-
-        $this->client = new Client(['base_uri' => $this->url, 'verify' => false, 'timeout' => 5]);
-        $this->logger = new Logger('MiniGame');
-        $this->logger->pushHandler(new StreamHandler(
-            storage_path('logs/'.date('Ymd').'/MiniGame.log'),
-            Logger::INFO
-        ));
+        $this->miniGame = MiniGameClient::getInstance();
+        $this->openId = 'oFtFh44QflCoAbo_sISuylskfG04';
+        $this->gameType = '60';
+        $this->advance = config('raid.rs');
     }
 
-    /**
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     */
     public function handle()
     {
-        if ($this->hasMutex() || $this->curRaid()) {
+        if ($this->miniGame->hasMutex($this->openId) || $this->miniGame->curRaid($this->openId)) {
             return;
         }
 
         $this->putOn();
         sleep(1);
-        $this->clearBag();
+        $this->miniGame->clearBag($this->openId);
         sleep(1);
 
         if (!is_null($raid = $this->getRaid())) {
-            $this->fm($raid->boss_level);
-            sleep(3);
-            for ($i = 0; $i < self::$maxTries; ++$i) {
-                if ($this->doRaid($raid->raid_id, $raid->boss_id)) {
+//            $this->miniGame->fm($this->openId, $raid->boss_level);
+//            sleep(3);
+            for ($i = 0; $i < MiniGameClient::MAX_TRIES; ++$i) {
+                if ($this->miniGame->doRaid($this->openId, $raid->raid_id, $raid->boss_id)) {
                     break;
                 }
             }
             sleep(3);
 
-            $this->createAdvert();
-            $this->setMutex();
+            $this->miniGame->setMutex($this->openId);
+            $this->miniGame->createAdvert($this->openId);
+        }
+    }
+
+    /**
+     * 穿戴装备.
+     *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function putOn()
+    {
+        $userInfo = $this->miniGame->getUserInfo($this->openId);
+        $zbList = array_column($userInfo['zbList'], 'id');
+        if (!empty($zbList)) {
+            foreach ($zbList as $v) {
+                $this->miniGame->levelCount($this->openId, $v);
+            }
+
+            Gear::whereIn('zb_id', $zbList)->get()->each(function ($item) {
+                $item->zb_got = 1;
+                $item->save();
+            });
         }
     }
 
     /**
      * 更新装备状态.
+     *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function updateRaidState()
     {
-        $userInfo = $this->getUserInfo();
+        $userInfo = $this->miniGame->getUserInfo($this->openId);
         // 已装备
         if (!empty($userInfo['bag'])) {
-            Raid::whereIn('zb_id', $userInfo['bag'])->get()->each(function ($item) {
+            Gear::whereIn('zb_id', $userInfo['bag'])->get()->each(function ($item) {
                 $item->zb_got = 1;
                 $item->save();
             });
@@ -83,7 +99,7 @@ class Ran
 
         // 未装备
         if (!empty($zbList = array_column($userInfo['zbList'], 'id'))) {
-            Raid::whereIn('zb_id', $zbList)->get()->each(function ($item) {
+            Gear::whereIn('zb_id', $zbList)->get()->each(function ($item) {
                 $item->zb_got = 1;
                 $item->save();
             });
@@ -93,19 +109,19 @@ class Ran
     /**
      * 更新副本.
      *
-     * @param string $gameType
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function updateRaidList(string $gameType)
+    public function updateRaidList()
     {
-        foreach ($this->getRaidList($gameType) as $item) {
+        foreach ($this->miniGame->getRaidList($this->gameType) as $item) {
             foreach ($item['bossList'] as $boss) {
                 foreach ($boss['zbList'] as $zb) {
-                    $raid = Raid::where('zb_id', $zb['id'])->first();
+                    $raid = Gear::where('zb_id', $zb['id'])->first();
                     if (is_null($raid)) {
-                        $raid = new Raid();
+                        $raid = new Gear();
                     }
 
-                    $raid->game_type = $gameType;
+                    $raid->game_type = $this->gameType;
                     $raid->raid_id = $item['raidId'];
                     $raid->raid_name = $item['raidName'];
                     $raid->raid_time = $item['raidTime'];
@@ -127,30 +143,13 @@ class Ran
     }
 
     /**
-     * 穿戴装备.
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     *
+     * @return null|Gear
      */
-    public function putOn()
+    public function getRaid(): ?Gear
     {
-        $userInfo = $this->getUserInfo();
-        $zbList = array_column($userInfo['zbList'], 'id');
-        if (!empty($zbList)) {
-            foreach ($zbList as $v) {
-                $this->levelCount($v);
-            }
-
-            Raid::whereIn('zb_id', $zbList)->get()->each(function ($item) {
-                $item->zb_got = 1;
-                $item->save();
-            });
-        }
-    }
-
-    /**
-     * @return null|Raid
-     */
-    public function getRaid(): ?Raid
-    {
-        $userInfo = $this->getUserInfo();
+        $userInfo = $this->miniGame->getUserInfo($this->openId);
 
         if (!empty($this->advance)) {
             foreach ($this->advance as $v) {
@@ -161,7 +160,7 @@ class Ran
                 if (isset($v['boss_id']) && !empty($v['boss_id'])) {
                     $bossIds = is_array($v['boss_id']) ? $v['boss_id'] : [$v['boss_id']];
                 } else {
-                    $bossIds = Raid::where('raid_id', $v['raid_id'])
+                    $bossIds = Gear::where('raid_id', $v['raid_id'])
                         ->where('zb_got', 0)
                         ->distinct()
                         ->get(['boss_id'])
@@ -175,7 +174,7 @@ class Ran
                         continue;
                     }
 
-                    $raid = Raid::where('raid_id', $v['raid_id'])
+                    $raid = Gear::where('raid_id', $v['raid_id'])
                         ->where('boss_id', $bossId)
                         ->where('zb_got', 0)
                         ->first()
@@ -188,7 +187,7 @@ class Ran
         }
 
         if (isset($userInfo['baodi']) && $userInfo['baodi'] > 20) {
-            $raid = Raid::where('game_type', $this->gameType)
+            $raid = Gear::where('game_type', $this->gameType)
                 ->where('zb_got', 0)
                 ->whereNotIn('boss_id', ['98', '99'])
                 ->orderBy('boss_level')
@@ -199,7 +198,7 @@ class Ran
             }
         }
 
-        return Raid::where('game_type', $this->gameType)
+        return Gear::where('game_type', $this->gameType)
             ->where('zb_got', 0)
             ->orderBy('boss_level')
             ->first()

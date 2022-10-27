@@ -2,9 +2,8 @@
 
 namespace App\Jobs;
 
-use App\Helpers\Ran;
+use App\Helpers\MiniGameClient;
 use App\Models\Local\AdvertQueue;
-use App\Traits\MiniGame;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -36,8 +35,8 @@ class AdvertisementVisit implements ShouldQueue
      */
     public function handle()
     {
-        $instance = new Ran(env('MG_GAME_TYPE'));
-        for ($i = 0; $i <= MiniGame::$maxTries; ++$i) {
+        $instance = MiniGameClient::getInstance();
+        for ($i = 0; $i <= MiniGameClient::MAX_TRIES; ++$i) {
             if ($instance->addMoney($this->advertQueue->open_id)) {
                 $this->advertQueue->status = 1;
                 $this->advertQueue->save();
