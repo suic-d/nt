@@ -41,6 +41,8 @@ class AdvertisementVisit implements ShouldQueue
                 $this->advertQueue->status = 1;
                 $this->advertQueue->save();
 
+                $instance->advertiseVisited($this->advertQueue->open_id);
+
                 break;
             }
         }

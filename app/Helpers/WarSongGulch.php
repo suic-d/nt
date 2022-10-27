@@ -39,7 +39,7 @@ class WarSongGulch
      */
     public function handle()
     {
-        if ($this->miniGame->hasMutex($this->openId) || $this->miniGame->curRaid($this->openId)) {
+        if (!$this->miniGame->curRaidOver($this->openId) || $this->miniGame->curRaid($this->openId)) {
             return;
         }
 
@@ -58,7 +58,7 @@ class WarSongGulch
             }
             sleep(3);
 
-            $this->miniGame->setMutex($this->openId);
+            $this->miniGame->refreshCurRaidOverTime($this->openId);
             $this->miniGame->createAdvert($this->openId);
         }
     }

@@ -18,6 +18,8 @@ class MiniGameClient
 
     const QUEUE_AD = 'mini_game_ad';
 
+    const ADV_TIME = 300;
+
     /**
      * @var Client
      */
@@ -27,6 +29,11 @@ class MiniGameClient
      * @var Logger
      */
     protected $logger;
+
+    /**
+     * @var \Illuminate\Contracts\Cache\Repository
+     */
+    protected $store;
 
     /**
      * @var self
@@ -39,6 +46,7 @@ class MiniGameClient
         $this->logger = new Logger($name = class_basename(__CLASS__));
         $path = storage_path('logs').DIRECTORY_SEPARATOR.date('Ymd').DIRECTORY_SEPARATOR.$name.'.log';
         $this->logger->pushHandler(new StreamHandler($path, Logger::INFO));
+        $this->store = Cache::store('redis');
     }
 
     /**
@@ -405,32 +413,73 @@ class MiniGameClient
     /**
      * @param string $openId
      *
-     * @return bool
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function hasMutex(string $openId): bool
+    public function advertiseVisited(string $openId)
     {
-        return Cache::has($this->getMutexName($openId));
+        $key = $this->getMutexName($openId);
+        if ($this->store->has($key)) {
+            $curRaidOverTime = $this->store->get($key) - self::ADV_TIME;
+            if ($curRaidOverTime < 0) {
+                $curRaidOverTime = 0;
+            }
+            $this->setCurRaidOverTime($openId, $curRaidOverTime);
+        }
     }
 
     /**
-     * 加锁.
+     * @param string $openId
      *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     *
+     * @return bool
+     */
+    public function curRaidOver($openId)
+    {
+        return time() >= $this->getCurRaidOverTime($openId);
+    }
+
+    /**
+     * @param string $openId
+     *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     *
+     * @return int
+     */
+    public function getCurRaidOverTime(string $openId): int
+    {
+        $key = $this->getMutexName($openId);
+        if (!$this->store->has($key)) {
+            $this->refreshCurRaidOverTime($openId);
+        }
+
+        return $this->store->get($key);
+    }
+
+    /**
      * @param string $openId
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function setMutex(string $openId)
+    public function refreshCurRaidOverTime(string $openId)
     {
         $userInfo = $this->getUserInfo($openId, true);
-        if (isset($userInfo['curRaidOverTime'], $userInfo['nowTime'])) {
-            $nowTime = (int) ceil($userInfo['nowTime'] / 1000);
+        if (isset($userInfo['curRaidOverTime'])) {
             $curRaidOverTime = (int) ceil($userInfo['curRaidOverTime'] / 1000);
-            $ttl = $curRaidOverTime - 600 - $nowTime;
-            if ($ttl > 0) {
-                // 加锁
-                Cache::set($this->getMutexName($openId), true, $ttl);
-            }
+            $this->setCurRaidOverTime($openId, $curRaidOverTime);
         }
+    }
+
+    /**
+     * @param string $openId
+     * @param int    $curRaidOverTime
+     *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function setCurRaidOverTime(string $openId, int $curRaidOverTime)
+    {
+        // 缓存24小时
+        $this->store->set($this->getMutexName($openId), $curRaidOverTime, 86400);
     }
 
     /**
