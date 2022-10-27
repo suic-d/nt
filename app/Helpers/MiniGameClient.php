@@ -335,6 +335,8 @@ class MiniGameClient
                 // 缓存24小时
                 Cache::set($key, $shopList, 86400);
             }
+
+            return $shopList;
         } catch (GuzzleException | Exception $exception) {
             $this->log(Logger::ERROR, __METHOD__.' '.$exception->getMessage());
         }
