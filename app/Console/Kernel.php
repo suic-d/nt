@@ -2,7 +2,6 @@
 
 namespace App\Console;
 
-use App\Helpers\BurningPlain;
 use App\Helpers\WarSongGulch;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -48,17 +47,10 @@ class Kernel extends ConsoleKernel
         // 战歌峡谷
         $schedule->call(function () {
             (new WarSongGulch())->handle();
-        });
+        })->everyMinute();
         $schedule->call(function () {
             (new WarSongGulch())->updateRaidList();
-        });
-        // 燃烧平原
-//        $schedule->call(function () {
-//            (new BurningPlain())->handle();
-//        })->everyMinute();
-//        $schedule->call(function () {
-//            (new BurningPlain())->updateRaidList();
-//        })->dailyAt('10:00');
+        })->hourly();
     }
 
     /**

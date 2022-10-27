@@ -165,6 +165,7 @@ class WarSongGulch
                 } else {
                     $bossIds = Raid::where('raid_id', $v['raid_id'])
                         ->where('zb_got', 0)
+                        ->orderBy('boss_level')
                         ->distinct()
                         ->get(['boss_id'])
                         ->pluck('boss_id')
