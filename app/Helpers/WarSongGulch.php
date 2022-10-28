@@ -5,6 +5,7 @@ namespace App\Helpers;
 use App\Models\Local\Raid;
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
+use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\SimpleCache\InvalidArgumentException;
 
@@ -30,12 +31,21 @@ class WarSongGulch
      */
     protected $advance;
 
+    /**
+     * @var Logger
+     */
+    protected $logger;
+
     public function __construct()
     {
         $this->miniGame = MiniGameClient::getInstance();
         $this->openId = env('MG_OPEN_ID');
         $this->gameType = '80';
         $this->advance = config('raid.zg');
+
+        $this->logger = new Logger($name = class_basename(__CLASS__));
+        $path = storage_path('logs').DIRECTORY_SEPARATOR.date('Ymd').DIRECTORY_SEPARATOR.$name.'.log';
+        $this->logger->pushHandler(new StreamHandler($path, Logger::INFO));
     }
 
     public function handle()
@@ -59,7 +69,7 @@ class WarSongGulch
                 $this->miniGame->refreshCurRaidOverTime($this->openId);
             }
         } catch (InvalidArgumentException | GuzzleException | Exception $exception) {
-            $this->miniGame->log(Logger::ERROR, $exception->getMessage());
+            $this->logger->error($exception->getMessage());
         }
     }
 
