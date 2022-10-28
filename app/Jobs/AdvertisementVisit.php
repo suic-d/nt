@@ -39,11 +39,12 @@ class AdvertisementVisit implements ShouldQueue
     public function handle()
     {
         $instance = MiniGameClient::getInstance();
-        $instance->addMoney($this->advertQueue->open_id);
+        if (0 == $this->advertQueue->status) {
+            $instance->addMoney($this->advertQueue->open_id);
+            $this->advertQueue->status = 1;
+            $this->advertQueue->save();
+        }
 
-        $this->advertQueue->status = 1;
-        $this->advertQueue->save();
-
-        $instance->advertiseVisited($this->advertQueue->open_id);
+        $instance->refreshCurRaidOverTime($this->advertQueue->open_id);
     }
 }

@@ -12,11 +12,9 @@ use Monolog\Logger;
 
 class MiniGameClient
 {
-    const MAX_TRIES = 5;
-
     const QUEUE_AD = 'mini_game_ad';
 
-    const ADV_TIME = 300;
+    const HTTP_TIMEOUT = 10;
 
     /**
      * @var Client
@@ -40,7 +38,11 @@ class MiniGameClient
 
     private function __construct()
     {
-        $this->client = new Client(['base_uri' => env('MG_BASE_URL'), 'verify' => false, 'timeout' => 5]);
+        $this->client = new Client([
+            'base_uri' => env('MG_BASE_URL'),
+            'verify' => false,
+            'timeout' => self::HTTP_TIMEOUT,
+        ]);
         $this->logger = new Logger($name = class_basename(__CLASS__));
         $path = storage_path('logs').DIRECTORY_SEPARATOR.date('Ymd').DIRECTORY_SEPARATOR.$name.'.log';
         $this->logger->pushHandler(new StreamHandler($path, Logger::INFO));
@@ -238,10 +240,7 @@ class MiniGameClient
         $this->buyZhuangBei($openId, json_encode($map[$level], JSON_UNESCAPED_UNICODE), 'fm');
 
         $userInfo = $this->getUserInfo($openId, true);
-        if (isset($userInfo['buffList'])) {
-            $this->getBuffList(json_encode($userInfo['buffList']));
-        }
-
+        $this->getBuffList(json_encode($userInfo['buffList']));
         $this->buffCount($openId);
     }
 
@@ -348,23 +347,6 @@ class MiniGameClient
     /**
      * @param string $openId
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
-    public function advertiseVisited(string $openId)
-    {
-        $key = $this->getMutexName($openId);
-        if ($this->store->has($key)) {
-            $curRaidOverTime = $this->store->get($key) - self::ADV_TIME;
-            $this->setCurRaidOverTime($openId, $curRaidOverTime);
-        } else {
-            $this->refreshCurRaidOverTime($openId);
-        }
-    }
-
-    /**
-     * @param string $openId
-     *
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      *
@@ -402,10 +384,8 @@ class MiniGameClient
     public function refreshCurRaidOverTime(string $openId)
     {
         $userInfo = $this->getUserInfo($openId, true);
-        if (isset($userInfo['curRaidOverTime'])) {
-            $curRaidOverTime = (int) ceil($userInfo['curRaidOverTime'] / 1000);
-            $this->setCurRaidOverTime($openId, $curRaidOverTime);
-        }
+        $curRaidOverTime = (int) ceil($userInfo['curRaidOverTime'] / 1000);
+        $this->setCurRaidOverTime($openId, $curRaidOverTime);
     }
 
     /**
