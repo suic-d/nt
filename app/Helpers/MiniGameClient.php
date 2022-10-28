@@ -595,7 +595,7 @@ class MiniGameClient
      * @param string     $message
      * @param array      $context
      */
-    protected function log($level, string $message, array $context = [])
+    public function log($level, string $message, array $context = [])
     {
         $this->logger->log($level, $message, $context);
         $this->logger->close();
