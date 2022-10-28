@@ -9,18 +9,8 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\SimpleCache\InvalidArgumentException;
 
-class WarSongGulch
+class WarSongGulch extends MiniGameAbstract
 {
-    /**
-     * @var MiniGameClient
-     */
-    protected $miniGame;
-
-    /**
-     * @var string
-     */
-    protected $openId;
-
     /**
      * @var string
      */

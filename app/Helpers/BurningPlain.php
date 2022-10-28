@@ -9,18 +9,8 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\SimpleCache\InvalidArgumentException;
 
-class BurningPlain
+class BurningPlain extends MiniGameAbstract
 {
-    /**
-     * @var MiniGameClient
-     */
-    protected $miniGame;
-
-    /**
-     * @var string
-     */
-    protected $openId;
-
     /**
      * @var string
      */
@@ -64,8 +54,8 @@ class BurningPlain
 //                $this->miniGame->fm($this->openId, $raid->boss_level);
 //                sleep(3);
                 $this->miniGame->doRaid($this->openId, $raid->raid_id, $raid->boss_id);
-//                $this->miniGame->createAdvert($this->openId);
-//                sleep(3);
+                $this->miniGame->createAdvert($this->openId);
+                sleep(3);
                 $this->miniGame->refreshCurRaidOverTime($this->openId);
             }
         } catch (InvalidArgumentException | GuzzleException | Exception $exception) {
