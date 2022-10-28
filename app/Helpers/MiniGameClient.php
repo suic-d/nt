@@ -422,10 +422,9 @@ class MiniGameClient
         $key = $this->getMutexName($openId);
         if ($this->store->has($key)) {
             $curRaidOverTime = $this->store->get($key) - self::ADV_TIME;
-            if ($curRaidOverTime < 0) {
-                $curRaidOverTime = 0;
-            }
             $this->setCurRaidOverTime($openId, $curRaidOverTime);
+        } else {
+            $this->refreshCurRaidOverTime($openId);
         }
     }
 
@@ -637,6 +636,7 @@ class MiniGameClient
         // 广告1
         $adv1 = new AdvertQueue();
         $adv1->open_id = $openId;
+        $adv1->num = 1;
         $adv1->expire_at = time() + 30;
         $adv1->save();
         AdvertisementVisit::dispatch($adv1)->onQueue(self::QUEUE_AD)->delay(now()->addSeconds(30));
@@ -644,6 +644,7 @@ class MiniGameClient
         // 广告2
         $adv2 = new AdvertQueue();
         $adv2->open_id = $openId;
+        $adv2->num = 2;
         $adv2->expire_at = time() + 60;
         $adv2->save();
         AdvertisementVisit::dispatch($adv2)->onQueue(self::QUEUE_AD)->delay(now()->addSeconds(60));
