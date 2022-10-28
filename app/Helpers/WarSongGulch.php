@@ -36,6 +36,7 @@ class WarSongGulch
 
     /**
      * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function handle()
     {
@@ -51,15 +52,10 @@ class WarSongGulch
         if (!is_null($raid = $this->getRaid())) {
             $this->miniGame->fm($this->openId, $raid->boss_level);
             sleep(3);
-            for ($i = 0; $i < MiniGameClient::MAX_TRIES; ++$i) {
-                if ($this->miniGame->doRaid($this->openId, $raid->raid_id, $raid->boss_id)) {
-                    sleep(3);
-                    $this->miniGame->refreshCurRaidOverTime($this->openId);
-                    $this->miniGame->createAdvert($this->openId);
-
-                    break;
-                }
-            }
+            $this->miniGame->doRaid($this->openId, $raid->raid_id, $raid->boss_id);
+            sleep(3);
+            $this->miniGame->refreshCurRaidOverTime($this->openId);
+            $this->miniGame->createAdvert($this->openId);
         }
     }
 
@@ -67,6 +63,7 @@ class WarSongGulch
      * 穿戴装备.
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function putOn()
     {
@@ -88,6 +85,7 @@ class WarSongGulch
      * 更新装备状态.
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function updateRaidState()
     {
@@ -113,6 +111,7 @@ class WarSongGulch
      * 更新副本.
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function updateRaidList()
     {
@@ -146,6 +145,7 @@ class WarSongGulch
     }
 
     /**
+     * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      *
      * @return null|Raid

@@ -4,9 +4,7 @@ namespace App\Helpers;
 
 use App\Jobs\AdvertisementVisit;
 use App\Models\Local\AdvertQueue;
-use Exception;
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use Illuminate\Support\Facades\Cache;
 use Monolog\Handler\StreamHandler;
@@ -65,6 +63,7 @@ class MiniGameClient
      * @param string $openId
      * @param false  $refresh
      *
+     * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      *
      * @return array
@@ -76,22 +75,16 @@ class MiniGameClient
             return Cache::get($key);
         }
 
-        try {
-            $response = $this->client->request('GET', 'miniGame/getUserInfo', [
-                RequestOptions::QUERY => ['openid' => $openId],
-            ]);
-            $userInfo = json_decode($response->getBody()->getContents(), true)['data'] ?? [];
-            if (!empty($userInfo)) {
-                // 缓存5分钟
-                Cache::set($key, $userInfo, 300);
-            }
-
-            return $userInfo;
-        } catch (GuzzleException | Exception $exception) {
-            $this->log(Logger::ERROR, __METHOD__.' '.$exception->getMessage());
+        $response = $this->client->request('GET', 'miniGame/getUserInfo', [
+            RequestOptions::QUERY => ['openid' => $openId],
+        ]);
+        $userInfo = json_decode($response->getBody()->getContents(), true)['data'];
+        if (!empty($userInfo)) {
+            // 缓存5分钟
+            Cache::set($key, $userInfo, 300);
         }
 
-        return [];
+        return $userInfo;
     }
 
     /**
@@ -99,35 +92,31 @@ class MiniGameClient
      *
      * @param string $openId
      * @param string $zbId
+     *
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function levelCount(string $openId, string $zbId)
     {
-        try {
-            $response = $this->client->request('GET', 'miniGame/levelCount', [RequestOptions::QUERY => [
-                'openid' => $openId,
-                'zbId' => $zbId,
-            ]]);
-            $this->log(Logger::INFO, __METHOD__.' '.$response->getBody()->getContents());
-        } catch (GuzzleException | Exception $exception) {
-            $this->log(Logger::ERROR, __METHOD__.' '.$exception->getMessage());
-        }
+        $response = $this->client->request('GET', 'miniGame/levelCount', [RequestOptions::QUERY => [
+            'openid' => $openId,
+            'zbId' => $zbId,
+        ]]);
+        $this->log(Logger::INFO, __METHOD__.' '.$response->getBody()->getContents());
     }
 
     /**
      * 清空背包.
      *
      * @param string $openId
+     *
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function clearBag(string $openId)
     {
-        try {
-            $response = $this->client->request('GET', 'miniGame/clearBag', [
-                RequestOptions::QUERY => ['openid' => $openId],
-            ]);
-            $this->log(Logger::INFO, __METHOD__.' '.$response->getBody()->getContents());
-        } catch (GuzzleException | Exception $exception) {
-            $this->log(Logger::ERROR, __METHOD__.' '.$exception->getMessage());
-        }
+        $response = $this->client->request('GET', 'miniGame/clearBag', [
+            RequestOptions::QUERY => ['openid' => $openId],
+        ]);
+        $this->log(Logger::INFO, __METHOD__.' '.$response->getBody()->getContents());
     }
 
     /**
@@ -137,24 +126,16 @@ class MiniGameClient
      * @param string $raidId
      * @param string $bossId
      *
-     * @return bool
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function doRaid(string $openId, string $raidId, string $bossId): bool
+    public function doRaid(string $openId, string $raidId, string $bossId)
     {
-        try {
-            $response = $this->client->request('GET', 'miniGame/doRaid', [RequestOptions::QUERY => [
-                'openid' => $openId,
-                'raidId' => $raidId,
-                'bossId' => $bossId,
-            ]]);
-            $this->log(Logger::INFO, __METHOD__.' '.$response->getBody()->getContents());
-
-            return true;
-        } catch (GuzzleException | Exception $exception) {
-            $this->log(Logger::ERROR, __METHOD__.' '.$exception->getMessage());
-        }
-
-        return false;
+        $response = $this->client->request('GET', 'miniGame/doRaid', [RequestOptions::QUERY => [
+            'openid' => $openId,
+            'raidId' => $raidId,
+            'bossId' => $bossId,
+        ]]);
+        $this->log(Logger::INFO, __METHOD__.' '.$response->getBody()->getContents());
     }
 
     /**
@@ -163,6 +144,7 @@ class MiniGameClient
      * @param string $gameType
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * @return array
      */
@@ -173,28 +155,23 @@ class MiniGameClient
             return Cache::get($key);
         }
 
-        try {
-            $response = $this->client->request('GET', 'miniGame/getRaidList', [
-                RequestOptions::QUERY => ['gameType' => $gameType],
-            ]);
-            $raidList = json_decode($response->getBody()->getContents(), true)['data'] ?? [];
-            if (!empty($raidList)) {
-                // 缓存24小时
-                Cache::set($key, $raidList, 86400);
-            }
-
-            return $raidList;
-        } catch (GuzzleException | Exception $exception) {
-            $this->log(Logger::ERROR, __METHOD__.' '.$exception->getMessage());
+        $response = $this->client->request('GET', 'miniGame/getRaidList', [
+            RequestOptions::QUERY => ['gameType' => $gameType],
+        ]);
+        $raidList = json_decode($response->getBody()->getContents(), true)['data'];
+        if (!empty($raidList)) {
+            // 缓存24小时
+            Cache::set($key, $raidList, 86400);
         }
 
-        return [];
+        return $raidList;
     }
 
     /**
      * 获取附魔列表.
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * @return array
      */
@@ -217,21 +194,17 @@ class MiniGameClient
     /**
      * @param string $buffId
      *
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     *
      * @return array
      */
     public function getBuffList(string $buffId): array
     {
-        try {
-            $response = $this->client->request('GET', 'miniGame/getBuffList', [
-                RequestOptions::QUERY => ['buffId' => $buffId],
-            ]);
+        $response = $this->client->request('GET', 'miniGame/getBuffList', [
+            RequestOptions::QUERY => ['buffId' => $buffId],
+        ]);
 
-            return json_decode($response->getBody()->getContents(), true)['data'] ?? [];
-        } catch (GuzzleException | Exception $exception) {
-            $this->log(Logger::ERROR, __METHOD__.' '.$exception->getMessage());
-        }
-
-        return [];
+        return json_decode($response->getBody()->getContents(), true)['data'];
     }
 
     /**
@@ -239,25 +212,17 @@ class MiniGameClient
      * @param string $detail
      * @param string $shopType
      *
-     * @return bool
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function buyZhuangBei(string $openId, string $detail, string $shopType): bool
+    public function buyZhuangBei(string $openId, string $detail, string $shopType)
     {
-        try {
-            $response = $this->client->request('GET', 'miniGame/buyZhuangbei', [RequestOptions::QUERY => [
-                'openid' => $openId,
-                'detail' => $detail,
-                'shopType' => $shopType,
-            ]]);
-            $this->log(Logger::INFO, __METHOD__.' '.$detail);
-            $this->log(Logger::INFO, __METHOD__.' '.$response->getBody()->getContents());
-
-            return true;
-        } catch (GuzzleException | Exception $exception) {
-            $this->log(Logger::ERROR, __METHOD__.' '.$exception->getMessage());
-        }
-
-        return false;
+        $response = $this->client->request('GET', 'miniGame/buyZhuangbei', [RequestOptions::QUERY => [
+            'openid' => $openId,
+            'detail' => $detail,
+            'shopType' => $shopType,
+        ]]);
+        $this->log(Logger::INFO, __METHOD__.' '.$detail);
+        $this->log(Logger::INFO, __METHOD__.' '.$response->getBody()->getContents());
     }
 
     /**
@@ -265,28 +230,19 @@ class MiniGameClient
      * @param int    $level
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function buyFM(string $openId, int $level)
     {
         $map = array_column($this->getFMList(), null, 'level');
-        if (isset($map[$level])) {
-            for ($i = 0; $i < self::MAX_TRIES; ++$i) {
-                if ($this->buyZhuangBei($openId, json_encode($map[$level], JSON_UNESCAPED_UNICODE), 'fm')) {
-                    break;
-                }
-            }
+        $this->buyZhuangBei($openId, json_encode($map[$level], JSON_UNESCAPED_UNICODE), 'fm');
 
-            $userInfo = $this->getUserInfo($openId, true);
-            if (isset($userInfo['buffList'])) {
-                $this->getBuffList(json_encode($userInfo['buffList']));
-            }
-
-            for ($i = 0; $i < self::MAX_TRIES; ++$i) {
-                if ($this->buffCount($openId)) {
-                    break;
-                }
-            }
+        $userInfo = $this->getUserInfo($openId, true);
+        if (isset($userInfo['buffList'])) {
+            $this->getBuffList(json_encode($userInfo['buffList']));
         }
+
+        $this->buffCount($openId);
     }
 
     /**
@@ -294,28 +250,21 @@ class MiniGameClient
      *
      * @param string $openId
      *
-     * @return bool
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function buffCount(string $openId): bool
+    public function buffCount(string $openId)
     {
-        try {
-            $response = $this->client->request('GET', 'miniGame/buffCount', [
-                RequestOptions::QUERY => ['openid' => $openId],
-            ]);
-            $this->log(Logger::INFO, __METHOD__.' '.$response->getBody()->getContents());
-
-            return true;
-        } catch (GuzzleException | Exception $exception) {
-            $this->log(Logger::ERROR, __METHOD__.' '.$exception->getMessage());
-        }
-
-        return false;
+        $response = $this->client->request('GET', 'miniGame/buffCount', [
+            RequestOptions::QUERY => ['openid' => $openId],
+        ]);
+        $this->log(Logger::INFO, __METHOD__.' '.$response->getBody()->getContents());
     }
 
     /**
      * @param string $gameType
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * @return array
      */
@@ -326,22 +275,16 @@ class MiniGameClient
             return Cache::get($key);
         }
 
-        try {
-            $response = $this->client->request('GET', 'miniGame/getShoppingList', [
-                RequestOptions::QUERY => ['gameType' => $gameType],
-            ]);
-            $shopList = json_decode($response->getBody()->getContents(), true)['data'] ?? [];
-            if (!empty($shopList)) {
-                // 缓存24小时
-                Cache::set($key, $shopList, 86400);
-            }
-
-            return $shopList;
-        } catch (GuzzleException | Exception $exception) {
-            $this->log(Logger::ERROR, __METHOD__.' '.$exception->getMessage());
+        $response = $this->client->request('GET', 'miniGame/getShoppingList', [
+            RequestOptions::QUERY => ['gameType' => $gameType],
+        ]);
+        $shopList = json_decode($response->getBody()->getContents(), true)['data'];
+        if (!empty($shopList)) {
+            // 缓存24小时
+            Cache::set($key, $shopList, 86400);
         }
 
-        return [];
+        return $shopList;
     }
 
     /**
@@ -349,28 +292,21 @@ class MiniGameClient
      *
      * @param string $openId
      *
-     * @return bool
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function addMoney(string $openId): bool
+    public function addMoney(string $openId)
     {
-        try {
-            $response = $this->client->request('GET', 'miniGame/addMoney', [
-                RequestOptions::QUERY => ['openid' => $openId],
-            ]);
-            $this->log(Logger::INFO, __METHOD__.' '.$response->getBody()->getContents());
-
-            return true;
-        } catch (GuzzleException | Exception $exception) {
-            $this->log(Logger::ERROR, __METHOD__.' '.$exception->getMessage());
-        }
-
-        return false;
+        $response = $this->client->request('GET', 'miniGame/addMoney', [
+            RequestOptions::QUERY => ['openid' => $openId],
+        ]);
+        $this->log(Logger::INFO, __METHOD__.' '.$response->getBody()->getContents());
     }
 
     /**
      * 任务列表.
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * @return array
      */
@@ -381,18 +317,14 @@ class MiniGameClient
             return Cache::get($key);
         }
 
-        try {
-            $response = $this->client->request('GET', 'miniGame/getRenwuList');
-            $missionList = json_decode($response->getBody()->getContents(), true)['data'] ?? [];
-            if (!empty($missionList)) {
-                // 缓存24小时
-                Cache::set($key, $missionList, 86400);
-            }
-        } catch (GuzzleException | Exception $exception) {
-            $this->log(Logger::ERROR, __METHOD__.' '.$exception->getMessage());
+        $response = $this->client->request('GET', 'miniGame/getRenwuList');
+        $missionList = json_decode($response->getBody()->getContents(), true)['data'];
+        if (!empty($missionList)) {
+            // 缓存24小时
+            Cache::set($key, $missionList, 86400);
         }
 
-        return [];
+        return $missionList;
     }
 
     /**
@@ -401,6 +333,7 @@ class MiniGameClient
      * @param string $type
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function buyGear(string $openId, string $name, string $type)
     {
@@ -416,6 +349,7 @@ class MiniGameClient
      * @param string $openId
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function advertiseVisited(string $openId)
     {
@@ -431,7 +365,8 @@ class MiniGameClient
     /**
      * @param string $openId
      *
-     *@throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      *
      * @return bool
      */
@@ -443,6 +378,7 @@ class MiniGameClient
     /**
      * @param string $openId
      *
+     * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      *
      * @return int
@@ -461,6 +397,7 @@ class MiniGameClient
      * @param string $openId
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function refreshCurRaidOverTime(string $openId)
     {
@@ -496,6 +433,7 @@ class MiniGameClient
     /**
      * @param string $openId
      *
+     * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      *
      * @return bool
@@ -511,6 +449,7 @@ class MiniGameClient
      * @param string    $openId
      * @param int|int[] $level
      *
+     * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      *
      * @return int
@@ -535,6 +474,7 @@ class MiniGameClient
      * @param string $openId
      * @param int    $bossLevel
      *
+     * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      *
      * @return int

@@ -32,19 +32,18 @@ class AdvertisementVisit implements ShouldQueue
 
     /**
      * Execute the job.
+     *
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function handle()
     {
         $instance = MiniGameClient::getInstance();
-        for ($i = 0; $i <= MiniGameClient::MAX_TRIES; ++$i) {
-            if ($instance->addMoney($this->advertQueue->open_id)) {
-                $this->advertQueue->status = 1;
-                $this->advertQueue->save();
+        $instance->addMoney($this->advertQueue->open_id);
 
-                $instance->advertiseVisited($this->advertQueue->open_id);
+        $this->advertQueue->status = 1;
+        $this->advertQueue->save();
 
-                break;
-            }
-        }
+        $instance->advertiseVisited($this->advertQueue->open_id);
     }
 }
