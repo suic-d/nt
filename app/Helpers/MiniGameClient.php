@@ -35,9 +35,19 @@ class MiniGameClient
     protected $store;
 
     /**
+     * @var string
+     */
+    protected $url;
+
+    /**
      * @var self
      */
     private static $instance;
+
+    public function __construct()
+    {
+        $this->url = env('MG_BASE_URL');
+    }
 
     /**
      * @return MiniGameClient
@@ -577,14 +587,18 @@ class MiniGameClient
     public function getClient()
     {
         if (!$this->client) {
-            $this->client = new Client([
-                'base_uri' => env('MG_BASE_URL'),
-                'verify' => false,
-                'timeout' => self::HTTP_TIMEOUT,
-            ]);
+            $this->client = $this->createDefaultClient();
         }
 
         return $this->client;
+    }
+
+    /**
+     * @return ClientInterface
+     */
+    public function createDefaultClient()
+    {
+        return new Client(['base_uri' => $this->url, 'verify' => false, 'timeout' => self::HTTP_TIMEOUT]);
     }
 
     /**
@@ -593,18 +607,28 @@ class MiniGameClient
     public function getLogger()
     {
         if (!$this->logger) {
-            $this->logger = new Logger($name = class_basename(__CLASS__));
-            $path = storage_path('logs').DIRECTORY_SEPARATOR.date('Ymd').DIRECTORY_SEPARATOR.$name.'.log';
-            $this->logger->pushHandler(new StreamHandler($path, Logger::INFO));
+            $this->logger = $this->createDefaultLogger();
         }
 
         return $this->logger;
     }
 
     /**
+     * @return LoggerInterface
+     */
+    public function createDefaultLogger()
+    {
+        $logger = new Logger($name = class_basename(__CLASS__));
+        $path = storage_path('logs').DIRECTORY_SEPARATOR.date('Ymd').DIRECTORY_SEPARATOR.$name.'.log';
+        $logger->pushHandler(new StreamHandler($path, Logger::INFO));
+
+        return $logger;
+    }
+
+    /**
      * @return CacheInterface
      */
-    public function getStore()
+    public function getStore(): CacheInterface
     {
         if (!$this->store) {
             $this->store = Cache::store('redis');

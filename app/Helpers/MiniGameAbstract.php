@@ -51,11 +51,21 @@ abstract class MiniGameAbstract
     public function getLogger()
     {
         if (!$this->logger) {
-            $this->logger = new Logger($name = class_basename(static::class));
-            $path = storage_path('logs').DIRECTORY_SEPARATOR.date('Ymd').DIRECTORY_SEPARATOR.$name.'.log';
-            $this->logger->pushHandler(new StreamHandler($path, Logger::INFO));
+            $this->logger = $this->createDefaultLogger();
         }
 
         return $this->logger;
+    }
+
+    /**
+     * @return LoggerInterface
+     */
+    public function createDefaultLogger()
+    {
+        $logger = new Logger($name = class_basename(static::class));
+        $path = storage_path('logs').DIRECTORY_SEPARATOR.date('Ymd').DIRECTORY_SEPARATOR.$name.'.log';
+        $logger->pushHandler(new StreamHandler($path, Logger::INFO));
+
+        return $logger;
     }
 }
