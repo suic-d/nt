@@ -22,7 +22,7 @@ class BurningPlain extends MiniGameAbstract
 
     public function __construct($gameType = '')
     {
-        if (empty($gameType)) {
+        if (!empty($gameType)) {
             $this->gameType = $gameType;
         }
         $this->openId = env('RS_OPEN_ID');

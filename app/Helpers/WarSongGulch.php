@@ -25,7 +25,7 @@ class WarSongGulch extends MiniGameAbstract
      */
     public function __construct(string $gameType = '')
     {
-        if (empty($gameType)) {
+        if (!empty($gameType)) {
             $this->gameType = $gameType;
         }
         $this->openId = env('MG_OPEN_ID');
