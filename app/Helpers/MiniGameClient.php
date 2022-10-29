@@ -594,14 +594,6 @@ class MiniGameClient
     }
 
     /**
-     * @return ClientInterface
-     */
-    public function createDefaultClient()
-    {
-        return new Client(['base_uri' => $this->url, 'verify' => false, 'timeout' => self::HTTP_TIMEOUT]);
-    }
-
-    /**
      * @return LoggerInterface
      */
     public function getLogger()
@@ -614,18 +606,6 @@ class MiniGameClient
     }
 
     /**
-     * @return LoggerInterface
-     */
-    public function createDefaultLogger()
-    {
-        $logger = new Logger($name = class_basename(__CLASS__));
-        $path = storage_path('logs').DIRECTORY_SEPARATOR.date('Ymd').DIRECTORY_SEPARATOR.$name.'.log';
-        $logger->pushHandler(new StreamHandler($path, Logger::INFO));
-
-        return $logger;
-    }
-
-    /**
      * @return CacheInterface
      */
     public function getStore(): CacheInterface
@@ -635,5 +615,25 @@ class MiniGameClient
         }
 
         return $this->store;
+    }
+
+    /**
+     * @return ClientInterface
+     */
+    protected function createDefaultClient()
+    {
+        return new Client(['base_uri' => $this->url, 'verify' => false, 'timeout' => self::HTTP_TIMEOUT]);
+    }
+
+    /**
+     * @return LoggerInterface
+     */
+    protected function createDefaultLogger()
+    {
+        $logger = new Logger($name = class_basename(__CLASS__));
+        $path = storage_path('logs').DIRECTORY_SEPARATOR.date('Ymd').DIRECTORY_SEPARATOR.$name.'.log';
+        $logger->pushHandler(new StreamHandler($path, Logger::INFO));
+
+        return $logger;
     }
 }

@@ -60,7 +60,7 @@ abstract class MiniGameAbstract
     /**
      * @return LoggerInterface
      */
-    public function createDefaultLogger()
+    protected function createDefaultLogger()
     {
         $logger = new Logger($name = class_basename(static::class));
         $path = storage_path('logs').DIRECTORY_SEPARATOR.date('Ymd').DIRECTORY_SEPARATOR.$name.'.log';
