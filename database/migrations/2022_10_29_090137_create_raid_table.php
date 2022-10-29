@@ -29,6 +29,7 @@ class CreateRaidTable extends Migration
             $table->tinyInteger('gold')->default(0)->comment('掉落金币');
             $table->tinyInteger('gong_zheng')->default(0)->comment('掉落公正徽章');
             $table->tinyInteger('han_bing')->default(0)->comment('掉落寒冰纹章');
+            $table->smallInteger('buff')->default(0)->comment('buff');
             $table->timestamps();
             $table->unique('zb_id');
         });

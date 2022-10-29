@@ -126,6 +126,7 @@ class WarSongGulch extends MiniGameAbstract
                     $raid->gold = $boss['goldDrop'];
                     $raid->gong_zheng = $boss['paiziDrop'] ?? 0;
                     $raid->han_bing = $boss['paizi80Drop'] ?? 0;
+                    $raid->buff = $boss['buff'] ?? 0;
                     $raid->zb_id = $zb['id'];
                     $raid->zb_name = $zb['name'];
                     $raid->zb_level = $zb['level'];
