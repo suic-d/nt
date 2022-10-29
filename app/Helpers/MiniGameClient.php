@@ -46,7 +46,7 @@ class MiniGameClient
 
     public function __construct()
     {
-        $this->url = env('MG_BASE_URL');
+        $this->url = config('raid.mini_game.base_url');
     }
 
     /**

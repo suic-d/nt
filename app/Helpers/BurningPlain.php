@@ -25,7 +25,7 @@ class BurningPlain extends MiniGameAbstract
         if (!empty($gameType)) {
             $this->gameType = $gameType;
         }
-        $this->openId = env('RS_OPEN_ID');
+        $this->openId = config('raid.burning_plain.open_id');
         $this->advance = config('raid.rs');
     }
 

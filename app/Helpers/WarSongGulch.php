@@ -28,7 +28,7 @@ class WarSongGulch extends MiniGameAbstract
         if (!empty($gameType)) {
             $this->gameType = $gameType;
         }
-        $this->openId = env('MG_OPEN_ID');
+        $this->openId = config('raid.war_song_gulch.open_id');
         $this->advance = config('raid.zg');
     }
 
