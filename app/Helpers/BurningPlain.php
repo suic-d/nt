@@ -5,8 +5,6 @@ namespace App\Helpers;
 use App\Models\Local\Gear;
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
-use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
 use Psr\SimpleCache\InvalidArgumentException;
 
 class BurningPlain extends MiniGameAbstract
@@ -21,45 +19,35 @@ class BurningPlain extends MiniGameAbstract
      */
     protected $advance;
 
-    /**
-     * @var Logger
-     */
-    protected $logger;
-
     public function __construct()
     {
-        $this->miniGame = MiniGameClient::getInstance();
         $this->openId = env('RS_OPEN_ID');
         $this->gameType = '60';
         $this->advance = config('raid.rs');
-
-        $this->logger = new Logger($name = class_basename(__CLASS__));
-        $path = storage_path('logs').DIRECTORY_SEPARATOR.date('Ymd').DIRECTORY_SEPARATOR.$name.'.log';
-        $this->logger->pushHandler(new StreamHandler($path, Logger::INFO));
     }
 
     public function handle()
     {
         try {
-            if (!$this->miniGame->curRaidOver($this->openId) || $this->miniGame->curRaid($this->openId)) {
+            if (!$this->getMiniGame()->curRaidOver($this->openId) || $this->getMiniGame()->curRaid($this->openId)) {
                 return;
             }
 
             $this->putOn();
             sleep(1);
-            $this->miniGame->clearBag($this->openId);
+            $this->getMiniGame()->clearBag($this->openId);
             sleep(1);
 
             if (!is_null($raid = $this->getRaid())) {
-//                $this->miniGame->fm($this->openId, $raid->boss_level);
+//                $this->getMiniGame()->fm($this->openId, $raid->boss_level);
 //                sleep(3);
-                $this->miniGame->doRaid($this->openId, $raid->raid_id, $raid->boss_id);
-                $this->miniGame->createAdvert($this->openId);
+                $this->getMiniGame()->doRaid($this->openId, $raid->raid_id, $raid->boss_id);
+                $this->getMiniGame()->createAdvert($this->openId);
                 sleep(3);
-                $this->miniGame->refreshCurRaidOverTime($this->openId);
+                $this->getMiniGame()->refreshCurRaidOverTime($this->openId);
             }
         } catch (InvalidArgumentException | GuzzleException | Exception $exception) {
-            $this->logger->error($exception->getMessage());
+            $this->getLogger()->error($exception->getMessage());
         }
     }
 
@@ -71,11 +59,11 @@ class BurningPlain extends MiniGameAbstract
      */
     public function putOn()
     {
-        $userInfo = $this->miniGame->getUserInfo($this->openId);
+        $userInfo = $this->getMiniGame()->getUserInfo($this->openId);
         $zbList = array_column($userInfo['zbList'], 'id');
         if (!empty($zbList)) {
             foreach ($zbList as $v) {
-                $this->miniGame->levelCount($this->openId, $v);
+                $this->getMiniGame()->levelCount($this->openId, $v);
             }
 
             Gear::whereIn('zb_id', $zbList)->get()->each(function ($item) {
@@ -93,7 +81,7 @@ class BurningPlain extends MiniGameAbstract
      */
     public function updateRaidState()
     {
-        $userInfo = $this->miniGame->getUserInfo($this->openId);
+        $userInfo = $this->getMiniGame()->getUserInfo($this->openId);
         // 已装备
         if (!empty($userInfo['bag'])) {
             Gear::whereIn('zb_id', $userInfo['bag'])->get()->each(function ($item) {
@@ -119,7 +107,7 @@ class BurningPlain extends MiniGameAbstract
      */
     public function updateRaidList()
     {
-        foreach ($this->miniGame->getRaidList($this->gameType) as $item) {
+        foreach ($this->getMiniGame()->getRaidList($this->gameType) as $item) {
             foreach ($item['bossList'] as $boss) {
                 foreach ($boss['zbList'] as $zb) {
                     $raid = Gear::where('zb_id', $zb['id'])->first();
@@ -156,7 +144,7 @@ class BurningPlain extends MiniGameAbstract
      */
     public function getRaid(): ?Gear
     {
-        $userInfo = $this->miniGame->getUserInfo($this->openId);
+        $userInfo = $this->getMiniGame()->getUserInfo($this->openId);
 
         if (!empty($this->advance)) {
             foreach ($this->advance as $v) {
