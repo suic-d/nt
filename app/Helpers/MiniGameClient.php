@@ -5,10 +5,13 @@ namespace App\Helpers;
 use App\Jobs\AdvertisementVisit;
 use App\Models\Local\AdvertQueue;
 use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\RequestOptions;
 use Illuminate\Support\Facades\Cache;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
+use Psr\Log\LoggerInterface;
+use Psr\SimpleCache\CacheInterface;
 
 class MiniGameClient
 {
@@ -17,17 +20,17 @@ class MiniGameClient
     const HTTP_TIMEOUT = 10;
 
     /**
-     * @var Client
+     * @var ClientInterface
      */
     protected $client;
 
     /**
-     * @var Logger
+     * @var LoggerInterface
      */
     protected $logger;
 
     /**
-     * @var \Illuminate\Contracts\Cache\Repository
+     * @var CacheInterface
      */
     protected $store;
 
@@ -35,19 +38,6 @@ class MiniGameClient
      * @var self
      */
     private static $instance;
-
-    private function __construct()
-    {
-        $this->client = new Client([
-            'base_uri' => env('MG_BASE_URL'),
-            'verify' => false,
-            'timeout' => self::HTTP_TIMEOUT,
-        ]);
-        $this->logger = new Logger($name = class_basename(__CLASS__));
-        $path = storage_path('logs').DIRECTORY_SEPARATOR.date('Ymd').DIRECTORY_SEPARATOR.$name.'.log';
-        $this->logger->pushHandler(new StreamHandler($path, Logger::INFO));
-        $this->store = Cache::store('redis');
-    }
 
     /**
      * @return MiniGameClient
@@ -77,7 +67,7 @@ class MiniGameClient
             return Cache::get($key);
         }
 
-        $response = $this->client->request('GET', 'miniGame/getUserInfo', [
+        $response = $this->getClient()->request('GET', 'miniGame/getUserInfo', [
             RequestOptions::QUERY => ['openid' => $openId],
         ]);
         $userInfo = json_decode($response->getBody()->getContents(), true)['data'];
@@ -99,7 +89,7 @@ class MiniGameClient
      */
     public function levelCount(string $openId, string $zbId)
     {
-        $response = $this->client->request('GET', 'miniGame/levelCount', [RequestOptions::QUERY => [
+        $response = $this->getClient()->request('GET', 'miniGame/levelCount', [RequestOptions::QUERY => [
             'openid' => $openId,
             'zbId' => $zbId,
         ]]);
@@ -115,7 +105,7 @@ class MiniGameClient
      */
     public function clearBag(string $openId)
     {
-        $response = $this->client->request('GET', 'miniGame/clearBag', [
+        $response = $this->getClient()->request('GET', 'miniGame/clearBag', [
             RequestOptions::QUERY => ['openid' => $openId],
         ]);
         $this->log(Logger::INFO, __METHOD__.' '.$response->getBody()->getContents());
@@ -132,7 +122,7 @@ class MiniGameClient
      */
     public function doRaid(string $openId, string $raidId, string $bossId)
     {
-        $response = $this->client->request('GET', 'miniGame/doRaid', [RequestOptions::QUERY => [
+        $response = $this->getClient()->request('GET', 'miniGame/doRaid', [RequestOptions::QUERY => [
             'openid' => $openId,
             'raidId' => $raidId,
             'bossId' => $bossId,
@@ -157,7 +147,7 @@ class MiniGameClient
             return Cache::get($key);
         }
 
-        $response = $this->client->request('GET', 'miniGame/getRaidList', [
+        $response = $this->getClient()->request('GET', 'miniGame/getRaidList', [
             RequestOptions::QUERY => ['gameType' => $gameType],
         ]);
         $raidList = json_decode($response->getBody()->getContents(), true)['data'];
@@ -202,7 +192,7 @@ class MiniGameClient
      */
     public function getBuffList(string $buffId): array
     {
-        $response = $this->client->request('GET', 'miniGame/getBuffList', [
+        $response = $this->getClient()->request('GET', 'miniGame/getBuffList', [
             RequestOptions::QUERY => ['buffId' => $buffId],
         ]);
 
@@ -218,7 +208,7 @@ class MiniGameClient
      */
     public function buyZhuangBei(string $openId, string $detail, string $shopType)
     {
-        $response = $this->client->request('GET', 'miniGame/buyZhuangbei', [RequestOptions::QUERY => [
+        $response = $this->getClient()->request('GET', 'miniGame/buyZhuangbei', [RequestOptions::QUERY => [
             'openid' => $openId,
             'detail' => $detail,
             'shopType' => $shopType,
@@ -253,7 +243,7 @@ class MiniGameClient
      */
     public function buffCount(string $openId)
     {
-        $response = $this->client->request('GET', 'miniGame/buffCount', [
+        $response = $this->getClient()->request('GET', 'miniGame/buffCount', [
             RequestOptions::QUERY => ['openid' => $openId],
         ]);
         $this->log(Logger::INFO, __METHOD__.' '.$response->getBody()->getContents());
@@ -274,7 +264,7 @@ class MiniGameClient
             return Cache::get($key);
         }
 
-        $response = $this->client->request('GET', 'miniGame/getShoppingList', [
+        $response = $this->getClient()->request('GET', 'miniGame/getShoppingList', [
             RequestOptions::QUERY => ['gameType' => $gameType],
         ]);
         $shopList = json_decode($response->getBody()->getContents(), true)['data'];
@@ -295,7 +285,7 @@ class MiniGameClient
      */
     public function addMoney(string $openId)
     {
-        $response = $this->client->request('GET', 'miniGame/addMoney', [
+        $response = $this->getClient()->request('GET', 'miniGame/addMoney', [
             RequestOptions::QUERY => ['openid' => $openId],
         ]);
         $this->log(Logger::INFO, __METHOD__.' '.$response->getBody()->getContents());
@@ -316,7 +306,7 @@ class MiniGameClient
             return Cache::get($key);
         }
 
-        $response = $this->client->request('GET', 'miniGame/getRenwuList');
+        $response = $this->getClient()->request('GET', 'miniGame/getRenwuList');
         $missionList = json_decode($response->getBody()->getContents(), true)['data'];
         if (!empty($missionList)) {
             // 缓存24小时
@@ -368,11 +358,11 @@ class MiniGameClient
     public function getCurRaidOverTime(string $openId): int
     {
         $key = $this->getMutexName($openId);
-        if (!$this->store->has($key)) {
+        if (!$this->getStore()->has($key)) {
             $this->refreshCurRaidOverTime($openId);
         }
 
-        return $this->store->get($key);
+        return $this->getStore()->get($key);
     }
 
     /**
@@ -397,7 +387,7 @@ class MiniGameClient
     public function setCurRaidOverTime(string $openId, int $curRaidOverTime)
     {
         // 缓存24小时
-        $this->store->set($this->getMutexName($openId), $curRaidOverTime, 86400);
+        $this->getStore()->set($this->getMutexName($openId), $curRaidOverTime, 86400);
     }
 
     /**
@@ -577,7 +567,49 @@ class MiniGameClient
      */
     public function log($level, string $message, array $context = [])
     {
-        $this->logger->log($level, $message, $context);
-        $this->logger->close();
+        $this->getLogger()->log($level, $message, $context);
+        $this->getLogger()->close();
+    }
+
+    /**
+     * @return ClientInterface
+     */
+    public function getClient()
+    {
+        if (!$this->client) {
+            $this->client = new Client([
+                'base_uri' => env('MG_BASE_URL'),
+                'verify' => false,
+                'timeout' => self::HTTP_TIMEOUT,
+            ]);
+        }
+
+        return $this->client;
+    }
+
+    /**
+     * @return LoggerInterface
+     */
+    public function getLogger()
+    {
+        if (!$this->logger) {
+            $this->logger = new Logger($name = class_basename(__CLASS__));
+            $path = storage_path('logs').DIRECTORY_SEPARATOR.date('Ymd').DIRECTORY_SEPARATOR.$name.'.log';
+            $this->logger->pushHandler(new StreamHandler($path, Logger::INFO));
+        }
+
+        return $this->logger;
+    }
+
+    /**
+     * @return CacheInterface
+     */
+    public function getStore()
+    {
+        if (!$this->store) {
+            $this->store = Cache::store('redis');
+        }
+
+        return $this->store;
     }
 }
