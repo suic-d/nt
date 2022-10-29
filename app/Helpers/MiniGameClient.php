@@ -152,21 +152,11 @@ class MiniGameClient
      */
     public function getRaidList(string $gameType): array
     {
-        $key = 'framework'.DIRECTORY_SEPARATOR.'cache-'.sha1(__METHOD__.$gameType);
-        if (Cache::has($key)) {
-            return Cache::get($key);
-        }
-
         $response = $this->getClient()->request('GET', 'miniGame/getRaidList', [
             RequestOptions::QUERY => ['gameType' => $gameType],
         ]);
-        $raidList = json_decode($response->getBody()->getContents(), true)['data'];
-        if (!empty($raidList)) {
-            // 缓存24小时
-            Cache::set($key, $raidList, 86400);
-        }
 
-        return $raidList;
+        return json_decode($response->getBody()->getContents(), true)['data'];
     }
 
     /**
