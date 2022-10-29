@@ -13,17 +13,22 @@ class WarSongGulch extends MiniGameAbstract
     /**
      * @var string
      */
-    protected $gameType;
+    protected $gameType = '80';
 
     /**
      * @var array
      */
     protected $advance;
 
-    public function __construct()
+    /**
+     * @param string $gameType
+     */
+    public function __construct(string $gameType = '')
     {
+        if (empty($gameType)) {
+            $this->gameType = $gameType;
+        }
         $this->openId = env('MG_OPEN_ID');
-        $this->gameType = '80';
         $this->advance = config('raid.zg');
     }
 

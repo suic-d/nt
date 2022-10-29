@@ -13,17 +13,19 @@ class BurningPlain extends MiniGameAbstract
     /**
      * @var string
      */
-    protected $gameType;
+    protected $gameType = '60';
 
     /**
      * @var array
      */
     protected $advance;
 
-    public function __construct()
+    public function __construct($gameType = '')
     {
+        if (empty($gameType)) {
+            $this->gameType = $gameType;
+        }
         $this->openId = env('RS_OPEN_ID');
-        $this->gameType = '60';
         $this->advance = config('raid.rs');
     }
 
