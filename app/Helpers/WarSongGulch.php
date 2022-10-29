@@ -3,6 +3,7 @@
 namespace App\Helpers;
 
 use App\Models\Local\Raid;
+use App\Models\Local\RaidOnce;
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
 use Monolog\Handler\StreamHandler;
@@ -156,6 +157,10 @@ class WarSongGulch extends MiniGameAbstract
      */
     public function getRaid(): ?Raid
     {
+        if (!is_null($raid = $this->getRaidOnce())) {
+            return $raid;
+        }
+
         $userInfo = $this->miniGame->getUserInfo($this->openId);
 
         if (!empty($this->advance)) {
@@ -211,5 +216,25 @@ class WarSongGulch extends MiniGameAbstract
             ->orderBy('boss_level')
             ->first()
             ;
+    }
+
+    /**
+     * @return null|Raid
+     */
+    public function getRaidOnce(): ?Raid
+    {
+        $raidOnce = RaidOnce::where('open_id', $this->openId)->orderBy('id')->first();
+        if (!is_null($raidOnce)) {
+            $raid = Raid::where('raid_id', $raidOnce->raid_id)
+                ->where('boss_id', $raidOnce->boss_id)
+                ->orderBy('id')
+                ->first()
+            ;
+            $raidOnce->delete();
+
+            return $raid;
+        }
+
+        return null;
     }
 }
