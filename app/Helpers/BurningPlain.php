@@ -3,6 +3,7 @@
 namespace App\Helpers;
 
 use App\Models\Local\Gear;
+use App\Models\Local\RaidOnce;
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -144,6 +145,10 @@ class BurningPlain extends MiniGameAbstract
      */
     public function getRaid(): ?Gear
     {
+        if (!is_null($raid = $this->getRaidOnce())) {
+            return $raid;
+        }
+
         $userInfo = $this->getMiniGame()->getUserInfo($this->openId);
 
         if (!empty($this->advance)) {
@@ -198,5 +203,25 @@ class BurningPlain extends MiniGameAbstract
             ->orderBy('boss_level')
             ->first()
             ;
+    }
+
+    /**
+     * @return null|Gear
+     */
+    public function getRaidOnce(): ?Gear
+    {
+        $raidOnce = RaidOnce::where('open_id', $this->openId)->orderBy('id')->first();
+        if (!is_null($raidOnce)) {
+            $raid = Gear::where('raid_id', $raidOnce->raid_id)
+                ->where('boss_id', $raidOnce->boss_id)
+                ->orderBy('id')
+                ->first()
+            ;
+            $raidOnce->delete();
+
+            return $raid;
+        }
+
+        return null;
     }
 }
