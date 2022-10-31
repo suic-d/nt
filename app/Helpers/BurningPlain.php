@@ -4,7 +4,6 @@ namespace App\Helpers;
 
 use App\Models\Local\Gear;
 use App\Models\Local\RaidOnce;
-use Exception;
 use GuzzleHttp\Exception\GuzzleException;
 use Psr\SimpleCache\InvalidArgumentException;
 
@@ -31,27 +30,7 @@ class BurningPlain extends MiniGameAbstract
 
     public function handle()
     {
-        try {
-            if (!$this->getMiniGame()->curRaidOver($this->openId) || $this->getMiniGame()->curRaid($this->openId)) {
-                return;
-            }
-
-            $this->putOn();
-            sleep(1);
-            $this->getMiniGame()->clearBag($this->openId);
-            sleep(1);
-
-            if (!is_null($raid = $this->getRaid())) {
-//                $this->getMiniGame()->fm($this->openId, $raid->boss_level);
-//                sleep(3);
-                $this->getMiniGame()->doRaid($this->openId, $raid->raid_id, $raid->boss_id);
-                $this->getMiniGame()->createAdvert($this->openId);
-                sleep(3);
-                $this->getMiniGame()->refreshCurRaidOverTime($this->openId);
-            }
-        } catch (InvalidArgumentException | GuzzleException | Exception $exception) {
-            $this->getLogger()->error($exception->getMessage());
-        }
+        $this->run();
     }
 
     /**

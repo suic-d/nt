@@ -439,6 +439,104 @@ class MiniGameClient
     }
 
     /**
+     * @param string $openId
+     * @param int    $bossLevel
+     *
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     *
+     * @return array|int[]
+     */
+    public function fmToBuy(string $openId, int $bossLevel)
+    {
+        $userInfo = $this->getUserInfo($openId, true);
+        $level = $userInfo['level'] + $userInfo['buff'];
+
+        // 高于25，无需fm
+        if ($level - $bossLevel > 25) {
+            return [];
+        }
+
+        $diff = $bossLevel + 25 - $level;
+        // 无需fm
+        if ($diff <= 0 || $diff > 250) {
+            return [];
+        }
+
+        if ($diff <= 20) {
+            return [20];
+        }
+        if ($diff > 20 && $diff <= 30) {
+            return [30];
+        }
+        if ($diff > 30 && $diff <= 40) {
+            return [40];
+        }
+        if ($diff > 40 && $diff <= 50) {
+            return [20, 30];
+        }
+        if ($diff > 50 && $diff <= 60) {
+            return [20, 40];
+        }
+        if ($diff > 60 && $diff <= 70) {
+            return [30, 40];
+        }
+        if ($diff > 70 && $diff <= 80) {
+            return [20, 60];
+        }
+        if ($diff > 80 && $diff <= 90) {
+            return [20, 30, 40];
+        }
+        if ($diff > 90 && $diff <= 100) {
+            return [100];
+        }
+        if ($diff > 100 && $diff <= 110) {
+            return [20, 30, 60];
+        }
+        if ($diff > 110 && $diff <= 120) {
+            return [20, 100];
+        }
+        if ($diff > 120 && $diff <= 130) {
+            return [30, 100];
+        }
+        if ($diff > 130 && $diff <= 140) {
+            return [40, 100];
+        }
+        if ($diff > 140 && $diff <= 150) {
+            return [20, 30, 100];
+        }
+        if ($diff > 150 && $diff <= 160) {
+            return [20, 40, 100];
+        }
+        if ($diff > 160 && $diff <= 170) {
+            return [30, 40, 100];
+        }
+        if ($diff > 170 && $diff <= 180) {
+            return [20, 60, 100];
+        }
+        if ($diff > 180 && $diff <= 190) {
+            return [20, 30, 40, 100];
+        }
+        if ($diff > 190 && $diff <= 200) {
+            return [40, 60, 100];
+        }
+        if ($diff > 200 && $diff <= 210) {
+            return [20, 30, 60, 100];
+        }
+        if ($diff > 210 && $diff <= 220) {
+            return [20, 40, 60, 100];
+        }
+        if ($diff > 220 && $diff <= 230) {
+            return [30, 40, 60, 100];
+        }
+        if ($diff > 230 && $diff <= 250) {
+            return [20, 30, 40, 60, 100];
+        }
+
+        return [];
+    }
+
+    /**
      * 附魔.
      *
      * @param string $openId
@@ -451,86 +549,8 @@ class MiniGameClient
      */
     public function fm(string $openId, int $bossLevel): int
     {
-        $userInfo = $this->getUserInfo($openId, true);
-        $level = $userInfo['level'] + $userInfo['buff'];
-        // 高于25，无需fm
-        if ($level - $bossLevel > 25) {
-            return 0;
-        }
-
-        $diff = $bossLevel + 25 - $level;
-        // 无需fm
-        if ($diff <= 0 || $diff > 250) {
-            return 0;
-        }
-        if ($diff <= 20) {
-            return $this->batchFM($openId, 20);
-        }
-        if ($diff > 20 && $diff <= 30) {
-            return $this->batchFM($openId, 30);
-        }
-        if ($diff > 30 && $diff <= 40) {
-            return $this->batchFM($openId, 40);
-        }
-        if ($diff > 40 && $diff <= 50) {
-            return $this->batchFM($openId, [20, 30]);
-        }
-        if ($diff > 50 && $diff <= 60) {
-            return $this->batchFM($openId, [20, 40]);
-        }
-        if ($diff > 60 && $diff <= 70) {
-            return $this->batchFM($openId, [30, 40]);
-        }
-        if ($diff > 70 && $diff <= 80) {
-            return $this->batchFM($openId, [20, 60]);
-        }
-        if ($diff > 80 && $diff <= 90) {
-            return $this->batchFM($openId, [20, 30, 40]);
-        }
-        if ($diff > 90 && $diff <= 100) {
-            return $this->batchFM($openId, 100);
-        }
-        if ($diff > 100 && $diff <= 110) {
-            return $this->batchFM($openId, [20, 30, 60]);
-        }
-        if ($diff > 110 && $diff <= 120) {
-            return $this->batchFM($openId, [20, 100]);
-        }
-        if ($diff > 120 && $diff <= 130) {
-            return $this->batchFM($openId, [30, 100]);
-        }
-        if ($diff > 130 && $diff <= 140) {
-            return $this->batchFM($openId, [40, 100]);
-        }
-        if ($diff > 140 && $diff <= 150) {
-            return $this->batchFM($openId, [20, 30, 100]);
-        }
-        if ($diff > 150 && $diff <= 160) {
-            return $this->batchFM($openId, [20, 40, 100]);
-        }
-        if ($diff > 160 && $diff <= 170) {
-            return $this->batchFM($openId, [30, 40, 100]);
-        }
-        if ($diff > 170 && $diff <= 180) {
-            return $this->batchFM($openId, [20, 60, 100]);
-        }
-        if ($diff > 180 && $diff <= 190) {
-            return $this->batchFM($openId, [20, 30, 40, 100]);
-        }
-        if ($diff > 190 && $diff <= 200) {
-            return $this->batchFM($openId, [40, 60, 100]);
-        }
-        if ($diff > 200 && $diff <= 210) {
-            return $this->batchFM($openId, [20, 30, 60, 100]);
-        }
-        if ($diff > 210 && $diff <= 220) {
-            return $this->batchFM($openId, [20, 40, 60, 100]);
-        }
-        if ($diff > 220 && $diff <= 230) {
-            return $this->batchFM($openId, [30, 40, 60, 100]);
-        }
-        if ($diff > 230 && $diff <= 250) {
-            return $this->batchFM($openId, [20, 30, 40, 60, 100]);
+        if (!empty($fmToBuy = $this->fmToBuy($openId, $bossLevel))) {
+            return $this->batchFM($openId, $fmToBuy);
         }
 
         return 0;
