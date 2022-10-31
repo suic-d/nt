@@ -36,6 +36,8 @@ class AdvertQueue implements ShouldQueue
 
     /**
      * Execute the job.
+     *
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function handle()
     {

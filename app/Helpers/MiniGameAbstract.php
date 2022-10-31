@@ -155,17 +155,13 @@ abstract class MiniGameAbstract
                 }
             }
 
-            // 广告1
-            $raidLog->advertLogs()->create([
-                'open_id' => $raidLog->open_id,
-                'num' => 1,
-            ]);
-
-            // 广告2
-            $raidLog->advertLogs()->create([
-                'open_id' => $raidLog->open_id,
-                'num' => 2,
-            ]);
+            // 广告
+            for ($num = 1; $num <= 2; ++$num) {
+                $raidLog->advertLogs()->create([
+                    'open_id' => $this->openId,
+                    'num' => $num,
+                ]);
+            }
 
             DB::commit();
 
