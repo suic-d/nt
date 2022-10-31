@@ -82,7 +82,7 @@ abstract class MiniGameAbstract
             if (!is_null($raid = $this->getRaid())) {
                 $this->createRaidLog($raid);
 
-                $this->getMiniGame()->setCurRaidOverTime($this->openId, $raid->raid_time);
+                $this->getMiniGame()->setCurRaidOverTime($this->openId, time() + $raid->raid_time);
             }
         } catch (InvalidArgumentException | Throwable | GuzzleException $exception) {
             $this->getLogger()->log(Logger::ERROR, $exception->getMessage());
