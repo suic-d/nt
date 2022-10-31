@@ -32,6 +32,10 @@ class CreateRaidTable extends Migration
             $table->smallInteger('buff')->default(0)->comment('buff');
             $table->timestamps();
             $table->unique('zb_id');
+            $table->index('game_type');
+            $table->index('raid_id');
+            $table->index('boss_id');
+            $table->index('zb_got');
         });
     }
 
