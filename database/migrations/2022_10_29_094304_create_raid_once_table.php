@@ -20,6 +20,9 @@ class CreateRaidOnceTable extends Migration
             $table->string('boss_name', 50)->default('')->comment('boss名称');
             $table->timestamps();
             $table->softDeletes();
+            $table->index('open_id');
+            $table->index('raid_id');
+            $table->index('boss_id');
         });
     }
 

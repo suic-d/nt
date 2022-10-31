@@ -6,6 +6,7 @@ use App\Jobs\RaidQueue;
 use App\Models\Local\Gear;
 use App\Models\Local\Raid;
 use App\Models\Local\RaidLog;
+use App\Models\Local\RaidOnce;
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\DB;
@@ -161,6 +162,15 @@ abstract class MiniGameAbstract
                     'open_id' => $this->openId,
                     'num' => $num,
                 ]);
+            }
+
+            $raidOnce = RaidOnce::where('open_id', $this->openId)
+                ->where('raid_id', $raid->raid_id)
+                ->where('boss_id', $raid->boss_id)
+                ->first()
+            ;
+            if (!is_null($raidOnce)) {
+                $raidOnce->delete();
             }
 
             DB::commit();

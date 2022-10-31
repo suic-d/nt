@@ -198,14 +198,11 @@ class WarSongGulch extends MiniGameAbstract
     {
         $raidOnce = RaidOnce::where('open_id', $this->openId)->orderBy('id')->first();
         if (!is_null($raidOnce)) {
-            $raid = Raid::where('raid_id', $raidOnce->raid_id)
+            return Raid::where('raid_id', $raidOnce->raid_id)
                 ->where('boss_id', $raidOnce->boss_id)
                 ->orderBy('id')
                 ->first()
             ;
-            $raidOnce->delete();
-
-            return $raid;
         }
 
         return null;

@@ -24,4 +24,17 @@ class RaidOnce extends Model
      * @var string
      */
     protected $table = 'raid_once';
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var string[]
+     */
+    protected $fillable = [
+        'open_id',
+        'raid_id',
+        'raid_name',
+        'boss_id',
+        'boss_name',
+    ];
 }
