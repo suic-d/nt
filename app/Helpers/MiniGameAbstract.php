@@ -115,6 +115,33 @@ abstract class MiniGameAbstract
     }
 
     /**
+     * @throws GuzzleException
+     * @throws InvalidArgumentException
+     *
+     * @return string
+     */
+    public function getCurRaidTimeLeft()
+    {
+        $diff = $this->getMiniGame()->getCurRaidOverTime($this->openId) - time();
+        if ($diff < 0) {
+            $diff = 0;
+        }
+
+        $second = $diff % 60;
+        $second = str_pad($second, 2, '0', STR_PAD_LEFT);
+
+        $diff /= 60;
+        $minute = $diff % 60;
+        $minute = str_pad($minute, 2, '0', STR_PAD_LEFT);
+
+        $diff /= 60;
+        $hour = $diff % 60;
+        $hour = str_pad($hour, 2, '0', STR_PAD_LEFT);
+
+        return sprintf('%s时%s分%s秒', $hour, $minute, $second);
+    }
+
+    /**
      * @return LoggerInterface
      */
     protected function createDefaultLogger()
