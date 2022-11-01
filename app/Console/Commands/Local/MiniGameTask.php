@@ -89,6 +89,8 @@ class MiniGameTask extends Command
         }
 
         $this->cache->forget($this->mutexName());
+
+        $this->log(Logger::INFO, __METHOD__.' Task Executed');
     }
 
     /**
