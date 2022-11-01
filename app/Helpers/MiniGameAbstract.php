@@ -29,6 +29,16 @@ abstract class MiniGameAbstract
     protected $openId;
 
     /**
+     * @var string
+     */
+    protected $gameType;
+
+    /**
+     * @var array
+     */
+    protected $advance;
+
+    /**
      * @var LoggerInterface
      */
     protected $logger;

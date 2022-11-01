@@ -9,24 +9,9 @@ use Psr\SimpleCache\InvalidArgumentException;
 
 class WarSongGulch extends MiniGameAbstract
 {
-    /**
-     * @var string
-     */
-    protected $gameType = '80';
-
-    /**
-     * @var array
-     */
-    protected $advance;
-
-    /**
-     * @param string $gameType
-     */
-    public function __construct(string $gameType = '')
+    public function __construct()
     {
-        if (!empty($gameType)) {
-            $this->gameType = $gameType;
-        }
+        $this->gameType = config('raid.war_song_gulch.game_type');
         $this->openId = config('raid.war_song_gulch.open_id');
         $this->advance = config('raid.zg');
     }

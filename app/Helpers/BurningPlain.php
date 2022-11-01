@@ -9,21 +9,9 @@ use Psr\SimpleCache\InvalidArgumentException;
 
 class BurningPlain extends MiniGameAbstract
 {
-    /**
-     * @var string
-     */
-    protected $gameType = '60';
-
-    /**
-     * @var array
-     */
-    protected $advance;
-
-    public function __construct($gameType = '')
+    public function __construct()
     {
-        if (!empty($gameType)) {
-            $this->gameType = $gameType;
-        }
+        $this->gameType = config('raid.burning_plain.game_type');
         $this->openId = config('raid.burning_plain.open_id');
         $this->advance = config('raid.rs');
     }
