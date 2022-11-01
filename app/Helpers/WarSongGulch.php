@@ -11,7 +11,7 @@ class WarSongGulch extends MiniGameAbstract
 {
     public function __construct()
     {
-        $this->gameType = config('raid.war_song_gulch.game_type');
+        $this->setGameType(config('raid.war_song_gulch.game_type'));
         $this->openId = config('raid.war_song_gulch.open_id');
         $this->advance = config('raid.zg');
     }

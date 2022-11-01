@@ -148,6 +148,14 @@ abstract class MiniGameAbstract
     }
 
     /**
+     * @param string $gameType
+     */
+    public function setGameType(string $gameType): void
+    {
+        $this->gameType = $gameType;
+    }
+
+    /**
      * @return LoggerInterface
      */
     protected function createDefaultLogger()
