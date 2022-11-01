@@ -6,6 +6,7 @@ use App\Helpers\BurningPlain;
 use App\Helpers\WarSongGulch;
 use Exception;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Cache;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
@@ -33,11 +34,28 @@ class MiniGameTask extends Command
     protected $logger;
 
     /**
+     * @var int
+     */
+    protected $expiresAt = 5;
+
+    /**
+     * @var string
+     */
+    protected $store = 'redis';
+
+    /**
+     * @var \Illuminate\Contracts\Cache\Repository
+     */
+    protected $cache;
+
+    /**
      * Create a new command instance.
      */
     public function __construct()
     {
         parent::__construct();
+
+        $this->cache = Cache::store($this->store);
     }
 
     /**
@@ -54,6 +72,10 @@ class MiniGameTask extends Command
 
     public function doRun()
     {
+        if (!$this->cache->add($this->mutexName(), true, $this->expiresAt * 60)) {
+            return;
+        }
+
         try {
             (new WarSongGulch())->handle();
         } catch (Exception $exception) {
@@ -65,6 +87,8 @@ class MiniGameTask extends Command
         } catch (Exception $exception) {
             $this->log(Logger::ERROR, $exception->getMessage());
         }
+
+        $this->cache->forget($this->mutexName());
 
         $this->log(Logger::INFO, __METHOD__.' Task Executed');
     }
@@ -86,7 +110,7 @@ class MiniGameTask extends Command
      * @param string     $message
      * @param array      $context
      */
-    protected function log($level, string $message, array $context = [])
+    public function log($level, string $message, array $context = [])
     {
         $this->getLogger()->log($level, $message, $context);
         $this->getLogger()->close();
@@ -95,13 +119,29 @@ class MiniGameTask extends Command
     /**
      * @return LoggerInterface
      */
-    protected function getLogger()
+    public function getLogger()
     {
         if (!$this->logger) {
             $this->logger = $this->createDefaultLogger();
         }
 
         return $this->logger;
+    }
+
+    /**
+     * @return string
+     */
+    public function mutexName()
+    {
+        return 'framework'.DIRECTORY_SEPARATOR.'cache-'.sha1(__METHOD__);
+    }
+
+    /**
+     * @return \Illuminate\Contracts\Cache\Repository
+     */
+    protected function createDefaultStore()
+    {
+        return Cache::store('redis');
     }
 
     /**
