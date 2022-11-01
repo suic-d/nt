@@ -85,9 +85,7 @@ abstract class MiniGameAbstract
             }
 
             $this->putOn();
-            sleep(1);
             $this->getMiniGame()->clearBag($this->openId);
-            sleep(1);
 
             if (!is_null($raid = $this->getRaid())) {
                 $this->createRaidLog($raid);
@@ -107,16 +105,14 @@ abstract class MiniGameAbstract
             }
 
             $this->putOn();
-            sleep(1);
             $this->getMiniGame()->clearBag($this->openId);
-            sleep(1);
 
             if (!is_null($raid = $this->getRaid())) {
                 $this->getMiniGame()->fm($this->openId, $raid->boss_level);
-                sleep(3);
+                sleep(1);
                 $this->getMiniGame()->doRaid($this->openId, $raid->raid_id, $raid->boss_id);
                 $this->getMiniGame()->createAdvert($this->openId);
-                sleep(3);
+                sleep(1);
                 $this->getMiniGame()->refreshCurRaidOverTime($this->openId);
             }
         } catch (InvalidArgumentException | GuzzleException | Exception $exception) {

@@ -443,7 +443,7 @@ class MiniGameClient
 
         foreach ($level as $v) {
             $this->buyFM($openId, $v);
-            sleep(3);
+            sleep(1);
         }
 
         return array_sum($level);
