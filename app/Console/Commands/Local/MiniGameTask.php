@@ -3,7 +3,6 @@
 namespace App\Console\Commands\Local;
 
 use App\Helpers\BurningPlain;
-use App\Helpers\MiniGameAbstract;
 use App\Helpers\WarSongGulch;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
@@ -49,11 +48,6 @@ class MiniGameTask extends Command
     protected $cache;
 
     /**
-     * @var array|MiniGameAbstract[]
-     */
-    protected $tasks = [];
-
-    /**
      * Create a new command instance.
      */
     public function __construct()
@@ -61,8 +55,6 @@ class MiniGameTask extends Command
         parent::__construct();
 
         $this->cache = Cache::store($this->store);
-        $this->tasks[] = new WarSongGulch();
-        $this->tasks[] = new BurningPlain();
     }
 
     /**
@@ -83,9 +75,8 @@ class MiniGameTask extends Command
             return;
         }
 
-        foreach ($this->tasks as $task) {
-            $task->handle();
-        }
+        (new WarSongGulch())->handle();
+        (new BurningPlain())->handle();
 
         $this->cache->forget($this->mutexName());
     }
