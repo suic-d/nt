@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Cache;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
-use Psr\SimpleCache\CacheInterface;
 
 class MiniGameClient
 {
@@ -30,7 +29,7 @@ class MiniGameClient
     protected $logger;
 
     /**
-     * @var CacheInterface
+     * @var string
      */
     protected $store;
 
@@ -40,6 +39,16 @@ class MiniGameClient
     protected $url;
 
     /**
+     * @var \Illuminate\Contracts\Cache\Repository
+     */
+    protected $cache;
+
+    /**
+     * @var int
+     */
+    protected $expiresAt = 86400;
+
+    /**
      * @var self
      */
     private static $instance;
@@ -47,6 +56,8 @@ class MiniGameClient
     public function __construct()
     {
         $this->url = config('raid.mini_game.base_url');
+        $this->store = config('raid.mini_game.store');
+        $this->cache = Cache::store($this->store);
     }
 
     /**
@@ -358,11 +369,11 @@ class MiniGameClient
     public function getCurRaidOverTime(string $openId): int
     {
         $key = $this->getMutexName($openId);
-        if (!$this->getStore()->has($key)) {
+        if (!$this->cache->has($key)) {
             $this->refreshCurRaidOverTime($openId);
         }
 
-        return $this->getStore()->get($key);
+        return $this->cache->get($key);
     }
 
     /**
@@ -387,7 +398,7 @@ class MiniGameClient
     public function setCurRaidOverTime(string $openId, int $curRaidOverTime)
     {
         // 缓存24小时
-        $this->getStore()->set($this->getMutexName($openId), $curRaidOverTime, 86400);
+        $this->cache->set($this->getMutexName($openId), $curRaidOverTime, $this->expiresAt);
     }
 
     /**
@@ -613,18 +624,6 @@ class MiniGameClient
         }
 
         return $this->logger;
-    }
-
-    /**
-     * @return CacheInterface
-     */
-    public function getStore(): CacheInterface
-    {
-        if (!$this->store) {
-            $this->store = Cache::store('redis');
-        }
-
-        return $this->store;
     }
 
     /**

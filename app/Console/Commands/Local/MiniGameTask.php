@@ -36,7 +36,7 @@ class MiniGameTask extends Command
     /**
      * @var int
      */
-    protected $expiresAt = 5;
+    protected $expiresAt = 60;
 
     /**
      * @var string
@@ -72,7 +72,7 @@ class MiniGameTask extends Command
 
     public function doRun()
     {
-        if (!$this->cache->add($this->mutexName(), true, $this->expiresAt * 60)) {
+        if (!$this->cache->add($this->mutexName(), true, $this->expiresAt)) {
             return;
         }
 
