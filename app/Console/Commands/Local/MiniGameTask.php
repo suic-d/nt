@@ -129,17 +129,9 @@ class MiniGameTask extends Command
     /**
      * @return string
      */
-    public function mutexName()
+    public function mutexName(): string
     {
         return 'framework'.DIRECTORY_SEPARATOR.'cache-'.sha1(__METHOD__);
-    }
-
-    /**
-     * @return \Illuminate\Contracts\Cache\Repository
-     */
-    protected function createDefaultStore()
-    {
-        return Cache::store('redis');
     }
 
     /**
