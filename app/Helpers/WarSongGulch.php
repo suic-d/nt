@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Models\Local\Buff;
 use App\Models\Local\Raid;
 use App\Models\Local\RaidOnce;
 use GuzzleHttp\Exception\GuzzleException;
@@ -191,5 +192,34 @@ class WarSongGulch extends MiniGameAbstract
         }
 
         return null;
+    }
+
+    /**
+     * @throws GuzzleException
+     */
+    public function updateBuff()
+    {
+        $buffIds = Raid::where('buff', '!=', 0)
+            ->distinct()
+            ->get(['buff'])
+            ->pluck('buff')
+            ->toArray()
+        ;
+        $buffList = $this->getMiniGame()->getBuffList(json_encode($buffIds));
+        foreach ($buffList as $bl) {
+            $buff = Buff::where('buff_id', $bl['id'])->first();
+            if (is_null($buff)) {
+                $buff = new Buff();
+            }
+
+            $buff->buff_id = $bl['id'];
+            $buff->name = $bl['name'];
+            $buff->buff_detail = $bl['buffDetail'];
+            $buff->story = $bl['story'];
+            $buff->level = $bl['level'];
+            $buff->price = $bl['price'];
+            $buff->paizi = $bl['paizi'];
+            $buff->save();
+        }
     }
 }
