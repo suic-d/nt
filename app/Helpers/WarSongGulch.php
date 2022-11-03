@@ -114,15 +114,11 @@ class WarSongGulch extends MiniGameAbstract
      *
      * @return null|Raid
      */
-    public function getRaid(): ?Raid
+    public function getAdvanceRaid()
     {
-        if (!is_null($raid = $this->getRaidOnce())) {
-            return $raid;
-        }
-
-        $userInfo = $this->getMiniGame()->getUserInfo($this->openId);
-
         if (!empty($this->advance)) {
+            $userInfo = $this->getMiniGame()->getUserInfo($this->openId);
+
             foreach ($this->advance as $v) {
                 if (!isset($v['raid_id']) || empty($v['raid_id'])) {
                     continue;
@@ -158,6 +154,26 @@ class WarSongGulch extends MiniGameAbstract
             }
         }
 
+        return null;
+    }
+
+    /**
+     * @throws GuzzleException
+     * @throws InvalidArgumentException
+     *
+     * @return null|Raid
+     */
+    public function getRaid(): ?Raid
+    {
+        if (!is_null($raid = $this->getRaidOnce())) {
+            return $raid;
+        }
+
+        if (!is_null($raid = $this->getAdvanceRaid())) {
+            return $raid;
+        }
+
+        $userInfo = $this->getMiniGame()->getUserInfo($this->openId);
         if (isset($userInfo['baodi']) && $userInfo['baodi'] > 20) {
             $raid = Raid::where('zb_got', 0)
                 ->whereNotIn('boss_id', ['98', '99'])

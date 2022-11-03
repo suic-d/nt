@@ -113,15 +113,11 @@ class BurningPlain extends MiniGameAbstract
      *
      * @return null|Gear
      */
-    public function getRaid(): ?Gear
+    public function getAdvanceRaid()
     {
-        if (!is_null($raid = $this->getRaidOnce())) {
-            return $raid;
-        }
-
-        $userInfo = $this->getMiniGame()->getUserInfo($this->openId);
-
         if (!empty($this->advance)) {
+            $userInfo = $this->getMiniGame()->getUserInfo($this->openId);
+
             foreach ($this->advance as $v) {
                 if (!isset($v['raid_id']) || empty($v['raid_id'])) {
                     continue;
@@ -156,6 +152,26 @@ class BurningPlain extends MiniGameAbstract
             }
         }
 
+        return null;
+    }
+
+    /**
+     * @throws GuzzleException
+     * @throws InvalidArgumentException
+     *
+     * @return null|Gear
+     */
+    public function getRaid(): ?Gear
+    {
+        if (!is_null($raid = $this->getRaidOnce())) {
+            return $raid;
+        }
+
+        if (!is_null($raid = $this->getAdvanceRaid())) {
+            return $raid;
+        }
+
+        $userInfo = $this->getMiniGame()->getUserInfo($this->openId);
         if (isset($userInfo['baodi']) && $userInfo['baodi'] > 20) {
             $raid = Gear::where('zb_got', 0)
                 ->whereNotIn('boss_id', ['98', '99'])
