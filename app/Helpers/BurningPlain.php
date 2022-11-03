@@ -163,7 +163,7 @@ class BurningPlain extends MiniGameAbstract
      */
     public function getRaid(): ?Gear
     {
-        if (!is_null($raid = $this->getRaidOnce())) {
+        if (!is_null($raid = $this->getOnceRaid())) {
             return $raid;
         }
 
@@ -192,7 +192,7 @@ class BurningPlain extends MiniGameAbstract
     /**
      * @return null|Gear
      */
-    public function getRaidOnce(): ?Gear
+    public function getOnceRaid(): ?Gear
     {
         $raidOnce = RaidOnce::where('open_id', $this->openId)->orderBy('id')->first();
         if (!is_null($raidOnce)) {

@@ -165,7 +165,7 @@ class WarSongGulch extends MiniGameAbstract
      */
     public function getRaid(): ?Raid
     {
-        if (!is_null($raid = $this->getRaidOnce())) {
+        if (!is_null($raid = $this->getOnceRaid())) {
             return $raid;
         }
 
@@ -194,7 +194,7 @@ class WarSongGulch extends MiniGameAbstract
     /**
      * @return null|Raid
      */
-    public function getRaidOnce(): ?Raid
+    public function getOnceRaid(): ?Raid
     {
         $raidOnce = RaidOnce::where('open_id', $this->openId)->orderBy('id')->first();
         if (!is_null($raidOnce)) {
