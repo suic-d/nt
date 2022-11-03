@@ -29,6 +29,7 @@ class RaidLog extends Model
      * @var string[]
      */
     protected $fillable = [
+        'game_type',
         'open_id',
         'raid_id',
         'raid_name',
