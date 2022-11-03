@@ -61,9 +61,7 @@ class LevelReport extends Command
 
     public function handle()
     {
-        $this->logger->info(__METHOD__.' processing');
         $this->rl();
-        $this->logger->info(__METHOD__.' processed');
     }
 
     public function rl()
@@ -81,10 +79,9 @@ class LevelReport extends Command
             }
 
             try {
-                $response = $this->client->request('POST', 'index.php/crontab/TransAttr/rl', [
+                $this->client->request('POST', 'index.php/crontab/TransAttr/rl', [
                     RequestOptions::JSON => ['skus' => $products->pluck('sku')],
                 ]);
-                $this->logger->info('page='.$page.' '.$response->getBody()->getContents());
             } catch (GuzzleException $exception) {
                 $this->logger->error('page='.$page.' '.$exception->getMessage());
             }
@@ -114,7 +111,6 @@ class LevelReport extends Command
         $pool = new Pool($this->client, $requests(), [
             'concurrency' => 5,
             'fulfilled' => function ($response, $idx) {
-                $this->logger->info('page='.$idx.' '.$response->getBody()->getContents());
             },
             'rejected' => function ($reason, $idx) {
                 $this->logger->error('page='.$idx.' '.$reason->getMessage());

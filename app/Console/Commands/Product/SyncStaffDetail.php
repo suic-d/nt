@@ -58,12 +58,9 @@ class SyncStaffDetail extends Command
         $pool = new Pool($this->client, $requests(), [
             'concurrency' => 5,
             'fulfilled' => function ($response, $idx) {
-                $this->logger->info('staff_id = '.$idx.' '.$response->getBody()->getContents());
-                $this->logger->close();
             },
             'rejected' => function ($reason, $idx) {
                 $this->logger->error('staff_id = '.$idx.' '.$reason->getMessage());
-                $this->logger->close();
             },
         ]);
         $pool->promise()->wait();

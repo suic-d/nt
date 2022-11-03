@@ -48,8 +48,7 @@ class SyncProductUser extends Command
     public function handle()
     {
         try {
-            $response = $this->client->request('GET', 'index.php/oaapi/oaapi/getProductUser');
-            $this->logger->info($response->getBody()->getContents());
+            $this->client->request('GET', 'index.php/oaapi/oaapi/getProductUser');
         } catch (GuzzleException $exception) {
             $this->logger->error($exception->getMessage());
         }

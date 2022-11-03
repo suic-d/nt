@@ -56,9 +56,8 @@ class PublishedList extends Command
     public function handle()
     {
         ini_set('memory_limit', '512M');
-        $this->logger->info(__METHOD__.' processing');
+
         $this->request();
-        $this->logger->info(__METHOD__.' processed');
     }
 
     public function request()
@@ -77,12 +76,9 @@ class PublishedList extends Command
         $pool = new Pool($this->client, $requests(), [
             'concurrency' => 5,
             'fulfilled' => function ($response, $idx) {
-                $this->logger->info('sku = '.$idx.' '.$response->getBody()->getContents());
-                $this->logger->close();
             },
             'rejected' => function ($reason, $idx) {
                 $this->logger->error('sku = '.$idx.' '.$reason->getMessage());
-                $this->logger->close();
             },
         ]);
         $pool->promise()->wait();
@@ -111,12 +107,9 @@ class PublishedList extends Command
         $pool = new Pool($this->client, $requests(), [
             'concurrency' => 5,
             'fulfilled' => function ($response, $idx) {
-                $this->logger->info('offset = '.$idx.' '.$response->getBody()->getContents());
-                $this->logger->close();
             },
             'rejected' => function ($reason, $idx) {
-                $this->logger->info('offset = '.$idx.' '.$reason->getMessage());
-                $this->logger->close();
+                $this->logger->error('offset = '.$idx.' '.$reason->getMessage());
             },
         ]);
         $pool->promise()->wait();

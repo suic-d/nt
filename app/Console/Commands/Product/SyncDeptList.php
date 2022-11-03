@@ -48,8 +48,7 @@ class SyncDeptList extends Command
     public function handle()
     {
         try {
-            $response = $this->client->request('GET', 'index.php/oaapi/oaapi/deptList');
-            $this->logger->info($response->getBody()->getContents());
+            $this->client->request('GET', 'index.php/oaapi/oaapi/deptList');
         } catch (GuzzleException $exception) {
             $this->logger->error($exception->getMessage());
         }

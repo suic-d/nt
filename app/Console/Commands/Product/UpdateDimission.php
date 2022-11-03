@@ -52,14 +52,11 @@ class UpdateDimission extends Command
         $staffIdArr = StaffList::where('is_dimission', 1)->get(['staff_id'])->pluck('staff_id');
         foreach ($staffIdArr as $v) {
             try {
-                $response = $this->client->request('GET', 'index.php/oaapi/oaapi/updateDimission', [
+                $this->client->request('GET', 'index.php/oaapi/oaapi/updateDimission', [
                     RequestOptions::QUERY => ['staff_id' => $v],
                 ]);
-                $this->logger->info('staff_id = '.$v.' '.$response->getBody()->getContents());
-                $this->logger->close();
             } catch (GuzzleException $exception) {
                 $this->logger->error('staff_id = '.$v.' '.$exception->getMessage());
-                $this->logger->close();
             }
         }
     }
