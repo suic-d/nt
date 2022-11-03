@@ -13,6 +13,7 @@ class CreateRaidLogTable extends Migration
     {
         Schema::create('raid_log', function (Blueprint $table) {
             $table->increments('id');
+            $table->string('game_type', 20)->default('')->comment('资料片版本');
             $table->string('open_id', 50)->default('');
             $table->string('raid_id', 20)->default('')->comment('raidId');
             $table->string('raid_name', 50)->default('')->comment('副本名称');

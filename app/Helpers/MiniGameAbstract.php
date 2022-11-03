@@ -187,6 +187,7 @@ abstract class MiniGameAbstract
 
         try {
             $raidLog = RaidLog::create([
+                'game_type' => $raid->game_type,
                 'open_id' => $this->openId,
                 'raid_id' => $raid->raid_id,
                 'raid_name' => $raid->raid_name,
