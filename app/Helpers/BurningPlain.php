@@ -157,8 +157,7 @@ class BurningPlain extends MiniGameAbstract
         }
 
         if (isset($userInfo['baodi']) && $userInfo['baodi'] > 20) {
-            $raid = Gear::where('game_type', $this->gameType)
-                ->where('zb_got', 0)
+            $raid = Gear::where('zb_got', 0)
                 ->whereNotIn('boss_id', ['98', '99'])
                 ->orderBy('boss_level')
                 ->first()
@@ -168,11 +167,10 @@ class BurningPlain extends MiniGameAbstract
             }
         }
 
-        return Gear::where('game_type', $this->gameType)
-            ->where('zb_got', 0)
+        return Gear::where('zb_got', 0)
             ->orderBy('boss_level')
             ->first()
-            ;
+        ;
     }
 
     /**

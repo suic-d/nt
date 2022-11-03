@@ -159,8 +159,7 @@ class WarSongGulch extends MiniGameAbstract
         }
 
         if (isset($userInfo['baodi']) && $userInfo['baodi'] > 20) {
-            $raid = Raid::where('game_type', $this->gameType)
-                ->where('zb_got', 0)
+            $raid = Raid::where('zb_got', 0)
                 ->whereNotIn('boss_id', ['98', '99'])
                 ->orderBy('boss_level')
                 ->first()
@@ -170,11 +169,10 @@ class WarSongGulch extends MiniGameAbstract
             }
         }
 
-        return Raid::where('game_type', $this->gameType)
-            ->where('zb_got', 0)
+        return Raid::where('zb_got', 0)
             ->orderBy('boss_level')
             ->first()
-            ;
+        ;
     }
 
     /**
