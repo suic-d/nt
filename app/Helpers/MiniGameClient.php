@@ -55,8 +55,8 @@ class MiniGameClient
 
     public function __construct()
     {
-        $this->url = config('raid.mini_game.base_url');
-        $this->store = config('raid.mini_game.store');
+        $this->url = config('raid.mini_game.base_url', '');
+        $this->store = config('raid.mini_game.store', '');
         $this->cache = Cache::store($this->store);
     }
 

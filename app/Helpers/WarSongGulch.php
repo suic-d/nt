@@ -12,9 +12,10 @@ class WarSongGulch extends MiniGameAbstract
 {
     public function __construct()
     {
-        $this->setGameType(config('raid.war_song_gulch.game_type'));
-        $this->openId = config('raid.war_song_gulch.open_id');
-        $this->advance = config('raid.war_song_gulch.advance');
+        $this->setGameType(config('raid.war_song_gulch.game_type', ''));
+        $this->openId = config('raid.war_song_gulch.open_id', '');
+        $this->advance = config('raid.war_song_gulch.advance', []);
+        $this->always = config('raid.war_song_gulch.always', []);
     }
 
     public function handle()
@@ -109,12 +110,27 @@ class WarSongGulch extends MiniGameAbstract
     }
 
     /**
+     * @return null|Raid
+     */
+    public function getAlwaysRaid(): ?Raid
+    {
+        if (!empty($this->always) && isset($this->always['raid_id'], $this->always['boss_id'])) {
+            return Raid::where('raid_id', $this->always['raid_id'])
+                ->where('boss_id', $this->always['boss_id'])
+                ->first()
+            ;
+        }
+
+        return null;
+    }
+
+    /**
      * @throws GuzzleException
      * @throws InvalidArgumentException
      *
      * @return null|Raid
      */
-    public function getAdvanceRaid()
+    public function getAdvanceRaid(): ?Raid
     {
         if (!empty($this->advance)) {
             $userInfo = $this->getMiniGame()->getUserInfo($this->openId);
@@ -165,6 +181,10 @@ class WarSongGulch extends MiniGameAbstract
      */
     public function getRaid(): ?Raid
     {
+        if (!is_null($raid = $this->getAlwaysRaid())) {
+            return $raid;
+        }
+
         if (!is_null($raid = $this->getOnceRaid())) {
             return $raid;
         }

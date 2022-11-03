@@ -11,9 +11,10 @@ class BurningPlain extends MiniGameAbstract
 {
     public function __construct()
     {
-        $this->setGameType(config('raid.burning_plain.game_type'));
-        $this->openId = config('raid.burning_plain.open_id');
-        $this->advance = config('raid.burning_plain.advance');
+        $this->setGameType(config('raid.burning_plain.game_type', ''));
+        $this->openId = config('raid.burning_plain.open_id', '');
+        $this->advance = config('raid.burning_plain.advance', []);
+        $this->always = config('raid.burning_plain.always', []);
     }
 
     public function handle()
@@ -108,6 +109,21 @@ class BurningPlain extends MiniGameAbstract
     }
 
     /**
+     * @return null|Gear
+     */
+    public function getAlwaysRaid(): ?Gear
+    {
+        if (!empty($this->always) && isset($this->always['raid_id'], $this->always['boss_id'])) {
+            return Gear::where('raid_id', $this->always['raid_id'])
+                ->where('boss_id', $this->always['boss_id'])
+                ->first()
+            ;
+        }
+
+        return null;
+    }
+
+    /**
      * @throws GuzzleException
      * @throws InvalidArgumentException
      *
@@ -163,6 +179,10 @@ class BurningPlain extends MiniGameAbstract
      */
     public function getRaid(): ?Gear
     {
+        if (!is_null($raid = $this->getAlwaysRaid())) {
+            return $raid;
+        }
+
         if (!is_null($raid = $this->getOnceRaid())) {
             return $raid;
         }

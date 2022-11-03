@@ -39,6 +39,11 @@ abstract class MiniGameAbstract
     protected $advance;
 
     /**
+     * @var array
+     */
+    protected $always;
+
+    /**
      * @var LoggerInterface
      */
     protected $logger;
