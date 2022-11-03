@@ -13,7 +13,7 @@ class BurningPlain extends MiniGameAbstract
     {
         $this->setGameType(config('raid.burning_plain.game_type'));
         $this->openId = config('raid.burning_plain.open_id');
-        $this->advance = config('raid.rs');
+        $this->advance = config('raid.burning_plain.advance');
     }
 
     public function handle()
