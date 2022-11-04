@@ -1,7 +1,7 @@
 @extends('layouts.raid')
 
 @section('content')
-<div class="layui-tab" lay-filter="advert-log">
+<div class="layui-tab layui-tab-card" lay-filter="advert-log">
     <ul class="layui-tab-title">
         <li class="layui-this" lay-tab-event="loadRaidLogs">Raid Logs</li>
         <li lay-tab-event="loadAdvertLogs">Advert Logs</li>

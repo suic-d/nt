@@ -25,7 +25,7 @@
 <body>
 <div class="layui-layout layui-layout-admin">
     <div class="layui-header">
-        <div class="layui-logo layui-hide-xs layui-bg-black">layout demo</div>
+        <div class="layui-logo layui-hide-xs layui-bg-green">layout demo</div>
         <!-- 头部区域（可配合layui 已有的水平导航） -->
         <ul class="layui-nav layui-layout-left">
             <!-- 移动端显示 -->
@@ -83,7 +83,7 @@
     <div class="layui-body">
         @yield('content')
     </div>
-    <div class="layui-footer"></div>
+{{--    <div class="layui-footer"></div>--}}
 </div>
 <script src="{{ @asset('js/app.js') }}"></script>
 @stack('scripts')
