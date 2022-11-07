@@ -11,7 +11,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
 
-    <link rel="stylesheet" href="{{ @asset('css/app.css') }}" media="all">
+    <link rel="stylesheet" href="{{ @asset('layui/css/layui.css') }}" media="all">
     <style>
         /* 移动端 */
         @media screen and (max-width: 768px) {
@@ -85,7 +85,7 @@
     </div>
 {{--    <div class="layui-footer"></div>--}}
 </div>
-<script src="{{ @asset('js/app.js') }}"></script>
+<script src="{{ @asset('layui/layui.js') }}"></script>
 @stack('scripts')
 </body>
 </html>
