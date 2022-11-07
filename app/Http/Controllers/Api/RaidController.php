@@ -78,22 +78,14 @@ class RaidController extends Controller
     }
 
     /**
-     * @param Request $request
-     *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getRaids(Request $request)
+    public function getRaids()
     {
-        $page = $request->input('page', 1);
-        $limit = $request->input('limit', 20);
-
-        $paginator = Raid::where('zb_got', 0)
-            ->orderBy('boss_level')
-            ->paginate($limit, ['*'], 'page', $page)
-        ;
+        $raids = Raid::where('zb_got', 0)->orderBy('boss_level')->get();
         $data = [];
-        if ($paginator->isNotEmpty()) {
-            foreach ($paginator->items() as $item) {
+        if ($raids->isNotEmpty()) {
+            foreach ($raids as $item) {
                 $data[] = [
                     'id' => $item->id,
                     'raid_name' => $item->raid_name,
@@ -109,7 +101,6 @@ class RaidController extends Controller
         return response()->json([
             'code' => 0,
             'msg' => '',
-            'count' => $paginator->total(),
             'data' => $data,
         ]);
     }
@@ -121,16 +112,10 @@ class RaidController extends Controller
      */
     public function getGears(Request $request)
     {
-        $page = $request->input('page', 1);
-        $limit = $request->input('limit', 20);
-
-        $paginator = Gear::where('zb_got', 0)
-            ->orderBy('boss_level')
-            ->paginate($limit, ['*'], 'page', $page)
-        ;
+        $gears = Gear::where('zb_got', 0)->orderBy('boss_level')->get();
         $data = [];
-        if ($paginator->isNotEmpty()) {
-            foreach ($paginator->items() as $item) {
+        if ($gears->isNotEmpty()) {
+            foreach ($gears as $item) {
                 $data[] = [
                     'id' => $item->id,
                     'raid_name' => $item->raid_name,
@@ -146,7 +131,6 @@ class RaidController extends Controller
         return response()->json([
             'code' => 0,
             'msg' => '',
-            'count' => $paginator->total(),
             'data' => $data,
         ]);
     }
