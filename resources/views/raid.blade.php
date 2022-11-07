@@ -96,7 +96,7 @@
                // page:true,
                // limit:20,
                cols:[[
-                   {field:"id", title:"ID", sort:true},
+                   {field:"id", title:"ID"},
                    {field:"raid_name", title:"RaidName"},
                    {field:"boss_name", title:"BossName"},
                    {field:"boss_level", title:"BossLevel", sort:true},
@@ -116,7 +116,7 @@
                 // page:true,
                 // limit:20,
                 cols:[[
-                    {field:"id", title:"ID", sort:true},
+                    {field:"id", title:"ID"},
                     {field:"raid_name", title:"RaidName"},
                     {field:"boss_name", title:"BossName"},
                     {field:"boss_level", title:"BossLevel", sort:true},
