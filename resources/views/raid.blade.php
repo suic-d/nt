@@ -57,6 +57,7 @@
                 url:"{{ @asset('api/raid/raid_logs') }}",
                 skin:"line",
                 even:true,
+                size:"sm",
                 page:true,
                 limit:20,
                 cols:[[
@@ -76,6 +77,7 @@
                 url:"{{ @asset('api/raid/adv_logs') }}",
                 skin:"line",
                 even:true,
+                size:"sm",
                 page:true,
                 limit:20,
                 cols:[[
@@ -89,13 +91,14 @@
 
         function loadRaids() {
             table.render({
-               elem:"#raids",
-               url:"{{ @asset('api/raid/raids') }}",
-               skin:"line",
-               even:true,
-               // page:true,
-               // limit:20,
-               cols:[[
+                elem:"#raids",
+                url:"{{ @asset('api/raid/raids') }}",
+                skin:"line",
+                even:true,
+                size:"sm",
+                // page:true,
+                // limit:20,
+                cols:[[
                    {field:"id", title:"ID"},
                    {field:"raid_name", title:"RaidName"},
                    {field:"boss_name", title:"BossName"},
@@ -104,7 +107,7 @@
                    {field:"zb_name", title:"ZbName"},
                    {field:"zb_level", title:"ZbLevel"},
                    {field:"drop_rate", title:"DropRate"},
-               ]]
+                ]]
             });
         }
 
@@ -114,6 +117,7 @@
                 url:"{{ @asset('api/raid/gears') }}",
                 skin:"line",
                 even:true,
+                size:"sm",
                 // page:true,
                 // limit:20,
                 cols:[[
@@ -135,6 +139,7 @@
                 url:"{{ @asset('api/raid/raid_kills') }}",
                 skin:"line",
                 even:true,
+                size:"sm",
                 cols:[[
                     {field:"raid_name", title:"副本"},
                     {field:"boss_name", title:"BOSS"},
@@ -149,6 +154,7 @@
                 url:"{{ @asset('api/raid/gear_kills') }}",
                 skin:"line",
                 even:true,
+                size:"sm",
                 cols:[[
                     {field:"raid_name", title:"副本"},
                     {field:"boss_name", title:"BOSS"},
