@@ -7,6 +7,7 @@ use App\Models\Local\Raid;
 use App\Models\Local\RaidOnce;
 use GuzzleHttp\Exception\GuzzleException;
 use Psr\SimpleCache\InvalidArgumentException;
+use Tightenco\Collect\Support\Arr;
 
 class WarSongGulch extends MiniGameAbstract
 {
@@ -135,36 +136,48 @@ class WarSongGulch extends MiniGameAbstract
         if (!empty($this->advance)) {
             $userInfo = $this->getMiniGame()->getUserInfo($this->openId);
 
+            if (isset($userInfo['baodi']) && $userInfo['baodi'] > 20) {
+                $raids = Raid::where('zb_got', 0)
+                    ->whereNotIn('boss_id', ['98', '99'])
+                    ->orderBy('boss_level')
+                    ->get()
+                ;
+            } else {
+                $raids = Raid::where('zb_got', 0)
+                    ->orderBy('boss_level')
+                    ->get()
+                ;
+            }
+            $raidGroup = $raids->reduce(function ($carry, $item) {
+                if (!isset($carry[$item->raid_id])) {
+                    $carry[$item->raid_id] = [];
+                }
+                $carry[$item->raid_id][$item->boss_id] = $item;
+
+                return $carry;
+            }, []);
+            unset($raids);
+
             foreach ($this->advance as $v) {
                 if (!isset($v['raid_id']) || empty($v['raid_id'])) {
                     continue;
                 }
 
                 if (isset($v['boss_id']) && !empty($v['boss_id'])) {
-                    $bossIds = is_array($v['boss_id']) ? $v['boss_id'] : [$v['boss_id']];
-                } else {
-                    $bossIds = Raid::where('raid_id', $v['raid_id'])
-                        ->where('zb_got', 0)
-                        ->orderBy('boss_level')
-                        ->distinct()
-                        ->get(['boss_id'])
-                        ->pluck('boss_id')
-                        ->toArray()
-                    ;
-                }
-
-                foreach ($bossIds as $bossId) {
-                    if (isset($userInfo['baodi']) && $userInfo['baodi'] > 20 && in_array($bossId, ['98', '99'])) {
-                        continue;
+                    if (is_array($v['boss_id'])) {
+                        foreach ($v['boss_id'] as $bossId) {
+                            if (isset($raidGroup[$v['raid_id']][$bossId])) {
+                                return $raidGroup[$v['raid_id']][$bossId];
+                            }
+                        }
+                    } else {
+                        if (isset($raidGroup[$v['raid_id']][$v['boss_id']])) {
+                            return $raidGroup[$v['raid_id']][$v['boss_id']];
+                        }
                     }
-
-                    $raid = Raid::where('raid_id', $v['raid_id'])
-                        ->where('boss_id', $bossId)
-                        ->where('zb_got', 0)
-                        ->first()
-                    ;
-                    if (!is_null($raid)) {
-                        return $raid;
+                } else {
+                    if (isset($raidGroup[$v['raid_id']])) {
+                        return Arr::first($raidGroup[$v['raid_id']]);
                     }
                 }
             }
