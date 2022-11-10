@@ -6,6 +6,7 @@ use App\Helpers\BurningPlain;
 use App\Helpers\WarSongGulch;
 use App\Http\Controllers\Controller;
 use App\Models\Local\AdvertLog;
+use App\Models\Local\Buff;
 use App\Models\Local\Gear;
 use App\Models\Local\Raid;
 use App\Models\Local\RaidLog;
@@ -85,12 +86,15 @@ class RaidController extends Controller
         $raids = Raid::where('zb_got', 0)->orderBy('boss_level')->get();
         $data = [];
         if ($raids->isNotEmpty()) {
+            $buffMap = Buff::get()->pluck('buff_detail', 'buff_id');
+
             foreach ($raids as $item) {
                 $data[] = [
                     'id' => $item->id,
                     'raid_name' => $item->raid_name,
                     'boss_name' => $item->boss_name,
                     'boss_level' => $item->boss_level,
+                    'buff' => $buffMap[$item->buff] ?? '',
                     'zb_name' => $item->zb_name,
                     'zb_level' => $item->zb_level,
                     'drop_rate' => count(array_unique(explode(',', $item->drop_rate))).'%',
@@ -115,12 +119,15 @@ class RaidController extends Controller
         $gears = Gear::where('zb_got', 0)->orderBy('boss_level')->get();
         $data = [];
         if ($gears->isNotEmpty()) {
+            $buffMap = Buff::get()->pluck('buff_detail', 'buff_id');
+
             foreach ($gears as $item) {
                 $data[] = [
                     'id' => $item->id,
                     'raid_name' => $item->raid_name,
                     'boss_name' => $item->boss_name,
                     'boss_level' => $item->boss_level,
+                    'buff' => $buffMap[$item->buff] ?? '',
                     'zb_name' => $item->zb_name,
                     'zb_level' => $item->zb_level,
                     'drop_rate' => count(array_unique(explode(',', $item->drop_rate))).'%',
