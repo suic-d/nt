@@ -5,6 +5,7 @@ namespace App\Helpers;
 use App\Models\Local\Gear;
 use App\Models\Local\RaidOnce;
 use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Support\Arr;
 use Psr\SimpleCache\InvalidArgumentException;
 
 class BurningPlain extends MiniGameAbstract
@@ -133,6 +134,26 @@ class BurningPlain extends MiniGameAbstract
     {
         if (!empty($this->advance)) {
             $userInfo = $this->getMiniGame()->getUserInfo($this->openId);
+            if (isset($userInfo['baodi']) && $userInfo['baodi'] > 20) {
+                $gears = Gear::where('zb_got', 0)
+                    ->whereNotIn('boss_id', ['98', '99'])
+                    ->orderBy('boss_level')
+                    ->get()
+                ;
+            } else {
+                $gears = Gear::where('zb_got', 0)
+                    ->orderBy('boss_level')
+                    ->get()
+                ;
+            }
+            $gearGroup = $gears->reduce(function ($carry, $item) {
+                if (!isset($carry[$item->raid_id])) {
+                    $carry[$item->raid_id] = [];
+                }
+                $carry[$item->raid_id][$item->boss_id] = $item;
+
+                return $carry;
+            }, []);
 
             foreach ($this->advance as $v) {
                 if (!isset($v['raid_id']) || empty($v['raid_id'])) {
@@ -140,29 +161,20 @@ class BurningPlain extends MiniGameAbstract
                 }
 
                 if (isset($v['boss_id']) && !empty($v['boss_id'])) {
-                    $bossIds = is_array($v['boss_id']) ? $v['boss_id'] : [$v['boss_id']];
-                } else {
-                    $bossIds = Gear::where('raid_id', $v['raid_id'])
-                        ->where('zb_got', 0)
-                        ->distinct()
-                        ->get(['boss_id'])
-                        ->pluck('boss_id')
-                        ->toArray()
-                    ;
-                }
-
-                foreach ($bossIds as $bossId) {
-                    if (isset($userInfo['baodi']) && $userInfo['baodi'] > 20 && in_array($bossId, ['98', '99'])) {
-                        continue;
+                    if (is_array($v['boss_id'])) {
+                        foreach ($v['boss_id'] as $bossId) {
+                            if (isset($gearGroup[$v['raid_id']][$bossId])) {
+                                return $gearGroup[$v['raid_id']][$bossId];
+                            }
+                        }
+                    } else {
+                        if (isset($gearGroup[$v['raid_id']][$v['boss_id']])) {
+                            return $gearGroup[$v['raid_id']][$v['boss_id']];
+                        }
                     }
-
-                    $raid = Gear::where('raid_id', $v['raid_id'])
-                        ->where('boss_id', $bossId)
-                        ->where('zb_got', 0)
-                        ->first()
-                    ;
-                    if (!is_null($raid)) {
-                        return $raid;
+                } else {
+                    if (isset($gearGroup[$v['raid_id']])) {
+                        return Arr::first($gearGroup[$v['raid_id']]);
                     }
                 }
             }
