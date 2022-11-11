@@ -161,6 +161,35 @@ abstract class MiniGameAbstract
     }
 
     /**
+     * @param string $name
+     * @param string $type
+     *
+     * @throws GuzzleException
+     * @throws InvalidArgumentException
+     */
+    public function buyGear(string $name, string $type)
+    {
+        $this->getMiniGame()->buyGear($this->openId, $name, $type);
+    }
+
+    /**
+     * @param string $raidId
+     * @param string $raidName
+     * @param string $bossId
+     * @param string $bossName
+     */
+    public function createRaidOnce(string $raidId, string $raidName, string $bossId, string $bossName)
+    {
+        RaidOnce::create([
+            'open_id' => $this->openId,
+            'raid_id' => $raidId,
+            'raid_name' => $raidName,
+            'boss_id' => $bossId,
+            'boss_name' => $bossName,
+        ]);
+    }
+
+    /**
      * @return LoggerInterface
      */
     protected function createDefaultLogger()
