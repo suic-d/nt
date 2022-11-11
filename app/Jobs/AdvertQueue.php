@@ -38,6 +38,7 @@ class AdvertQueue implements ShouldQueue
      * Execute the job.
      *
      * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function handle()
     {
