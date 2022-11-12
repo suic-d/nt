@@ -29,12 +29,7 @@ class RaidLog extends Model
      */
     protected $table = 'raid_log';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var string[]
-     */
-    protected $fillable = ['*'];
+    protected static $unguarded = true;
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany

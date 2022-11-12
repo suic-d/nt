@@ -25,10 +25,5 @@ class RaidOnce extends Model
      */
     protected $table = 'raid_once';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var string[]
-     */
-    protected $fillable = ['*'];
+    protected static $unguarded = true;
 }

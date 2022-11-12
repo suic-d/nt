@@ -27,12 +27,7 @@ class FMLog extends Model
      */
     protected $table = 'fm_log';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var string[]
-     */
-    protected $fillable = ['*'];
+    protected static $unguarded = true;
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo

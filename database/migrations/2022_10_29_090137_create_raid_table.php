@@ -13,6 +13,7 @@ class CreateRaidTable extends Migration
     {
         Schema::create('raid', function (Blueprint $table) {
             $table->increments('id');
+            $table->string('open_id', 50)->default('');
             $table->string('game_type', 20)->default('')->comment('资料片版本');
             $table->string('raid_id', 20)->default('')->comment('raidId');
             $table->string('raid_name', 50)->default('')->comment('副本名称');
@@ -31,7 +32,7 @@ class CreateRaidTable extends Migration
             $table->tinyInteger('han_bing')->default(0)->comment('掉落寒冰纹章');
             $table->smallInteger('buff')->default(0)->comment('buff');
             $table->timestamps();
-            $table->unique('zb_id');
+            $table->unique(['open_id', 'zb_id']);
             $table->index('game_type');
             $table->index('raid_id');
             $table->index('boss_id');

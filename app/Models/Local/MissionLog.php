@@ -29,12 +29,7 @@ class MissionLog extends Model
      */
     protected $table = 'mission_logs';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var string[]
-     */
-    protected $fillable = ['*'];
+    protected static $unguarded = true;
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany

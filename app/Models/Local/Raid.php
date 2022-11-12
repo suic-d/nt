@@ -23,10 +23,5 @@ class Raid extends Model
      */
     protected $table = 'raid';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var string[]
-     */
-    protected $fillable = ['*'];
+    protected static $unguarded = true;
 }
