@@ -31,11 +31,11 @@ class BurningPlain extends MiniGameAbstract
      */
     public function putOn()
     {
-        $userInfo = $this->getMiniGame()->getUserInfo($this->openId);
+        $userInfo = $this->getUserInfo();
         $zbList = array_column($userInfo['zbList'], 'id');
         if (!empty($zbList)) {
             foreach ($zbList as $v) {
-                $this->getMiniGame()->levelCount($this->openId, $v);
+                $this->levelCount($v);
             }
 
             Gear::whereIn('zb_id', $zbList)->get()->each(function ($item) {
@@ -53,7 +53,7 @@ class BurningPlain extends MiniGameAbstract
      */
     public function updateRaidState()
     {
-        $userInfo = $this->getMiniGame()->getUserInfo($this->openId);
+        $userInfo = $this->getUserInfo();
         // 已装备
         if (!empty($userInfo['bag'])) {
             Gear::whereIn('zb_id', $userInfo['bag'])->get()->each(function ($item) {
@@ -79,7 +79,7 @@ class BurningPlain extends MiniGameAbstract
      */
     public function updateRaidList()
     {
-        foreach ($this->getMiniGame()->getRaidList($this->gameType) as $item) {
+        foreach ($this->getRaidList() as $item) {
             foreach ($item['bossList'] as $boss) {
                 foreach ($boss['zbList'] as $zb) {
                     $raid = Gear::where('zb_id', $zb['id'])->first();
@@ -133,7 +133,7 @@ class BurningPlain extends MiniGameAbstract
     public function getAdvanceRaid()
     {
         if (!empty($this->advance)) {
-            $userInfo = $this->getMiniGame()->getUserInfo($this->openId);
+            $userInfo = $this->getUserInfo();
             if (isset($userInfo['baodi']) && $userInfo['baodi'] > 20) {
                 $gears = Gear::where('zb_got', 0)
                     ->whereNotIn('boss_id', ['98', '99'])
@@ -203,7 +203,7 @@ class BurningPlain extends MiniGameAbstract
             return $raid;
         }
 
-        $userInfo = $this->getMiniGame()->getUserInfo($this->openId);
+        $userInfo = $this->getUserInfo();
         if (isset($userInfo['baodi']) && $userInfo['baodi'] > 20) {
             $raid = Gear::where('zb_got', 0)
                 ->whereNotIn('boss_id', ['98', '99'])

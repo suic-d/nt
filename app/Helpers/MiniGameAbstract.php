@@ -88,17 +88,16 @@ abstract class MiniGameAbstract
     public function run()
     {
         try {
-            if (!$this->getMiniGame()->curRaidOver($this->openId) || $this->getMiniGame()->curRaid($this->openId)) {
+            if (!$this->curRaidOver() || $this->curRaid()) {
                 return;
             }
 
             $this->putOn();
-            $this->getMiniGame()->clearBag($this->openId);
+            $this->clearBag();
 
             if (!is_null($raid = $this->getRaid())) {
                 $this->createRaidLog($raid);
-
-                $this->getMiniGame()->setCurRaidOverTime($this->openId, time() + $raid->raid_time);
+                $this->setCurRaidOverTime(time() + $raid->raid_time);
             }
         } catch (InvalidArgumentException | Throwable | GuzzleException $exception) {
             $this->getLogger()->log(Logger::ERROR, $exception->getMessage());
@@ -108,16 +107,16 @@ abstract class MiniGameAbstract
     public function startMission()
     {
         try {
-            if (!$this->getMiniGame()->curRaidOver($this->openId) || $this->getMiniGame()->curRaid($this->openId)) {
+            if (!$this->curRaidOver() || $this->curRaid()) {
                 return;
             }
 
             $this->putOn();
-            $this->getMiniGame()->clearBag($this->openId);
+            $this->clearBag();
 
             if (!is_null($mission = $this->getMission())) {
                 $this->createMissionLog($mission);
-                $this->getMiniGame()->setCurRaidOverTime($this->openId, time() + $mission->time);
+                $this->setCurRaidOverTime(time() + $mission->time);
             }
         } catch (InvalidArgumentException | GuzzleException | Throwable $exception) {
             $this->getLogger()->error($exception->getMessage());
@@ -225,6 +224,92 @@ abstract class MiniGameAbstract
             $mission->time = $item['times'];
             $mission->save();
         }
+    }
+
+    /**
+     * @param int $curRaidOverTime
+     *
+     * @throws InvalidArgumentException
+     */
+    public function setCurRaidOverTime(int $curRaidOverTime)
+    {
+        $this->getMiniGame()->setCurRaidOverTime($this->openId, $curRaidOverTime);
+    }
+
+    /**
+     * @throws GuzzleException
+     * @throws InvalidArgumentException
+     *
+     * @return bool
+     */
+    public function curRaidOver(): bool
+    {
+        return $this->getMiniGame()->curRaidOver($this->openId);
+    }
+
+    /**
+     * @throws GuzzleException
+     * @throws InvalidArgumentException
+     *
+     * @return bool
+     */
+    public function curRaid(): bool
+    {
+        return $this->getMiniGame()->curRaid($this->openId);
+    }
+
+    /**
+     * @throws GuzzleException
+     */
+    public function clearBag()
+    {
+        $this->getMiniGame()->clearBag($this->openId);
+    }
+
+    /**
+     * @param false $refresh
+     *
+     * @throws GuzzleException
+     * @throws InvalidArgumentException
+     *
+     * @return array
+     */
+    public function getUserInfo(bool $refresh = false): array
+    {
+        return $this->getMiniGame()->getUserInfo($this->openId, $refresh);
+    }
+
+    /**
+     * @param string $zbId
+     *
+     * @throws GuzzleException
+     */
+    public function levelCount(string $zbId)
+    {
+        $this->getMiniGame()->levelCount($this->openId, $zbId);
+    }
+
+    /**
+     * @param string $buffId
+     *
+     * @throws GuzzleException
+     *
+     * @return array
+     */
+    public function getBuffList(string $buffId)
+    {
+        return $this->getMiniGame()->getBuffList($buffId);
+    }
+
+    /**
+     * @throws GuzzleException
+     * @throws InvalidArgumentException
+     *
+     * @return array
+     */
+    public function getRaidList()
+    {
+        return $this->getMiniGame()->getRaidList($this->gameType);
     }
 
     /**
