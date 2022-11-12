@@ -62,7 +62,6 @@ class RaidQueue implements ShouldQueue
             }
 
             $instance->doRaid($this->raidLog->open_id, $this->raidLog->raid_id, $this->raidLog->boss_id);
-            $this->raidLog->update(['status' => RaidLog::COMPLETED]);
 
             if ($this->raidLog->advertLogs->isNotEmpty()) {
                 foreach ($this->raidLog->advertLogs as $ad) {
@@ -70,6 +69,8 @@ class RaidQueue implements ShouldQueue
                     $ad->update(['status' => AdvertLog::PENDING]);
                 }
             }
+
+            $this->raidLog->update(['status' => RaidLog::COMPLETED]);
         }
     }
 }
