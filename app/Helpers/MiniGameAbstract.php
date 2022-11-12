@@ -2,8 +2,11 @@
 
 namespace App\Helpers;
 
+use App\Jobs\MissionQueue;
 use App\Jobs\RaidQueue;
 use App\Models\Local\Gear;
+use App\Models\Local\Mission;
+use App\Models\Local\MissionLog;
 use App\Models\Local\Raid;
 use App\Models\Local\RaidLog;
 use App\Models\Local\RaidOnce;
@@ -102,7 +105,7 @@ abstract class MiniGameAbstract
         }
     }
 
-    public function start()
+    public function startMission()
     {
         try {
             if (!$this->getMiniGame()->curRaidOver($this->openId) || $this->getMiniGame()->curRaid($this->openId)) {
@@ -112,17 +115,26 @@ abstract class MiniGameAbstract
             $this->putOn();
             $this->getMiniGame()->clearBag($this->openId);
 
-            if (!is_null($raid = $this->getRaid())) {
-                $this->getMiniGame()->fm($this->openId, $raid->boss_level);
-                sleep(1);
-                $this->getMiniGame()->doRaid($this->openId, $raid->raid_id, $raid->boss_id);
-                $this->getMiniGame()->createAdvert($this->openId);
-                sleep(1);
-                $this->getMiniGame()->refreshCurRaidOverTime($this->openId);
+            if (!is_null($mission = $this->getMission())) {
+                $this->createMissionLog($mission);
+                $this->getMiniGame()->setCurRaidOverTime($this->openId, time() + $mission->time);
             }
-        } catch (InvalidArgumentException | GuzzleException | Exception $exception) {
+        } catch (InvalidArgumentException | GuzzleException | Throwable $exception) {
             $this->getLogger()->error($exception->getMessage());
         }
+    }
+
+    /**
+     * @return null|Mission
+     */
+    public function getMission(): ?Mission
+    {
+        return Mission::where('open_id', $this->openId)
+            ->where('status', 0)
+            ->orderBy('level')
+            ->orderBy('time')
+            ->first()
+        ;
     }
 
     /**
@@ -190,6 +202,32 @@ abstract class MiniGameAbstract
     }
 
     /**
+     * @throws GuzzleException
+     * @throws InvalidArgumentException
+     */
+    public function updateMissionList()
+    {
+        foreach ($this->getMiniGame()->getMissionList() as $item) {
+            $mission = Mission::where('open_id', $this->openId)
+                ->where('mission_id', $item['id'])
+                ->first()
+            ;
+            if (is_null($mission)) {
+                $mission = new Mission();
+                $mission->open_id = $this->openId;
+            }
+
+            $mission->mission_id = $item['id'];
+            $mission->name = $item['name'];
+            $mission->sw = $item['sw'];
+            $mission->sw_val = $item['swVal'];
+            $mission->level = $item['level'];
+            $mission->time = $item['times'];
+            $mission->save();
+        }
+    }
+
+    /**
      * @return LoggerInterface
      */
     protected function createDefaultLogger()
@@ -199,6 +237,41 @@ abstract class MiniGameAbstract
         $logger->pushHandler(new StreamHandler($path, Logger::INFO));
 
         return $logger;
+    }
+
+    /**
+     * @param Mission $mission
+     *
+     * @throws Throwable
+     */
+    protected function createMissionLog(Mission $mission)
+    {
+        DB::beginTransaction();
+
+        try {
+            $missionLog = MissionLog::create([
+                'open_id' => $this->openId,
+                'mission_id' => $mission->mission_id,
+                'name' => $mission->name,
+            ]);
+
+            // 广告
+            for ($num = 1; $num <= 2; ++$num) {
+                $missionLog->advertLogs()->create([
+                    'open_id' => $this->openId,
+                    'num' => $num,
+                ]);
+            }
+
+            DB::commit();
+
+            MissionQueue::dispatch($missionLog)->onQueue(MissionQueue::QUEUE);
+            $missionLog->update(['status' => MissionLog::PENDING]);
+        } catch (Exception $exception) {
+            DB::rollBack();
+
+            throw $exception;
+        }
     }
 
     /**
