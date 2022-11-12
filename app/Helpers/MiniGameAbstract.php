@@ -252,6 +252,7 @@ abstract class MiniGameAbstract
             DB::commit();
 
             RaidQueue::dispatch($raidLog)->onQueue(RaidQueue::QUEUE);
+            $raidLog->update(['status' => RaidLog::PENDING]);
         } catch (Exception $exception) {
             DB::rollBack();
 

@@ -9,6 +9,10 @@ class FMLog extends Model
 {
     use HasFactory;
 
+    const NONE = 0;
+
+    const COMPLETED = 1;
+
     /**
      * The connection name for the model.
      *

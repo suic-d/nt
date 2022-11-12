@@ -16,7 +16,7 @@ class CreateAdvertLogTable extends Migration
             $table->integer('raid_log_id')->default(0)->comment('关联raid_log.id');
             $table->string('open_id', 50)->default('');
             $table->tinyInteger('num')->default(1)->comment('广告次序');
-            $table->tinyInteger('status')->default(0)->comment('0-未完成，1-已完成');
+            $table->tinyInteger('status')->default(0)->comment('0-待处理，1-处理中，2-完成');
             $table->timestamps();
             $table->index('raid_log_id');
             $table->index('status');

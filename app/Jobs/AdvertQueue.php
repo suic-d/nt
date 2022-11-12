@@ -43,9 +43,9 @@ class AdvertQueue implements ShouldQueue
     public function handle()
     {
         $instance = MiniGameClient::getInstance();
-        if (0 == $this->advertLog->status) {
+        if (AdvertLog::PENDING == $this->advertLog->status) {
             $instance->addMoney($this->advertLog->open_id);
-            $this->advertLog->update(['status' => 1]);
+            $this->advertLog->update(['status' => AdvertLog::COMPLETED]);
         }
         $instance->refreshCurRaidOverTime($this->advertLog->open_id);
     }

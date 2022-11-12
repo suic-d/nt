@@ -19,7 +19,7 @@ class CreateRaidLogTable extends Migration
             $table->string('raid_name', 50)->default('')->comment('副本名称');
             $table->string('boss_id', 20)->default('')->comment('bossId');
             $table->string('boss_name', 50)->default('')->comment('boss名称');
-            $table->tinyInteger('status')->default(0)->comment('0-未完成，1-已完成');
+            $table->tinyInteger('status')->default(0)->comment('0-待处理，1-处理中，2-完成');
             $table->timestamps();
         });
     }

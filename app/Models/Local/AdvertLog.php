@@ -9,6 +9,12 @@ class AdvertLog extends Model
 {
     use HasFactory;
 
+    const NONE = 0;
+
+    const PENDING = 1;
+
+    const COMPLETED = 2;
+
     /**
      * The connection name for the model.
      *
