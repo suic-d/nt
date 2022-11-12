@@ -627,6 +627,21 @@ class MiniGameClient
     }
 
     /**
+     * @param string $openId
+     * @param int    $id
+     *
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function doMission(string $openId, int $id)
+    {
+        $response = $this->client->request('GET', 'miniGame/doRenwu', [RequestOptions::QUERY => [
+            'openid' => $openId,
+            'id' => $id,
+        ]]);
+        $this->log(Logger::INFO, __METHOD__.' '.$response->getBody()->getContents());
+    }
+
+    /**
      * @return ClientInterface
      */
     protected function createDefaultClient()
