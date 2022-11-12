@@ -34,15 +34,7 @@ class RaidLog extends Model
      *
      * @var string[]
      */
-    protected $fillable = [
-        'game_type',
-        'open_id',
-        'raid_id',
-        'raid_name',
-        'boss_id',
-        'boss_name',
-        'status',
-    ];
+    protected $fillable = ['*'];
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany

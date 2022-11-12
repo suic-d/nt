@@ -34,11 +34,7 @@ class MissionLog extends Model
      *
      * @var string[]
      */
-    protected $fillable = [
-        'open_id',
-        'mission_id',
-        'name',
-    ];
+    protected $fillable = ['*'];
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany

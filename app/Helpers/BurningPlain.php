@@ -39,8 +39,7 @@ class BurningPlain extends MiniGameAbstract
             }
 
             Gear::whereIn('zb_id', $zbList)->get()->each(function ($item) {
-                $item->zb_got = 1;
-                $item->save();
+                $item->update(['zb_got' => 1]);
             });
         }
     }
@@ -57,16 +56,14 @@ class BurningPlain extends MiniGameAbstract
         // 已装备
         if (!empty($userInfo['bag'])) {
             Gear::whereIn('zb_id', $userInfo['bag'])->get()->each(function ($item) {
-                $item->zb_got = 1;
-                $item->save();
+                $item->update(['zb_got' => 1]);
             });
         }
 
         // 未装备
         if (!empty($zbList = array_column($userInfo['zbList'], 'id'))) {
             Gear::whereIn('zb_id', $zbList)->get()->each(function ($item) {
-                $item->zb_got = 1;
-                $item->save();
+                $item->update(['zb_got' => 1]);
             });
         }
     }
@@ -82,28 +79,27 @@ class BurningPlain extends MiniGameAbstract
         foreach ($this->getRaidList() as $item) {
             foreach ($item['bossList'] as $boss) {
                 foreach ($boss['zbList'] as $zb) {
-                    $raid = Gear::where('zb_id', $zb['id'])->first();
-                    if (is_null($raid)) {
-                        $raid = new Gear();
-                    }
+                    $data = [
+                        'game_type' => $this->gameType,
+                        'raid_id' => $item['raidId'],
+                        'raid_name' => $item['raidName'],
+                        'raid_time' => $item['raidTime'],
+                        'boss_id' => $boss['bossId'],
+                        'boss_name' => $boss['bossName'],
+                        'boss_level' => $boss['bossLevel'],
+                        'gold' => $boss['goldDrop'],
+                        'gong_zheng' => $boss['paiziDrop'] ?? 0,
+                        'han_bing' => $boss['paizi80Drop'] ?? 0,
+                        'buff' => $boss['buff'] ?? 0,
+                        'zb_id' => $zb['id'],
+                        'zb_name' => $zb['name'],
+                        'zb_level' => $zb['level'],
+                        'zb_color' => $zb['color'],
+                        'drop_rate' => join(',', $zb['gailv']),
+                    ];
 
-                    $raid->game_type = $this->gameType;
-                    $raid->raid_id = $item['raidId'];
-                    $raid->raid_name = $item['raidName'];
-                    $raid->raid_time = $item['raidTime'];
-                    $raid->boss_id = $boss['bossId'];
-                    $raid->boss_name = $boss['bossName'];
-                    $raid->boss_level = $boss['bossLevel'];
-                    $raid->gold = $boss['goldDrop'];
-                    $raid->gong_zheng = $boss['paiziDrop'] ?? 0;
-                    $raid->han_bing = $boss['paizi80Drop'] ?? 0;
-                    $raid->buff = $boss['buff'] ?? 0;
-                    $raid->zb_id = $zb['id'];
-                    $raid->zb_name = $zb['name'];
-                    $raid->zb_level = $zb['level'];
-                    $raid->zb_color = $zb['color'];
-                    $raid->drop_rate = join(',', $zb['gailv']);
-                    $raid->save();
+                    $raid = Gear::where('zb_id', $zb['id'])->first();
+                    is_null($raid) ? Gear::create($data) : $raid->update($data);
                 }
             }
         }

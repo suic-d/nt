@@ -207,22 +207,21 @@ abstract class MiniGameAbstract
     public function updateMissionList()
     {
         foreach ($this->getMiniGame()->getMissionList() as $item) {
+            $data = [
+                'open_id' => $this->openId,
+                'mission_id' => $item['id'],
+                'name' => $item['name'],
+                'sw' => $item['sw'],
+                'sw_val' => $item['swVal'],
+                'level' => $item['level'],
+                'time' => $item['times'],
+            ];
+
             $mission = Mission::where('open_id', $this->openId)
                 ->where('mission_id', $item['id'])
                 ->first()
             ;
-            if (is_null($mission)) {
-                $mission = new Mission();
-                $mission->open_id = $this->openId;
-            }
-
-            $mission->mission_id = $item['id'];
-            $mission->name = $item['name'];
-            $mission->sw = $item['sw'];
-            $mission->sw_val = $item['swVal'];
-            $mission->level = $item['level'];
-            $mission->time = $item['times'];
-            $mission->save();
+            is_null($mission) ? Mission::create($data) : $mission->update($data);
         }
     }
 

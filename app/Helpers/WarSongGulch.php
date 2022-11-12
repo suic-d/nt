@@ -40,8 +40,7 @@ class WarSongGulch extends MiniGameAbstract
             }
 
             Raid::whereIn('zb_id', $zbList)->get()->each(function ($item) {
-                $item->zb_got = 1;
-                $item->save();
+                $item->update(['zb_got' => 1]);
             });
         }
     }
@@ -58,16 +57,14 @@ class WarSongGulch extends MiniGameAbstract
         // 已装备
         if (!empty($userInfo['bag'])) {
             Raid::whereIn('zb_id', $userInfo['bag'])->get()->each(function ($item) {
-                $item->zb_got = 1;
-                $item->save();
+                $item->update(['zb_got' => 1]);
             });
         }
 
         // 未装备
         if (!empty($zbList = array_column($userInfo['zbList'], 'id'))) {
             Raid::whereIn('zb_id', $zbList)->get()->each(function ($item) {
-                $item->zb_got = 1;
-                $item->save();
+                $item->update(['zb_got' => 1]);
             });
         }
     }
@@ -83,28 +80,26 @@ class WarSongGulch extends MiniGameAbstract
         foreach ($this->getRaidList() as $item) {
             foreach ($item['bossList'] as $boss) {
                 foreach ($boss['zbList'] as $zb) {
+                    $data = [
+                        'game_type' => $this->gameType,
+                        'raid_id' => $item['raidId'],
+                        'raid_name' => $item['raidName'],
+                        'raid_time' => $item['raid_time'],
+                        'boss_id' => $boss['bossId'],
+                        'boss_name' => $boss['bossName'],
+                        'boss_level' => $boss['bossLevel'],
+                        'buff' => $boss['buff'] ?? 0,
+                        'zb_id' => $zb['id'],
+                        'zb_name' => $zb['name'],
+                        'zb_level' => $zb['level'],
+                        'zb_color' => $zb['color'],
+                        'drop_rate' => join(',', $zb['gailv']),
+                        'gold' => $boss['goldDrop'],
+                        'gong_zheng' => $boss['paiziDrop'] ?? 0,
+                        'han_bing' => $boss['paizi80Drop'] ?? 0,
+                    ];
                     $raid = Raid::where('zb_id', $zb['id'])->first();
-                    if (is_null($raid)) {
-                        $raid = new Raid();
-                    }
-
-                    $raid->game_type = $this->gameType;
-                    $raid->raid_id = $item['raidId'];
-                    $raid->raid_name = $item['raidName'];
-                    $raid->raid_time = $item['raidTime'];
-                    $raid->boss_id = $boss['bossId'];
-                    $raid->boss_name = $boss['bossName'];
-                    $raid->boss_level = $boss['bossLevel'];
-                    $raid->gold = $boss['goldDrop'];
-                    $raid->gong_zheng = $boss['paiziDrop'] ?? 0;
-                    $raid->han_bing = $boss['paizi80Drop'] ?? 0;
-                    $raid->buff = $boss['buff'] ?? 0;
-                    $raid->zb_id = $zb['id'];
-                    $raid->zb_name = $zb['name'];
-                    $raid->zb_level = $zb['level'];
-                    $raid->zb_color = $zb['color'];
-                    $raid->drop_rate = join(',', $zb['gailv']);
-                    $raid->save();
+                    is_null($raid) ? Raid::create($data) : $raid->update($data);
                 }
             }
         }
@@ -253,19 +248,18 @@ class WarSongGulch extends MiniGameAbstract
             ->toArray()
         ;
         foreach ($this->getBuffList(json_encode($buffIds)) as $bl) {
-            $buff = Buff::where('buff_id', $bl['id'])->first();
-            if (is_null($buff)) {
-                $buff = new Buff();
-            }
+            $data = [
+                'buff_id' => $bl['id'],
+                'name' => $bl['name'],
+                'buff_detail' => $bl['buffDetail'],
+                'story' => $bl['story'],
+                'level' => $bl['level'],
+                'price' => $bl['price'],
+                'paizi' => $bl['paizi'],
+            ];
 
-            $buff->buff_id = $bl['id'];
-            $buff->name = $bl['name'];
-            $buff->buff_detail = $bl['buffDetail'];
-            $buff->story = $bl['story'];
-            $buff->level = $bl['level'];
-            $buff->price = $bl['price'];
-            $buff->paizi = $bl['paizi'];
-            $buff->save();
+            $buff = Buff::where('buff_id', $bl['id'])->first();
+            is_null($buff) ? Buff::create($data) : $buff->update($data);
         }
     }
 }

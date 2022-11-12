@@ -34,12 +34,7 @@ class AdvertLog extends Model
      *
      * @var string[]
      */
-    protected $fillable = [
-        'raid_log_id',
-        'open_id',
-        'num',
-        'status',
-    ];
+    protected $fillable = ['*'];
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo

@@ -22,4 +22,11 @@ class Mission extends Model
      * @var string
      */
     protected $table = 'missions';
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var string[]
+     */
+    protected $fillable = ['*'];
 }

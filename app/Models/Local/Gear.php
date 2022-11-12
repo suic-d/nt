@@ -23,4 +23,11 @@ class Gear extends Model
      * @var string
      */
     protected $table = 'gear';
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var string[]
+     */
+    protected $fillable = ['*'];
 }

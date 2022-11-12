@@ -32,12 +32,7 @@ class FMLog extends Model
      *
      * @var string[]
      */
-    protected $fillable = [
-        'raid_log_id',
-        'open_id',
-        'level',
-        'status',
-    ];
+    protected $fillable = ['*'];
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo

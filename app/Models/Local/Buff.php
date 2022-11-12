@@ -22,4 +22,19 @@ class Buff extends Model
      * @var string
      */
     protected $table = 'buff';
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var string[]
+     */
+    protected $fillable = [
+        'buff_id',
+        'name',
+        'buff_detail',
+        'story',
+        'level',
+        'price',
+        'paizi',
+    ];
 }
