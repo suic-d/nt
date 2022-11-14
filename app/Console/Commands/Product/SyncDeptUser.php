@@ -31,6 +31,8 @@ class SyncDeptUser extends Command
     public function __construct()
     {
         parent::__construct();
+
+        $this->url = env('BASE_URL');
     }
 
     public function handle()

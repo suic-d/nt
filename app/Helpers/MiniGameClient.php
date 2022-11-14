@@ -2,43 +2,21 @@
 
 namespace App\Helpers;
 
-use App\Jobs\AdvertisementVisit;
-use App\Models\Local\AdvertQueue;
+use App\Traits\ClientTrait;
 use App\Traits\LoggerTrait;
-use GuzzleHttp\Client;
-use GuzzleHttp\ClientInterface;
 use GuzzleHttp\RequestOptions;
 use Illuminate\Support\Facades\Cache;
 use Monolog\Logger;
-use Psr\Log\LoggerInterface;
 
 class MiniGameClient
 {
     use LoggerTrait;
-
-    const QUEUE_AD = 'mini_game_ad';
-
-    const HTTP_TIMEOUT = 10;
-
-    /**
-     * @var ClientInterface
-     */
-    protected $client;
-
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
+    use ClientTrait;
 
     /**
      * @var string
      */
     protected $store;
-
-    /**
-     * @var string
-     */
-    protected $url;
 
     /**
      * @var \Illuminate\Contracts\Cache\Repository
@@ -58,6 +36,7 @@ class MiniGameClient
     public function __construct()
     {
         $this->url = config('raid.mini_game.base_url', '');
+        $this->timeout = 10;
         $this->store = config('raid.mini_game.store', '');
         $this->cache = Cache::store($this->store);
     }
@@ -570,30 +549,6 @@ class MiniGameClient
     }
 
     /**
-     * 创建广告队列.
-     *
-     * @param mixed $openId
-     */
-    public function createAdvert($openId)
-    {
-        // 广告1
-        $adv1 = new AdvertQueue();
-        $adv1->open_id = $openId;
-        $adv1->num = 1;
-        $adv1->expire_at = time() + 30;
-        $adv1->save();
-        AdvertisementVisit::dispatch($adv1)->onQueue(self::QUEUE_AD)->delay(now()->addSeconds(30));
-
-        // 广告2
-        $adv2 = new AdvertQueue();
-        $adv2->open_id = $openId;
-        $adv2->num = 2;
-        $adv2->expire_at = time() + 60;
-        $adv2->save();
-        AdvertisementVisit::dispatch($adv2)->onQueue(self::QUEUE_AD)->delay(now()->addSeconds(60));
-    }
-
-    /**
      * @param int|string $level
      * @param string     $message
      * @param array      $context
@@ -605,18 +560,6 @@ class MiniGameClient
     }
 
     /**
-     * @return ClientInterface
-     */
-    public function getClient()
-    {
-        if (!$this->client) {
-            $this->client = $this->createDefaultClient();
-        }
-
-        return $this->client;
-    }
-
-    /**
      * @param string $openId
      * @param int    $id
      *
@@ -624,18 +567,10 @@ class MiniGameClient
      */
     public function doMission(string $openId, int $id)
     {
-        $response = $this->client->request('GET', 'miniGame/doRenwu', [RequestOptions::QUERY => [
+        $response = $this->getClient()->request('GET', 'miniGame/doRenwu', [RequestOptions::QUERY => [
             'openid' => $openId,
             'id' => $id,
         ]]);
         $this->log(Logger::INFO, $response->getBody()->getContents());
-    }
-
-    /**
-     * @return ClientInterface
-     */
-    protected function createDefaultClient()
-    {
-        return new Client(['base_uri' => $this->url, 'verify' => false, 'timeout' => self::HTTP_TIMEOUT]);
     }
 }

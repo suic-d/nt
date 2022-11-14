@@ -3,8 +3,8 @@
 namespace App\Console\Commands\Asset;
 
 use App\Models\Company;
+use App\Traits\ClientTrait;
 use App\Traits\LoggerTrait;
-use GuzzleHttp\Client;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
 use Illuminate\Console\Command;
@@ -12,6 +12,7 @@ use Illuminate\Console\Command;
 class UpdateCompanyInfo extends Command
 {
     use LoggerTrait;
+    use ClientTrait;
 
     /**
      * The name and signature of the console command.
@@ -27,15 +28,11 @@ class UpdateCompanyInfo extends Command
      */
     protected $description = '更新公司天眼查数据信息';
 
-    /**
-     * @var Client
-     */
-    protected $client;
-
     public function __construct()
     {
         parent::__construct();
-        $this->client = new Client(['base_uri' => env('BASE_URL_ASSET'), 'verify' => false]);
+
+        $this->url = env('BASE_URL_ASSET');
     }
 
     public function handle()
@@ -46,7 +43,7 @@ class UpdateCompanyInfo extends Command
                 yield $value => new Request('GET', 'listing/test/set_company_status?id='.$value);
             }
         };
-        $pool = new Pool($this->client, $requests(), [
+        $pool = new Pool($this->getClient(), $requests(), [
             'concurrency' => 5,
             'fulfilled' => function ($response, $idx) {
             },

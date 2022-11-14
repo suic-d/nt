@@ -8,6 +8,16 @@ use GuzzleHttp\ClientInterface;
 trait ClientTrait
 {
     /**
+     * @var string
+     */
+    protected $url;
+
+    /**
+     * @var int
+     */
+    protected $timeout = 30;
+
+    /**
      * @var ClientInterface
      */
     protected $client;
@@ -29,6 +39,6 @@ trait ClientTrait
      */
     protected function createDefaultClient()
     {
-        return new Client(['base_uri' => env('BASE_URL'), 'verify' => false, 'timeout' => 30]);
+        return new Client(['base_uri' => $this->url, 'verify' => false, 'timeout' => $this->timeout]);
     }
 }
