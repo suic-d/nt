@@ -554,7 +554,12 @@ abstract class MiniGameAbstract
         }
     }
 
-    public static function timeFormat($time)
+    /**
+     * @param int $time
+     *
+     * @return string
+     */
+    public static function timeFormat(int $time): string
     {
         $format = '';
 
@@ -575,7 +580,7 @@ abstract class MiniGameAbstract
             $format = str_pad($hour, 2, '0', STR_PAD_LEFT).'小时'.$format;
         }
 
-        return sprintf('%s小时%s分%s秒', $hour, $minute, $second);
+        return $format;
     }
 
     /**

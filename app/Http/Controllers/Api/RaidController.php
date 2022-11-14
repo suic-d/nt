@@ -98,7 +98,7 @@ class RaidController extends Controller
                 $data[] = [
                     'id' => $item->id,
                     'raid_name' => $item->raid_name,
-                    'raid_time' => MiniGameAbstract::timeFormat($item->raid_time),
+                    'raid_time' => MiniGameAbstract::timeFormat($item->raid_time / 2),
                     'boss_name' => $item->boss_name,
                     'boss_level' => $item->boss_level,
                     'buff' => $buffMap[$item->buff] ?? '',
@@ -136,7 +136,7 @@ class RaidController extends Controller
                 $data[] = [
                     'id' => $item->id,
                     'raid_name' => $item->raid_name,
-                    'raid_time' => MiniGameAbstract::timeFormat($item->raid_time),
+                    'raid_time' => MiniGameAbstract::timeFormat($item->raid_time / 2),
                     'boss_name' => $item->boss_name,
                     'boss_level' => $item->boss_level,
                     'buff' => $buffMap[$item->buff] ?? '',
