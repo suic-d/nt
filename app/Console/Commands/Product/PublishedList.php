@@ -5,16 +5,18 @@ namespace App\Console\Commands\Product;
 use App\Models\Sku;
 use App\Models\SpuPublished;
 use App\Models\SpuPublishedList;
+use App\Traits\LoggerTrait;
 use Exception;
 use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
 use Illuminate\Console\Command;
-use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
 
 class PublishedList extends Command
 {
+    use LoggerTrait;
+
     /**
      * The name and signature of the console command.
      *
@@ -30,24 +32,16 @@ class PublishedList extends Command
     protected $description = '刊登报表';
 
     /**
-     * @var Logger
-     */
-    protected $logger;
-
-    /**
-     * @var Client
+     * @var ClientInterface
      */
     protected $client;
 
     public function __construct()
     {
         parent::__construct();
-        $this->logger = new Logger('publishedList');
-        $this->logger->pushHandler(new StreamHandler(
-            storage_path('logs/'.date('Ymd').'/publishedList.log'),
-            Logger::INFO
-        ));
-        $this->client = new Client(['base_uri' => env('BASE_URL'), 'verify' => false]);
+
+        $this->createDefaultClient();
+        $this->createDefaultLogger();
     }
 
     /**
@@ -164,5 +158,17 @@ class PublishedList extends Command
         } catch (Exception $exception) {
             $this->logger->error($exception->getMessage());
         }
+    }
+
+    /**
+     * @return ClientInterface
+     */
+    protected function createDefaultClient()
+    {
+        if (!$this->client) {
+            $this->client = new Client(['base_uri' => env('BASE_URL'), 'verify' => false]);
+        }
+
+        return $this->client;
     }
 }

@@ -373,7 +373,7 @@ abstract class MiniGameAbstract
                         'game_type' => $this->gameType,
                         'raid_id' => $item['raidId'],
                         'raid_name' => $item['raidName'],
-                        'raid_time' => $item['raid_time'],
+                        'raid_time' => $item['raidTime'],
                         'boss_id' => $boss['bossId'],
                         'boss_name' => $boss['bossName'],
                         'boss_level' => $boss['bossLevel'],

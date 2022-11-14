@@ -3,15 +3,17 @@
 namespace App\Console\Commands\Product;
 
 use App\Models\StaffList;
+use App\Traits\LoggerTrait;
 use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
 use Illuminate\Console\Command;
-use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
 
 class SyncStaffDetail extends Command
 {
+    use LoggerTrait;
+
     /**
      * The name and signature of the console command.
      *
@@ -27,24 +29,16 @@ class SyncStaffDetail extends Command
     protected $description = '获取员工详情';
 
     /**
-     * @var Client
+     * @var ClientInterface
      */
     protected $client;
-
-    /**
-     * @var Logger
-     */
-    protected $logger;
 
     public function __construct()
     {
         parent::__construct();
-        $this->client = new Client(['base_uri' => env('BASE_URL'), 'verify' => false]);
-        $this->logger = new Logger('syncStaffDetail');
-        $this->logger->pushHandler(new StreamHandler(
-            storage_path('logs/'.date('Ymd').'/syncStaffDetail.log'),
-            Logger::INFO
-        ));
+
+        $this->createDefaultClient();
+        $this->createDefaultLogger();
     }
 
     public function handle()
@@ -64,5 +58,17 @@ class SyncStaffDetail extends Command
             },
         ]);
         $pool->promise()->wait();
+    }
+
+    /**
+     * @return ClientInterface
+     */
+    protected function createDefaultClient()
+    {
+        if (!$this->client) {
+            $this->client = new Client(['base_uri' => env('BASE_URL'), 'verify' => false]);
+        }
+
+        return $this->client;
     }
 }

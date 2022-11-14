@@ -3,18 +3,17 @@
 namespace App\Console\Commands\Product;
 
 use App\Models\SkuReview;
+use App\Traits\LoggerTrait;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
 use Illuminate\Console\Command;
-use Monolog\Formatter\LineFormatter;
-use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
-use Psr\Log\LoggerInterface;
 
 class GetProcessInstance extends Command
 {
+    use LoggerTrait;
+
     /**
      * The name and signature of the console command.
      *
@@ -33,16 +32,6 @@ class GetProcessInstance extends Command
      * @var ClientInterface
      */
     protected $client;
-
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
-
-    /**
-     * @var string
-     */
-    protected $dateFormat = 'Y-m-d H:i:s';
 
     public function __construct()
     {
@@ -88,23 +77,5 @@ class GetProcessInstance extends Command
         }
 
         return $this->client;
-    }
-
-    /**
-     * @return LoggerInterface
-     */
-    protected function createDefaultLogger()
-    {
-        if (!$this->logger) {
-            $name = class_basename(__CLASS__);
-            $path = storage_path('logs').DIRECTORY_SEPARATOR.date('Ymd').DIRECTORY_SEPARATOR.$name.'.log';
-            $handler = new StreamHandler($path, Logger::INFO);
-            $handler->setFormatter(new LineFormatter(null, $this->dateFormat, true, true));
-
-            $this->logger = new Logger($name);
-            $this->logger->pushHandler($handler);
-        }
-
-        return $this->logger;
     }
 }

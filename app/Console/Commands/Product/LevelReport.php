@@ -10,6 +10,7 @@ use App\Models\Sku;
 use App\Models\SkuLevel;
 use App\Models\SpuInfo;
 use App\Models\Supplier;
+use App\Traits\LoggerTrait;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
@@ -18,13 +19,11 @@ use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\RequestOptions;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use Monolog\Formatter\LineFormatter;
-use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
-use Psr\Log\LoggerInterface;
 
 class LevelReport extends Command
 {
+    use LoggerTrait;
+
     /**
      * The name and signature of the console command.
      *
@@ -43,16 +42,6 @@ class LevelReport extends Command
      * @var ClientInterface
      */
     protected $client;
-
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
-
-    /**
-     * @var string
-     */
-    protected $dateFormat = 'Y-m-d H:i:s';
 
     /**
      * @var \Illuminate\Database\Eloquent\Collection|LevelConfig[]
@@ -284,24 +273,6 @@ class LevelReport extends Command
         }
 
         return round($periodSum / $batchSum, 1);
-    }
-
-    /**
-     * @return LoggerInterface
-     */
-    protected function createDefaultLogger()
-    {
-        if (!$this->logger) {
-            $name = class_basename(__CLASS__);
-            $path = storage_path('logs').DIRECTORY_SEPARATOR.date('Ymd').DIRECTORY_SEPARATOR.$name.'.log';
-            $handler = new StreamHandler($path, Logger::INFO);
-            $handler->setFormatter(new LineFormatter(null, $this->dateFormat, true, true));
-
-            $this->logger = new Logger($name);
-            $this->logger->pushHandler($handler);
-        }
-
-        return $this->logger;
     }
 
     /**

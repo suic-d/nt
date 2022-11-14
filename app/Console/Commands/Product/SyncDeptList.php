@@ -2,14 +2,16 @@
 
 namespace App\Console\Commands\Product;
 
+use App\Traits\LoggerTrait;
 use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Console\Command;
-use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
 
 class SyncDeptList extends Command
 {
+    use LoggerTrait;
+
     /**
      * The name and signature of the console command.
      *
@@ -25,24 +27,16 @@ class SyncDeptList extends Command
     protected $description = '获取部门列表';
 
     /**
-     * @var Client
+     * @var ClientInterface
      */
     protected $client;
-
-    /**
-     * @var Logger
-     */
-    protected $logger;
 
     public function __construct()
     {
         parent::__construct();
-        $this->client = new Client(['base_uri' => env('BASE_URL'), 'verify' => false]);
-        $this->logger = new Logger('syncDeptList');
-        $this->logger->pushHandler(new StreamHandler(
-            storage_path('logs/'.date('Ymd').'/syncDeptList.log'),
-            Logger::INFO
-        ));
+
+        $this->createDefaultClient();
+        $this->createDefaultLogger();
     }
 
     public function handle()
@@ -52,5 +46,17 @@ class SyncDeptList extends Command
         } catch (GuzzleException $exception) {
             $this->logger->error($exception->getMessage());
         }
+    }
+
+    /**
+     * @return ClientInterface
+     */
+    protected function createDefaultClient()
+    {
+        if (!$this->client) {
+            $this->client = new Client(['base_uri' => env('BASE_URL'), 'verify' => false]);
+        }
+
+        return $this->client;
     }
 }
