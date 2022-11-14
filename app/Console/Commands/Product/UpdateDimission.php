@@ -3,15 +3,17 @@
 namespace App\Console\Commands\Product;
 
 use App\Models\StaffList;
-use GuzzleHttp\Client;
+use App\Traits\ClientTrait;
+use App\Traits\LoggerTrait;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use Illuminate\Console\Command;
-use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
 
 class UpdateDimission extends Command
 {
+    use LoggerTrait;
+    use ClientTrait;
+
     /**
      * The name and signature of the console command.
      *
@@ -26,25 +28,9 @@ class UpdateDimission extends Command
      */
     protected $description = '更新员工在职状态';
 
-    /**
-     * @var Client
-     */
-    protected $client;
-
-    /**
-     * @var Logger
-     */
-    protected $logger;
-
     public function __construct()
     {
         parent::__construct();
-        $this->client = new Client(['base_uri' => env('BASE_URL'), 'verify' => false, 'timeout' => 5]);
-        $this->logger = new Logger('updateDimission');
-        $this->logger->pushHandler(new StreamHandler(
-            storage_path('logs/'.date('Ymd').'/updateDimission.log'),
-            Logger::INFO
-        ));
     }
 
     public function handle()
@@ -52,11 +38,11 @@ class UpdateDimission extends Command
         $staffIdArr = StaffList::where('is_dimission', 1)->get(['staff_id'])->pluck('staff_id');
         foreach ($staffIdArr as $v) {
             try {
-                $this->client->request('GET', 'index.php/oaapi/oaapi/updateDimission', [
+                $this->getClient()->request('GET', 'index.php/oaapi/oaapi/updateDimission', [
                     RequestOptions::QUERY => ['staff_id' => $v],
                 ]);
             } catch (GuzzleException $exception) {
-                $this->logger->error('staff_id = '.$v.' '.$exception->getMessage());
+                $this->getLogger()->error('staff_id = '.$v.' '.$exception->getMessage());
             }
         }
     }

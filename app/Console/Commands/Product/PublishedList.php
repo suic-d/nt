@@ -5,10 +5,9 @@ namespace App\Console\Commands\Product;
 use App\Models\Sku;
 use App\Models\SpuPublished;
 use App\Models\SpuPublishedList;
+use App\Traits\ClientTrait;
 use App\Traits\LoggerTrait;
 use Exception;
-use GuzzleHttp\Client;
-use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
 use Illuminate\Console\Command;
@@ -16,6 +15,7 @@ use Illuminate\Console\Command;
 class PublishedList extends Command
 {
     use LoggerTrait;
+    use ClientTrait;
 
     /**
      * The name and signature of the console command.
@@ -31,17 +31,9 @@ class PublishedList extends Command
      */
     protected $description = '刊登报表';
 
-    /**
-     * @var ClientInterface
-     */
-    protected $client;
-
     public function __construct()
     {
         parent::__construct();
-
-        $this->createDefaultClient();
-        $this->createDefaultLogger();
     }
 
     /**
@@ -67,12 +59,12 @@ class PublishedList extends Command
                 yield $sku => new Request('GET', 'index.php/crontab/TransAttr/updatePublishedList?sku='.$sku);
             }
         };
-        $pool = new Pool($this->client, $requests(), [
+        $pool = new Pool($this->getClient(), $requests(), [
             'concurrency' => 5,
             'fulfilled' => function ($response, $idx) {
             },
             'rejected' => function ($reason, $idx) {
-                $this->logger->error('sku = '.$idx.' '.$reason->getMessage());
+                $this->getLogger()->error('sku = '.$idx.' '.$reason->getMessage());
             },
         ]);
         $pool->promise()->wait();
@@ -98,12 +90,12 @@ class PublishedList extends Command
                 );
             }
         };
-        $pool = new Pool($this->client, $requests(), [
+        $pool = new Pool($this->getClient(), $requests(), [
             'concurrency' => 5,
             'fulfilled' => function ($response, $idx) {
             },
             'rejected' => function ($reason, $idx) {
-                $this->logger->error('offset = '.$idx.' '.$reason->getMessage());
+                $this->getLogger()->error('offset = '.$idx.' '.$reason->getMessage());
             },
         ]);
         $pool->promise()->wait();
@@ -156,19 +148,7 @@ class PublishedList extends Command
                 unset($publishedModels, $publishedGroup);
             }
         } catch (Exception $exception) {
-            $this->logger->error($exception->getMessage());
+            $this->getLogger()->error($exception->getMessage());
         }
-    }
-
-    /**
-     * @return ClientInterface
-     */
-    protected function createDefaultClient()
-    {
-        if (!$this->client) {
-            $this->client = new Client(['base_uri' => env('BASE_URL'), 'verify' => false]);
-        }
-
-        return $this->client;
     }
 }

@@ -3,9 +3,8 @@
 namespace App\Console\Commands\Product;
 
 use App\Models\SkuReview;
+use App\Traits\ClientTrait;
 use App\Traits\LoggerTrait;
-use GuzzleHttp\Client;
-use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
 use Illuminate\Console\Command;
@@ -13,6 +12,7 @@ use Illuminate\Console\Command;
 class GetProcessInstance extends Command
 {
     use LoggerTrait;
+    use ClientTrait;
 
     /**
      * The name and signature of the console command.
@@ -28,17 +28,9 @@ class GetProcessInstance extends Command
      */
     protected $description = '钉钉审核';
 
-    /**
-     * @var ClientInterface
-     */
-    protected $client;
-
     public function __construct()
     {
         parent::__construct();
-
-        $this->createDefaultClient();
-        $this->createDefaultLogger();
     }
 
     public function handle()
@@ -53,29 +45,17 @@ class GetProcessInstance extends Command
                 yield $v->id => new Request('GET', 'index.php/api/v1/ExternalAPI/getProcessInstance?review_id='.$v->id);
             }
         };
-        $pool = new Pool($this->client, $requests(), [
+        $pool = new Pool($this->getClient(), $requests(), [
             'concurrency' => 5,
             'fulfilled' => function ($response, $idx) {
-                $this->logger->info('review_id = '.$idx.' '.$response->getBody()->getContents());
-                $this->logger->close();
+                $this->getLogger()->info('review_id = '.$idx.' '.$response->getBody()->getContents());
+                $this->getLogger()->close();
             },
             'rejected' => function ($reason, $idx) {
-                $this->logger->error('review_id = '.$idx.' '.$reason->getMessage());
-                $this->logger->close();
+                $this->getLogger()->error('review_id = '.$idx.' '.$reason->getMessage());
+                $this->getLogger()->close();
             },
         ]);
         $pool->promise()->wait();
-    }
-
-    /**
-     * @return ClientInterface
-     */
-    protected function createDefaultClient()
-    {
-        if (!$this->client) {
-            $this->client = new Client(['base_uri' => env('BASE_URL'), 'verity' => false]);
-        }
-
-        return $this->client;
     }
 }

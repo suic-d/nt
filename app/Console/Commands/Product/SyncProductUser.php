@@ -36,7 +36,6 @@ class SyncProductUser extends Command
         parent::__construct();
 
         $this->createDefaultClient();
-        $this->createDefaultLogger();
     }
 
     public function handle()
@@ -44,7 +43,7 @@ class SyncProductUser extends Command
         try {
             $this->client->request('GET', 'index.php/oaapi/oaapi/getProductUser');
         } catch (GuzzleException $exception) {
-            $this->logger->error($exception->getMessage());
+            $this->getLogger()->error($exception->getMessage());
         }
     }
 

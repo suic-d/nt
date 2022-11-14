@@ -22,18 +22,28 @@ trait LoggerTrait
     /**
      * @return LoggerInterface
      */
-    protected function createDefaultLogger()
+    public function getLogger()
     {
         if (!$this->logger) {
-            $name = class_basename(__CLASS__);
-            $path = storage_path('logs').DIRECTORY_SEPARATOR.date('Ymd').DIRECTORY_SEPARATOR.$name.'.log';
-            $handler = new StreamHandler($path, Logger::INFO);
-            $handler->setFormatter(new LineFormatter(null, $this->dateFormat, true, true));
-
-            $this->logger = new Logger($name);
-            $this->logger->pushHandler($handler);
+            $this->logger = $this->createDefaultLogger();
         }
 
         return $this->logger;
+    }
+
+    /**
+     * @return LoggerInterface
+     */
+    protected function createDefaultLogger()
+    {
+        $name = class_basename(__CLASS__);
+        $path = storage_path('logs').DIRECTORY_SEPARATOR.date('Ymd').DIRECTORY_SEPARATOR.$name.'.log';
+        $handler = new StreamHandler($path, Logger::INFO);
+        $handler->setFormatter(new LineFormatter(null, $this->dateFormat, true, true));
+
+        $logger = new Logger($name);
+        $logger->pushHandler($handler);
+
+        return $logger;
     }
 }

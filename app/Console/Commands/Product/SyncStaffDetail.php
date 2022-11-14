@@ -3,9 +3,8 @@
 namespace App\Console\Commands\Product;
 
 use App\Models\StaffList;
+use App\Traits\ClientTrait;
 use App\Traits\LoggerTrait;
-use GuzzleHttp\Client;
-use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
 use Illuminate\Console\Command;
@@ -13,6 +12,7 @@ use Illuminate\Console\Command;
 class SyncStaffDetail extends Command
 {
     use LoggerTrait;
+    use ClientTrait;
 
     /**
      * The name and signature of the console command.
@@ -28,17 +28,9 @@ class SyncStaffDetail extends Command
      */
     protected $description = '获取员工详情';
 
-    /**
-     * @var ClientInterface
-     */
-    protected $client;
-
     public function __construct()
     {
         parent::__construct();
-
-        $this->createDefaultClient();
-        $this->createDefaultLogger();
     }
 
     public function handle()
@@ -49,26 +41,14 @@ class SyncStaffDetail extends Command
                 yield $value => new Request('GET', 'index.php/oaapi/oaapi/staffDetail?id='.$value);
             }
         };
-        $pool = new Pool($this->client, $requests(), [
+        $pool = new Pool($this->getClient(), $requests(), [
             'concurrency' => 5,
             'fulfilled' => function ($response, $idx) {
             },
             'rejected' => function ($reason, $idx) {
-                $this->logger->error('staff_id = '.$idx.' '.$reason->getMessage());
+                $this->getLogger()->error('staff_id = '.$idx.' '.$reason->getMessage());
             },
         ]);
         $pool->promise()->wait();
-    }
-
-    /**
-     * @return ClientInterface
-     */
-    protected function createDefaultClient()
-    {
-        if (!$this->client) {
-            $this->client = new Client(['base_uri' => env('BASE_URL'), 'verify' => false]);
-        }
-
-        return $this->client;
     }
 }

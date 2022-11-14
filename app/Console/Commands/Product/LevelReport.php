@@ -10,9 +10,8 @@ use App\Models\Sku;
 use App\Models\SkuLevel;
 use App\Models\SpuInfo;
 use App\Models\Supplier;
+use App\Traits\ClientTrait;
 use App\Traits\LoggerTrait;
-use GuzzleHttp\Client;
-use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
@@ -23,6 +22,7 @@ use Illuminate\Support\Facades\DB;
 class LevelReport extends Command
 {
     use LoggerTrait;
+    use ClientTrait;
 
     /**
      * The name and signature of the console command.
@@ -39,11 +39,6 @@ class LevelReport extends Command
     protected $description = 'sku等级报表';
 
     /**
-     * @var ClientInterface
-     */
-    protected $client;
-
-    /**
      * @var \Illuminate\Database\Eloquent\Collection|LevelConfig[]
      */
     private static $levelConfigs;
@@ -51,9 +46,6 @@ class LevelReport extends Command
     public function __construct()
     {
         parent::__construct();
-
-        $this->createDefaultClient();
-        $this->createDefaultLogger();
     }
 
     public function handle()
@@ -76,11 +68,11 @@ class LevelReport extends Command
             }
 
             try {
-                $this->client->request('POST', 'index.php/crontab/TransAttr/rl', [
+                $this->getClient()->request('POST', 'index.php/crontab/TransAttr/rl', [
                     RequestOptions::JSON => ['skus' => $products->pluck('sku')],
                 ]);
             } catch (GuzzleException $exception) {
-                $this->logger->error('page='.$page.' '.$exception->getMessage());
+                $this->getLogger()->error('page='.$page.' '.$exception->getMessage());
             }
 
             unset($products);
@@ -105,12 +97,12 @@ class LevelReport extends Command
                 yield $page => new Request('GET', 'index.php/crontab/TransAttr/lr?page='.$page.'&limit='.$perPage);
             }
         };
-        $pool = new Pool($this->client, $requests(), [
+        $pool = new Pool($this->getClient(), $requests(), [
             'concurrency' => 5,
             'fulfilled' => function ($response, $idx) {
             },
             'rejected' => function ($reason, $idx) {
-                $this->logger->error('page='.$idx.' '.$reason->getMessage());
+                $this->getLogger()->error('page='.$idx.' '.$reason->getMessage());
             },
         ]);
         $pool->promise()->wait();
@@ -273,17 +265,5 @@ class LevelReport extends Command
         }
 
         return round($periodSum / $batchSum, 1);
-    }
-
-    /**
-     * @return ClientInterface
-     */
-    protected function createDefaultClient()
-    {
-        if (!$this->client) {
-            $this->client = new Client(['base_uri' => env('BASE_URL'), 'verity' => false]);
-        }
-
-        return $this->client;
     }
 }
