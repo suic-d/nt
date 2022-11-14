@@ -4,11 +4,14 @@ namespace App\Console\Commands\Product;
 
 use App\Models\SkuReview;
 use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
 use Illuminate\Console\Command;
+use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 
 class GetProcessInstance extends Command
 {
@@ -27,24 +30,26 @@ class GetProcessInstance extends Command
     protected $description = '钉钉审核';
 
     /**
-     * @var Client
+     * @var ClientInterface
      */
     protected $client;
 
     /**
-     * @var Logger
+     * @var LoggerInterface
      */
     protected $logger;
+
+    /**
+     * @var string
+     */
+    protected $dateFormat = 'Y-m-d H:i:s';
 
     public function __construct()
     {
         parent::__construct();
-        $this->client = new Client(['base_uri' => env('BASE_URL'), 'verify' => false]);
-        $this->logger = new Logger('getProcessInstance');
-        $this->logger->pushHandler(new StreamHandler(
-            storage_path('logs/'.date('Ymd').'/getProcessInstance.log'),
-            Logger::INFO
-        ));
+
+        $this->createDefaultClient();
+        $this->createDefaultLogger();
     }
 
     public function handle()
@@ -71,5 +76,35 @@ class GetProcessInstance extends Command
             },
         ]);
         $pool->promise()->wait();
+    }
+
+    /**
+     * @return ClientInterface
+     */
+    protected function createDefaultClient()
+    {
+        if (!$this->client) {
+            $this->client = new Client(['base_uri' => env('BASE_URL'), 'verity' => false]);
+        }
+
+        return $this->client;
+    }
+
+    /**
+     * @return LoggerInterface
+     */
+    protected function createDefaultLogger()
+    {
+        if (!$this->logger) {
+            $name = class_basename(__CLASS__);
+            $path = storage_path('logs').DIRECTORY_SEPARATOR.date('Ymd').DIRECTORY_SEPARATOR.$name.'.log';
+            $handler = new StreamHandler($path, Logger::INFO);
+            $handler->setFormatter(new LineFormatter(null, $this->dateFormat, true, true));
+
+            $this->logger = new Logger($name);
+            $this->logger->pushHandler($handler);
+        }
+
+        return $this->logger;
     }
 }

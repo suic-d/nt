@@ -11,14 +11,17 @@ use App\Models\SkuLevel;
 use App\Models\SpuInfo;
 use App\Models\Supplier;
 use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\RequestOptions;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 
 class LevelReport extends Command
 {
@@ -37,14 +40,19 @@ class LevelReport extends Command
     protected $description = 'sku等级报表';
 
     /**
-     * @var Client
+     * @var ClientInterface
      */
     protected $client;
 
     /**
-     * @var Logger
+     * @var LoggerInterface
      */
     protected $logger;
+
+    /**
+     * @var string
+     */
+    protected $dateFormat = 'Y-m-d H:i:s';
 
     /**
      * @var \Illuminate\Database\Eloquent\Collection|LevelConfig[]
@@ -54,9 +62,9 @@ class LevelReport extends Command
     public function __construct()
     {
         parent::__construct();
-        $this->client = new Client(['base_uri' => env('BASE_URL'), 'verify' => false]);
-        $this->logger = new Logger('levelReport');
-        $this->logger->pushHandler(new StreamHandler(storage_path('logs/levelReport.log'), Logger::INFO));
+
+        $this->createDefaultClient();
+        $this->createDefaultLogger();
     }
 
     public function handle()
@@ -276,5 +284,35 @@ class LevelReport extends Command
         }
 
         return round($periodSum / $batchSum, 1);
+    }
+
+    /**
+     * @return LoggerInterface
+     */
+    protected function createDefaultLogger()
+    {
+        if (!$this->logger) {
+            $name = class_basename(__CLASS__);
+            $path = storage_path('logs').DIRECTORY_SEPARATOR.date('Ymd').DIRECTORY_SEPARATOR.$name.'.log';
+            $handler = new StreamHandler($path, Logger::INFO);
+            $handler->setFormatter(new LineFormatter(null, $this->dateFormat, true, true));
+
+            $this->logger = new Logger($name);
+            $this->logger->pushHandler($handler);
+        }
+
+        return $this->logger;
+    }
+
+    /**
+     * @return ClientInterface
+     */
+    protected function createDefaultClient()
+    {
+        if (!$this->client) {
+            $this->client = new Client(['base_uri' => env('BASE_URL'), 'verity' => false]);
+        }
+
+        return $this->client;
     }
 }

@@ -8,6 +8,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\RequestOptions;
 use Illuminate\Support\Facades\Cache;
+use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
@@ -47,6 +48,11 @@ class MiniGameClient
      * @var int
      */
     protected $expiresAt = 86400;
+
+    /**
+     * @var string
+     */
+    protected $dateFormat = 'Y-m-d H:i:s';
 
     /**
      * @var self
@@ -114,7 +120,7 @@ class MiniGameClient
             'openid' => $openId,
             'zbId' => $zbId,
         ]]);
-        $this->log(Logger::INFO, __METHOD__.' '.$response->getBody()->getContents());
+        $this->log(Logger::INFO, $response->getBody()->getContents());
     }
 
     /**
@@ -129,7 +135,7 @@ class MiniGameClient
         $response = $this->getClient()->request('GET', 'miniGame/clearBag', [
             RequestOptions::QUERY => ['openid' => $openId],
         ]);
-        $this->log(Logger::INFO, __METHOD__.' '.$response->getBody()->getContents());
+        $this->log(Logger::INFO, $response->getBody()->getContents());
     }
 
     /**
@@ -148,7 +154,7 @@ class MiniGameClient
             'raidId' => $raidId,
             'bossId' => $bossId,
         ]]);
-        $this->log(Logger::INFO, __METHOD__.' '.$response->getBody()->getContents());
+        $this->log(Logger::INFO, $response->getBody()->getContents());
     }
 
     /**
@@ -224,8 +230,8 @@ class MiniGameClient
             'detail' => $detail,
             'shopType' => $shopType,
         ]]);
-        $this->log(Logger::INFO, __METHOD__.' '.$detail);
-        $this->log(Logger::INFO, __METHOD__.' '.$response->getBody()->getContents());
+        $this->log(Logger::INFO, $detail);
+        $this->log(Logger::INFO, $response->getBody()->getContents());
     }
 
     /**
@@ -257,7 +263,7 @@ class MiniGameClient
         $response = $this->getClient()->request('GET', 'miniGame/buffCount', [
             RequestOptions::QUERY => ['openid' => $openId],
         ]);
-        $this->log(Logger::INFO, __METHOD__.' '.$response->getBody()->getContents());
+        $this->log(Logger::INFO, $response->getBody()->getContents());
     }
 
     /**
@@ -299,7 +305,7 @@ class MiniGameClient
         $response = $this->getClient()->request('GET', 'miniGame/addMoney', [
             RequestOptions::QUERY => ['openid' => $openId],
         ]);
-        $this->log(Logger::INFO, __METHOD__.' '.$response->getBody()->getContents());
+        $this->log(Logger::INFO, $response->getBody()->getContents());
     }
 
     /**
@@ -638,7 +644,7 @@ class MiniGameClient
             'openid' => $openId,
             'id' => $id,
         ]]);
-        $this->log(Logger::INFO, __METHOD__.' '.$response->getBody()->getContents());
+        $this->log(Logger::INFO, $response->getBody()->getContents());
     }
 
     /**
@@ -656,7 +662,9 @@ class MiniGameClient
     {
         $logger = new Logger($name = class_basename(__CLASS__));
         $path = storage_path('logs').DIRECTORY_SEPARATOR.date('Ymd').DIRECTORY_SEPARATOR.$name.'.log';
-        $logger->pushHandler(new StreamHandler($path, Logger::INFO));
+        $handler = new StreamHandler($path, Logger::INFO);
+        $handler->setFormatter(new LineFormatter(null, $this->dateFormat, true, true));
+        $logger->pushHandler($handler);
 
         return $logger;
     }
