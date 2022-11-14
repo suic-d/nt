@@ -101,6 +101,7 @@
                 cols:[[
                    {field:"id", title:"ID"},
                    {field:"raid_name", title:"RaidName"},
+                    {field:"raid_time", title:"RaidTime"},
                    {field:"boss_name", title:"BossName"},
                    {field:"boss_level", title:"BossLevel", sort:true},
                    {field:"buff", title:"Buff"},
@@ -123,6 +124,7 @@
                 cols:[[
                     {field:"id", title:"ID"},
                     {field:"raid_name", title:"RaidName"},
+                    {field:"raid_time", title:"RaidTime"},
                     {field:"boss_name", title:"BossName"},
                     {field:"boss_level", title:"BossLevel", sort:true},
                     {field:"buff", title:"Buff"},

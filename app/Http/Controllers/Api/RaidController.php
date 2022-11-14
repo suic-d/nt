@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Helpers\BurningPlain;
+use App\Helpers\MiniGameAbstract;
 use App\Helpers\WarSongGulch;
 use App\Http\Controllers\Controller;
 use App\Models\Local\AdvertLog;
 use App\Models\Local\Buff;
-use App\Models\Local\Gear;
 use App\Models\Local\Raid;
 use App\Models\Local\RaidLog;
 use Illuminate\Http\Request;
@@ -83,7 +83,13 @@ class RaidController extends Controller
      */
     public function getRaids()
     {
-        $raids = Raid::where('zb_got', 0)->orderBy('boss_level')->get();
+        $instance = new WarSongGulch();
+        $raids = Raid::where('open_id', $instance->getOpenId())
+            ->where('zb_got', 0)
+            ->orderBy('boss_level')
+            ->orderBy('raid_time')
+            ->get()
+        ;
         $data = [];
         if ($raids->isNotEmpty()) {
             $buffMap = Buff::get()->pluck('buff_detail', 'buff_id');
@@ -92,6 +98,7 @@ class RaidController extends Controller
                 $data[] = [
                     'id' => $item->id,
                     'raid_name' => $item->raid_name,
+                    'raid_time' => MiniGameAbstract::timeFormat($item->raid_time),
                     'boss_name' => $item->boss_name,
                     'boss_level' => $item->boss_level,
                     'buff' => $buffMap[$item->buff] ?? '',
@@ -110,13 +117,17 @@ class RaidController extends Controller
     }
 
     /**
-     * @param Request $request
-     *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getGears(Request $request)
+    public function getGears()
     {
-        $gears = Gear::where('zb_got', 0)->orderBy('boss_level')->get();
+        $instance = new BurningPlain();
+        $gears = Raid::where('open_id', $instance->getOpenId())
+            ->where('zb_got', 0)
+            ->orderBy('boss_level')
+            ->orderBy('raid_time')
+            ->get()
+        ;
         $data = [];
         if ($gears->isNotEmpty()) {
             $buffMap = Buff::get()->pluck('buff_detail', 'buff_id');
@@ -125,6 +136,7 @@ class RaidController extends Controller
                 $data[] = [
                     'id' => $item->id,
                     'raid_name' => $item->raid_name,
+                    'raid_time' => MiniGameAbstract::timeFormat($item->raid_time),
                     'boss_name' => $item->boss_name,
                     'boss_level' => $item->boss_level,
                     'buff' => $buffMap[$item->buff] ?? '',
