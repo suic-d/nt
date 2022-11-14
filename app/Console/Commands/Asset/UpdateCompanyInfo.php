@@ -3,16 +3,16 @@
 namespace App\Console\Commands\Asset;
 
 use App\Models\Company;
+use App\Traits\LoggerTrait;
 use GuzzleHttp\Client;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
 use Illuminate\Console\Command;
-use Monolog\Formatter\LineFormatter;
-use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
 
 class UpdateCompanyInfo extends Command
 {
+    use LoggerTrait;
+
     /**
      * The name and signature of the console command.
      *
@@ -32,26 +32,10 @@ class UpdateCompanyInfo extends Command
      */
     protected $client;
 
-    /**
-     * @var Logger
-     */
-    protected $logger;
-
-    /**
-     * @var string
-     */
-    protected $dateFormat = 'Y-m-d H:i:s';
-
     public function __construct()
     {
         parent::__construct();
         $this->client = new Client(['base_uri' => env('BASE_URL_ASSET'), 'verify' => false]);
-
-        $this->logger = new Logger($name = class_basename(__CLASS__));
-        $path = storage_path('logs').DIRECTORY_SEPARATOR.date('Ymd').DIRECTORY_SEPARATOR.$name.'.log';
-        $handler = new StreamHandler($path, Logger::INFO);
-        $handler->setFormatter(new LineFormatter(null, $this->dateFormat, true, true));
-        $this->logger->pushHandler($handler);
     }
 
     public function handle()
@@ -67,7 +51,7 @@ class UpdateCompanyInfo extends Command
             'fulfilled' => function ($response, $idx) {
             },
             'rejected' => function ($reason, $idx) {
-                $this->logger->error('company_id = '.$idx.' '.$reason->getMessage());
+                $this->getLogger()->error('company_id = '.$idx.' '.$reason->getMessage());
             },
         ]);
         $pool->promise()->wait();

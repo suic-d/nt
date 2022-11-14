@@ -9,8 +9,6 @@ use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\RequestOptions;
 use Illuminate\Support\Facades\Cache;
-use Monolog\Formatter\LineFormatter;
-use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 
@@ -51,11 +49,6 @@ class MiniGameClient
      * @var int
      */
     protected $expiresAt = 86400;
-
-    /**
-     * @var string
-     */
-    protected $dateFormat = 'Y-m-d H:i:s';
 
     /**
      * @var self
@@ -622,7 +615,6 @@ class MiniGameClient
 
         return $this->client;
     }
-
 
     /**
      * @param string $openId
