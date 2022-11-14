@@ -4,7 +4,7 @@ namespace App\Console\Commands\AssessV2;
 
 use App\Models\Assess\DeptList;
 use App\Models\Assess\StaffList;
-use GuzzleHttp\Client;
+use App\Traits\ClientTrait;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
@@ -12,6 +12,8 @@ use Illuminate\Console\Command;
 
 class OA extends Command
 {
+    use ClientTrait;
+
     /**
      * The name and signature of the console command.
      *
@@ -26,15 +28,11 @@ class OA extends Command
      */
     protected $description = '测评OA';
 
-    /**
-     * @var Client
-     */
-    protected $client;
-
     public function __construct()
     {
         parent::__construct();
-        $this->client = new Client(['base_uri' => env('BASE_URL_ASSESS_V2'), 'verify' => false]);
+
+        $this->url = env('BASE_URL_ASSESS_V2');
     }
 
     public function handle()
@@ -52,7 +50,7 @@ class OA extends Command
     public function syncUserList()
     {
         try {
-            $response = $this->client->request('GET', 'index.php/oaapi/oaapi/userList');
+            $response = $this->getClient()->request('GET', 'index.php/oaapi/oaapi/userList');
             echo $response->getBody()->getContents(), PHP_EOL;
         } catch (GuzzleException $exception) {
             echo $exception->getMessage(), PHP_EOL;
@@ -70,7 +68,7 @@ class OA extends Command
                 yield new Request('GET', 'index.php/oaapi/oaapi/getShopList?id='.$value);
             }
         };
-        $pool = new Pool($this->client, $requests(), [
+        $pool = new Pool($this->getClient(), $requests(), [
             'concurrency' => 5,
             'fulfilled' => function ($response) {
                 echo $response->getBody()->getContents(), PHP_EOL;
@@ -96,7 +94,7 @@ class OA extends Command
                 yield $value => new Request('GET', 'index.php/oaapi/oaapi/staffDetail?id='.$value);
             }
         };
-        $pool = new Pool($this->client, $requests(), [
+        $pool = new Pool($this->getClient(), $requests(), [
             'concurrency' => 5,
             'fulfilled' => function ($response) {
                 echo $response->getBody()->getContents(), PHP_EOL;
@@ -119,7 +117,7 @@ class OA extends Command
                 yield $value => new Request('GET', 'index.php/oaapi/oaapi/deptUser?id='.$value);
             }
         };
-        $pool = new Pool($this->client, $requests(), [
+        $pool = new Pool($this->getClient(), $requests(), [
             'concurrency' => 5,
             'fulfilled' => function ($response) {
                 echo $response->getBody()->getContents(), PHP_EOL;
@@ -137,7 +135,7 @@ class OA extends Command
     public function syncDeptList()
     {
         try {
-            $response = $this->client->request('GET', 'index.php/oaapi/oaapi/deptList');
+            $response = $this->getClient()->request('GET', 'index.php/oaapi/oaapi/deptList');
             echo $response->getBody()->getContents(), PHP_EOL;
         } catch (GuzzleException $exception) {
             echo $exception->getMessage(), PHP_EOL;
