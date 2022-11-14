@@ -4,14 +4,14 @@ namespace App\Console\Commands\Local;
 
 use App\Helpers\BurningPlain;
 use App\Helpers\WarSongGulch;
+use App\Traits\LoggerTrait;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
-use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
-use Psr\Log\LoggerInterface;
 
 class MiniGameTask extends Command
 {
+    use LoggerTrait;
+
     /**
      * The name and signature of the console command.
      *
@@ -26,11 +26,6 @@ class MiniGameTask extends Command
      * @var string
      */
     protected $description = 'minigame worker';
-
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
 
     /**
      * @var int
@@ -105,34 +100,10 @@ class MiniGameTask extends Command
     }
 
     /**
-     * @return LoggerInterface
-     */
-    public function getLogger()
-    {
-        if (!$this->logger) {
-            $this->logger = $this->createDefaultLogger();
-        }
-
-        return $this->logger;
-    }
-
-    /**
      * @return string
      */
     public function mutexName(): string
     {
         return 'framework'.DIRECTORY_SEPARATOR.'cache-'.sha1(__METHOD__);
-    }
-
-    /**
-     * @return LoggerInterface
-     */
-    protected function createDefaultLogger()
-    {
-        $logger = new Logger($name = class_basename(__CLASS__));
-        $path = storage_path('logs').DIRECTORY_SEPARATOR.date('Ymd').DIRECTORY_SEPARATOR.$name.'.log';
-        $logger->pushHandler(new StreamHandler($path, Logger::INFO));
-
-        return $logger;
     }
 }

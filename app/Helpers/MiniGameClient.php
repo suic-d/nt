@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 use App\Jobs\AdvertisementVisit;
 use App\Models\Local\AdvertQueue;
+use App\Traits\LoggerTrait;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\RequestOptions;
@@ -15,6 +16,8 @@ use Psr\Log\LoggerInterface;
 
 class MiniGameClient
 {
+    use LoggerTrait;
+
     const QUEUE_AD = 'mini_game_ad';
 
     const HTTP_TIMEOUT = 10;
@@ -620,17 +623,6 @@ class MiniGameClient
         return $this->client;
     }
 
-    /**
-     * @return LoggerInterface
-     */
-    public function getLogger()
-    {
-        if (!$this->logger) {
-            $this->logger = $this->createDefaultLogger();
-        }
-
-        return $this->logger;
-    }
 
     /**
      * @param string $openId
@@ -653,19 +645,5 @@ class MiniGameClient
     protected function createDefaultClient()
     {
         return new Client(['base_uri' => $this->url, 'verify' => false, 'timeout' => self::HTTP_TIMEOUT]);
-    }
-
-    /**
-     * @return LoggerInterface
-     */
-    protected function createDefaultLogger()
-    {
-        $logger = new Logger($name = class_basename(__CLASS__));
-        $path = storage_path('logs').DIRECTORY_SEPARATOR.date('Ymd').DIRECTORY_SEPARATOR.$name.'.log';
-        $handler = new StreamHandler($path, Logger::INFO);
-        $handler->setFormatter(new LineFormatter(null, $this->dateFormat, true, true));
-        $logger->pushHandler($handler);
-
-        return $logger;
     }
 }
