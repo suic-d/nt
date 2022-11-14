@@ -10,19 +10,19 @@ use App\Models\Local\MissionLog;
 use App\Models\Local\Raid;
 use App\Models\Local\RaidLog;
 use App\Models\Local\RaidOnce;
+use App\Traits\LoggerTrait;
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\DB;
-use Monolog\Formatter\LineFormatter;
-use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
-use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 use Throwable;
 use Tightenco\Collect\Support\Arr;
 
 abstract class MiniGameAbstract
 {
+    use LoggerTrait;
+
     /**
      * @var MiniGameClient
      */
@@ -48,16 +48,6 @@ abstract class MiniGameAbstract
      */
     protected $always;
 
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
-
-    /**
-     * @var string
-     */
-    protected $dateFormat = 'Y-m-d H:i:s';
-
     abstract public function handle();
 
     /**
@@ -78,18 +68,6 @@ abstract class MiniGameAbstract
     public function getOpenId(): string
     {
         return $this->openId;
-    }
-
-    /**
-     * @return LoggerInterface
-     */
-    public function getLogger()
-    {
-        if (!$this->logger) {
-            $this->logger = $this->createDefaultLogger();
-        }
-
-        return $this->logger;
     }
 
     public function run()
@@ -587,20 +565,6 @@ abstract class MiniGameAbstract
         }
 
         return $format;
-    }
-
-    /**
-     * @return LoggerInterface
-     */
-    protected function createDefaultLogger()
-    {
-        $logger = new Logger($name = class_basename(static::class));
-        $path = storage_path('logs').DIRECTORY_SEPARATOR.date('Ymd').DIRECTORY_SEPARATOR.$name.'.log';
-        $handler = new StreamHandler($path, Logger::INFO);
-        $handler->setFormatter(new LineFormatter(null, $this->dateFormat, true, true));
-        $logger->pushHandler($handler);
-
-        return $logger;
     }
 
     /**

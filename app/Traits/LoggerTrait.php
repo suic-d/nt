@@ -36,7 +36,7 @@ trait LoggerTrait
      */
     protected function createDefaultLogger()
     {
-        $name = class_basename(__CLASS__);
+        $name = class_basename(static::class);
         $path = storage_path('logs').DIRECTORY_SEPARATOR.date('Ymd').DIRECTORY_SEPARATOR.$name.'.log';
         $handler = new StreamHandler($path, Logger::INFO);
         $handler->setFormatter(new LineFormatter(null, $this->dateFormat, true, true));
