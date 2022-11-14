@@ -99,15 +99,16 @@
                 // page:true,
                 // limit:20,
                 cols:[[
-                   {field:"id", title:"ID"},
-                   {field:"raid_name", title:"RaidName"},
+                    {field:"raid_id", title:"RaidID"},
+                    {field:"raid_name", title:"RaidName"},
                     {field:"raid_time", title:"RaidTime"},
-                   {field:"boss_name", title:"BossName"},
-                   {field:"boss_level", title:"BossLevel", sort:true},
-                   {field:"buff", title:"Buff"},
-                   {field:"zb_name", title:"ZbName"},
-                   {field:"zb_level", title:"ZbLevel"},
-                   {field:"drop_rate", title:"DropRate"},
+                    {field:"boss_id", title:"BossID"},
+                    {field:"boss_name", title:"BossName"},
+                    {field:"boss_level", title:"BossLevel", sort:true},
+                    {field:"buff", title:"Buff"},
+                    {field:"zb_name", title:"ZbName"},
+                    {field:"zb_level", title:"ZbLevel"},
+                    {field:"drop_rate", title:"DropRate"},
                 ]]
             });
         }
@@ -122,9 +123,10 @@
                 // page:true,
                 // limit:20,
                 cols:[[
-                    {field:"id", title:"ID"},
+                    {field:"raid_id", title:"RaidID"},
                     {field:"raid_name", title:"RaidName"},
                     {field:"raid_time", title:"RaidTime"},
+                    {field:"boss_id", title:"BossID"},
                     {field:"boss_name", title:"BossName"},
                     {field:"boss_level", title:"BossLevel", sort:true},
                     {field:"buff", title:"Buff"},
