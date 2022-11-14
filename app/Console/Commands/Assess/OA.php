@@ -5,6 +5,7 @@ namespace App\Console\Commands\Assess;
 use App\Models\Assess\DeptList;
 use App\Models\Assess\StaffList;
 use App\Traits\ClientTrait;
+use App\Traits\LoggerTrait;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
@@ -13,6 +14,7 @@ use Illuminate\Console\Command;
 class OA extends Command
 {
     use ClientTrait;
+    use LoggerTrait;
 
     /**
      * The name and signature of the console command.
@@ -50,10 +52,9 @@ class OA extends Command
     public function syncUserList()
     {
         try {
-            $response = $this->getClient()->request('GET', 'index.php/oaapi/oaapi/userList');
-            echo $response->getBody()->getContents(), PHP_EOL;
+            $this->getClient()->request('GET', 'index.php/oaapi/oaapi/userList');
         } catch (GuzzleException $exception) {
-            echo $exception->getMessage(), PHP_EOL;
+            $this->getLogger()->error($exception->getMessage());
         }
     }
 
@@ -71,10 +72,9 @@ class OA extends Command
         $pool = new Pool($this->getClient(), $requests(), [
             'concurrency' => 5,
             'fulfilled' => function ($response) {
-                echo $response->getBody()->getContents(), PHP_EOL;
             },
             'rejected' => function ($exception) {
-                echo $exception->getMessage(), PHP_EOL;
+                $this->getLogger()->error($exception->getMessage());
             },
         ]);
         $pool->promise()->wait();
@@ -97,10 +97,9 @@ class OA extends Command
         $pool = new Pool($this->getClient(), $requests(), [
             'concurrency' => 5,
             'fulfilled' => function ($response) {
-                echo $response->getBody()->getContents(), PHP_EOL;
             },
             'rejected' => function ($exception) {
-                echo $exception->getMessage(), PHP_EOL;
+                $this->getLogger()->error($exception->getMessage());
             },
         ]);
         $pool->promise()->wait();
@@ -120,10 +119,9 @@ class OA extends Command
         $pool = new Pool($this->getClient(), $requests(), [
             'concurrency' => 5,
             'fulfilled' => function ($response) {
-                echo $response->getBody()->getContents(), PHP_EOL;
             },
             'rejected' => function ($exception) {
-                echo $exception->getMessage(), PHP_EOL;
+                $this->getLogger()->error($exception->getMessage());
             },
         ]);
         $pool->promise()->wait();
@@ -135,10 +133,9 @@ class OA extends Command
     public function syncDeptList()
     {
         try {
-            $response = $this->getClient()->request('GET', 'index.php/oaapi/oaapi/deptList');
-            echo $response->getBody()->getContents(), PHP_EOL;
+            $this->getClient()->request('GET', 'index.php/oaapi/oaapi/deptList');
         } catch (GuzzleException $exception) {
-            echo $exception->getMessage(), PHP_EOL;
+            $this->getLogger()->error($exception->getMessage());
         }
     }
 }

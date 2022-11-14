@@ -34,6 +34,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('product:syncDeptUser')->dailyAt('12:05')->withoutOverlapping();
         $schedule->command('product:syncStaffDetail')->dailyAt('12:10')->withoutOverlapping();
         $schedule->command('product:syncProductUser')->dailyAt('12:15')->withoutOverlapping();
+        $schedule->command('product:updateDimission')->dailyAt('12:20')->withoutOverlapping();
         // 钉钉审核
         $schedule->command('product:getProcessInstance')->everyFiveMinutes();
 
