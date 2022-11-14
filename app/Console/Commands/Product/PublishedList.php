@@ -66,7 +66,7 @@ class PublishedList extends Command
             'fulfilled' => function ($response, $idx) {
             },
             'rejected' => function ($reason, $idx) {
-                $this->getLogger()->error('sku = '.$idx.' '.$reason->getMessage());
+                $this->getLogger()->error($idx.' '.$reason->getMessage());
             },
         ]);
         $pool->promise()->wait();

@@ -44,7 +44,7 @@ class UpdateDimission extends Command
                     RequestOptions::QUERY => ['staff_id' => $v],
                 ]);
             } catch (GuzzleException $exception) {
-                $this->getLogger()->error('staff_id = '.$v.' '.$exception->getMessage());
+                $this->getLogger()->error($v.' '.$exception->getMessage());
             }
         }
     }

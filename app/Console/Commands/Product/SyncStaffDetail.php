@@ -48,7 +48,7 @@ class SyncStaffDetail extends Command
             'fulfilled' => function ($response, $idx) {
             },
             'rejected' => function ($reason, $idx) {
-                $this->getLogger()->error('staff_id = '.$idx.' '.$reason->getMessage());
+                $this->getLogger()->error($idx.' '.$reason->getMessage());
             },
         ]);
         $pool->promise()->wait();
