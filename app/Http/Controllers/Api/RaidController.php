@@ -24,7 +24,10 @@ class RaidController extends Controller
         $page = $request->input('page', 1);
         $limit = $request->input('limit', 20);
 
-        $paginator = RaidLog::latest()->paginate($limit, ['*'], 'page', $page);
+        $paginator = RaidLog::where('status', RaidLog::COMPLETED)
+            ->latest()
+            ->paginate($limit, ['*'], 'page', $page)
+        ;
         $data = [];
         if ($paginator->isNotEmpty()) {
             foreach ($paginator->items() as $item) {
@@ -57,7 +60,10 @@ class RaidController extends Controller
         $page = $request->input('page', 1);
         $limit = $request->input('limit', 20);
 
-        $paginator = AdvertLog::latest()->paginate($limit, ['*'], 'page', $page);
+        $paginator = AdvertLog::where('status', AdvertLog::COMPLETED)
+            ->latest()
+            ->paginate($limit, ['*'], 'page', $page)
+        ;
         $data = [];
         if ($paginator->isNotEmpty()) {
             foreach ($paginator->items() as $item) {
@@ -165,8 +171,9 @@ class RaidController extends Controller
     {
         $instance = new WarSongGulch();
         $raidLogGroup = RaidLog::where('open_id', $instance->getOpenId())
+            ->where('status', RaidLog::COMPLETED)
             ->get()
-            ->reduce(function ($carry, RaidLog $item) {
+            ->reduce(function ($carry, $item) {
                 if (!isset($carry[$item->raid_id][$item->boss_id])) {
                     $carry[$item->raid_id][$item->boss_id] = [
                         'raid_name' => $item->raid_name,
@@ -203,8 +210,9 @@ class RaidController extends Controller
     {
         $instance = new BurningPlain();
         $raidLogGroup = RaidLog::where('open_id', $instance->getOpenId())
+            ->where('status', RaidLog::COMPLETED)
             ->get()
-            ->reduce(function ($carry, RaidLog $item) {
+            ->reduce(function ($carry, $item) {
                 if (!isset($carry[$item->raid_id][$item->boss_id])) {
                     $carry[$item->raid_id][$item->boss_id] = [
                         'raid_name' => $item->raid_name,
