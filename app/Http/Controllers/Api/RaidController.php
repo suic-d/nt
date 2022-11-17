@@ -25,7 +25,7 @@ class RaidController extends Controller
         $limit = $request->input('limit', 20);
 
         $paginator = RaidLog::where('status', RaidLog::COMPLETED)
-            ->latest()
+            ->latest('id')
             ->paginate($limit, ['*'], 'page', $page)
         ;
         $data = [];
@@ -38,6 +38,7 @@ class RaidController extends Controller
                     'raid_name' => $item->raid_name,
                     'boss_name' => $item->boss_name,
                     'created_at' => $item->created_at->toDateTimeString(),
+                    'updated_at' => $item->updated_at->toDateTimeString(),
                 ];
             }
         }
@@ -61,7 +62,7 @@ class RaidController extends Controller
         $limit = $request->input('limit', 20);
 
         $paginator = AdvertLog::where('status', AdvertLog::COMPLETED)
-            ->latest()
+            ->latest('id')
             ->paginate($limit, ['*'], 'page', $page)
         ;
         $data = [];
@@ -72,6 +73,7 @@ class RaidController extends Controller
                     'open_id' => $item->open_id,
                     'num' => $item->num,
                     'created_at' => $item->created_at->toDateTimeString(),
+                    'updated_at' => $item->updated_at->toDateTimeString(),
                 ];
             }
         }

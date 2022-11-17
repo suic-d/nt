@@ -66,7 +66,7 @@
                     {field:"game_type", title:"GameType"},
                     {field:"raid_name", title:"RaidName"},
                     {field:"boss_name", title:"BossName"},
-                    {field:"created_at", title:"CreatedAt"},
+                    {field:"updated_at", title:"UpdatedAt"},
                 ]]
             });
         }
@@ -84,7 +84,7 @@
                     {field:"id", title:"ID", sort:true},
                     {field:"open_id", title:"OpenID"},
                     {field:"num", title:"Num"},
-                    {field:"created_at", title:"CreatedAt"},
+                    {field:"updated_at", title:"UpdatedAt"},
                 ]]
             });
         }
