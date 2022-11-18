@@ -568,6 +568,14 @@ abstract class MiniGameAbstract
     }
 
     /**
+     * @throws GuzzleException
+     */
+    public function clearDeBuff()
+    {
+        $this->getMiniGame()->submitRenWu($this->openId, 98, 98);
+    }
+
+    /**
      * @param Mission $mission
      *
      * @throws Throwable

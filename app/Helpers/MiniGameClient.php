@@ -573,4 +573,21 @@ class MiniGameClient
         ]]);
         $this->log(Logger::INFO, $response->getBody()->getContents());
     }
+
+    /**
+     * @param string $openId
+     * @param int    $id
+     * @param int    $type
+     *
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function submitRenWu(string $openId, int $id, int $type)
+    {
+        $response = $this->getClient()->request('GET', 'miniGame/submitRenwu', [RequestOptions::QUERY => [
+            'openid' => $openId,
+            'id' => $id,
+            'type' => $type,
+        ]]);
+        $this->log(Logger::INFO, $response->getBody()->getContents());
+    }
 }

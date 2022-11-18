@@ -52,6 +52,7 @@ class Kernel extends ConsoleKernel
         })->everyMinute();
         $schedule->call(function () {
             (new WarSongGulch())->updateRaidList();
+            (new BurningPlain())->updateRaidList();
         })->hourly();
         // 燃烧平原
         $schedule->call(function () {
