@@ -477,15 +477,15 @@ abstract class MiniGameAbstract
      */
     public function getRaid()
     {
-        if (!is_null($raid = $this->getAlwaysRaid())) {
-            return $raid;
-        }
-
         if (!is_null($raid = $this->getOnceRaid())) {
             return $raid;
         }
 
         if (!is_null($raid = $this->getAdvanceRaid())) {
+            return $raid;
+        }
+
+        if (!is_null($raid = $this->getAlwaysRaid())) {
             return $raid;
         }
 
